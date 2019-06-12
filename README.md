@@ -7,7 +7,9 @@ This repository contains pipeline to prepare input files for mixQTL
 * Input: 
     - RNA-seq in BAM
     - Phased genotype in VCF
-    - Other supporting files
+    - Other supporting files, such as
+        + Gene model (defining gene body when counting reads)
+        + Black list (list of region with low AS mappability and HLA region)
 * Output:
     - For each individual:
         + Total read count per gene (TRC)
