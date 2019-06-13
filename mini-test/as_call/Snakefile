@@ -1,0 +1,29 @@
+# this module is a prototype of calling phASER
+
+rule run_phaser:
+    input:
+        vcf = config['data']['genotype'],
+        bam = config['data']['rnaseq']
+    output:
+        'output/{task}/phaser.{name}.haplotypic_counts.txt'
+    threads: 4
+    shell:
+        '''
+        {config[phaser][phaser]} \
+            --vcf config[data][genotype] \
+            --bam config[data][rnaseq] \
+            --paired_end config[phaser-parameter][paired_end] \
+            --mapq config[phaser-parameter][mapq] \
+            --baseq config[phaser-parameter][baseq] \
+            --sample config[data][indiv-id] \
+            --blacklist config[blacklist][region] \
+            --haplo_count_blacklist config[blacklist][haplo-mappability] \
+            --threads {threads} \
+            --o output/{wildcards.task}/phaser.{wildcards.name}
+        '''
+
+
+rule run_gene_ae:
+    input:
+    output:
+    shell:
