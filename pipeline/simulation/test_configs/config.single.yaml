@@ -1,0 +1,4 @@
+M: 200
+parameter_file:
+  name: 'test'
+  path: 'test_configs/param_single.yaml'
