@@ -1,0 +1,21 @@
+name: "mixqtl-pipeline"
+output_dir: "../docs"
+include: [".nojekyll"]
+exclude: ["include"]
+navbar:
+  title: "mixqtl-pipeline"
+  left:
+    - text: "Home"
+      href: index.html
+  right:
+    - icon: fa-github
+      href: https://github.com/liangyy/mixqtl-pipeline
+date: "`r paste('Last update at: ', format(Sys.time(), '%b %d, %Y'))`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+    highlight: textmate
+    number_sections: true
+    

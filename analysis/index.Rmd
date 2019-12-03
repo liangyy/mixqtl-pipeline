@@ -1,0 +1,7 @@
+---
+title: "Analysis gallary"
+---
+
+* mixQTL runs on simulated data [link](sim_mixqtl.html)
+
+

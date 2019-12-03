@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Results on mixQTL runs on simulated data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mixqtl-pipeline</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/liangyy/mixqtl-pipeline">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Results on mixQTL runs on simulated data</h1>
+
+</div>
+
+
+<pre class="r"><code>rm(list = ls())
+library(ggplot2)
+theme_set(theme_bw(base_size = 12))
+library(dplyr)
+library(reshape2)
+options(stringsAsFactors = FALSE)
+source(&#39;../code/rlib_analysis.R&#39;)
+datadir = &#39;~/Desktop/mixqtl-pipeline-results/simulation-mixqtl&#39;
+cbPalette2 &lt;- c(&quot;ascQTL&quot; = &quot;#999999&quot;, &quot;mixQTL&quot; = &quot;#E69F00&quot;, &quot;trcQTL&quot; = &quot;#56B4E9&quot;, &#39;WASP2&#39; = &quot;#009E73&quot;, &#39;RASQUAL&#39; = &quot;#F0E442&quot;, &#39;WASP&#39; = &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
+source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R&#39;)
+th$panel.border = element_rect(colour = th$axis.line$colour)</code></pre>
+<div id="load-data" class="section level1">
+<h1><span class="header-section-number">1</span> Load data</h1>
+<pre class="r"><code>thetas = c(&#39;5e-5&#39;, &#39;2.5e-5&#39;, &#39;1e-5&#39;, &#39;5e-6&#39;, &#39;2.5e-6&#39;, &#39;1e-6&#39;)
+samplesizes = (1 : 5) * 100
+dat_list = list()
+for(theta in thetas) {
+  for(samplesize in samplesizes) {
+    jobname = paste0(&#39;samplesize&#39;, samplesize, &#39;_x_&#39;, &#39;theta&#39;, theta)
+    filename = paste0(datadir, &#39;/&#39;, &#39;mixqtl.&#39;, jobname, &#39;__from_1_to_200.txt.gz&#39;)
+    tmp = read.table(filename, header = T)
+    dat_list[[length(dat_list) + 1]] = tmp %&gt;% mutate(theta = theta, sample_size = samplesize)
+  }
+}
+dat = do.call(rbind, dat_list)
+for(i in c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;)) {
+  dat[, i] = fill_in_na_pval(dat[, i])
+}
+dat$theta = factor(dat$theta, levels = thetas)</code></pre>
+</div>
+<div id="type-i-error" class="section level1">
+<h1><span class="header-section-number">2</span> Type I error</h1>
+<p>Calculate type I error at alpha = 0.05.</p>
+<pre class="r"><code>dat_null = dat %&gt;% filter(beta == 0) %&gt;% mutate(idx = 1 : nrow(.))
+melt_null = dat_null %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;), measure.vars = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;))
+melt_null = melt_null %&gt;% mutate(is_sig = is_sig(value))
+summary_t1e = melt_null %&gt;% group_by(theta, sample_size, variable) %&gt;% summarize(t1e = mean(is_sig), nobs = n()) %&gt;% ungroup() %&gt;% mutate(t1e_se = sqrt(t1e * (1 - t1e) / nobs)) 
+summary_t1e = summary_t1e %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
+  x = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;),
+  y = c(&#39;trcQTL&#39;, &#39;ascQTL&#39;, &#39;mixQTL&#39;)
+)))</code></pre>
+<p>Plot the whole grid (for supplement).</p>
+<pre class="r"><code>p = summary_t1e %&gt;% ggplot(aes(color = method)) + 
+  geom_bar(aes(x = method, y = t1e), stat = &#39;identity&#39;, fill = &#39;white&#39;) + 
+  geom_errorbar(aes(x = method, ymin = t1e - t1e_se * 1.96, ymax = t1e + t1e_se * 1.96), width = .2) + 
+  geom_hline(yintercept = 0.05, linetype = 2) + 
+  scale_color_manual(values=cbPalette2) + 
+  ggtitle(&#39;Type I error&#39;) + 
+  facet_grid(sample_size~theta)  # , labeller = label_both
+p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1))
+p = p + th
+p = p + xlab(&#39;Method&#39;) + ylab(&#39;Type I error&#39;)
+p = p + theme(legend.position = &#39;bottom&#39;) + theme(aspect.ratio = 1)
+p</code></pre>
+<p><img src="sim_mixqtl_files/figure-html/t1e%20plot-1.png" width="576" /></p>
+<pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_t1e_full.png&#39;, p, height = 6, width = 6)</code></pre>
+<p>Plot a sub-grid for main text.</p>
+<pre class="r"><code>sub_thetas = c(&#39;1e-5&#39;, &#39;2.5e-6&#39;)
+sub_samplesizes = c(100, 300, 500)
+p = summary_t1e %&gt;% filter(theta %in% sub_thetas, sample_size %in% sub_samplesizes) %&gt;% ggplot(aes(color = method)) + 
+  geom_bar(aes(x = method, y = t1e), stat = &#39;identity&#39;, fill = &#39;white&#39;) + 
+  geom_errorbar(aes(x = method, ymin = t1e - t1e_se * 1.96, ymax = t1e + t1e_se * 1.96), width = .2) + 
+  geom_hline(yintercept = 0.05, linetype = 2) + 
+  scale_color_manual(values=cbPalette2) + 
+  ggtitle(&#39;Type I error&#39;) + 
+  facet_grid(sample_size~theta, labeller = label_both)
+p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1))
+p = p + th
+p = p + xlab(&#39;Method&#39;) + ylab(&#39;Type I error&#39;)
+p = p + theme(legend.position = &#39;bottom&#39;) + theme(aspect.ratio = 1)
+p</code></pre>
+<p><img src="sim_mixqtl_files/figure-html/t1e%20sub-1.png" width="336" /></p>
+<pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_t1e.png&#39;, p, height = 5.5, width = 3.5)</code></pre>
+</div>
+<div id="power" class="section level1">
+<h1><span class="header-section-number">3</span> Power</h1>
+<p>Calculate power at alpha = 0.05</p>
+<pre class="r"><code>dat_causal = dat %&gt;% filter(beta != 0) %&gt;% mutate(idx = 1 : nrow(.))
+melt_causal = dat_causal %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;, &#39;beta&#39;), measure.vars = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;))
+melt_causal = melt_causal %&gt;% mutate(is_sig = is_sig(value))
+summary_causal = melt_causal %&gt;% group_by(theta, sample_size, variable, beta) %&gt;% summarize(power = mean(is_sig), nobs = n()) %&gt;% ungroup() %&gt;% mutate(power_se = sqrt(power * (1 - power) / nobs)) 
+summary_causal = summary_causal %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
+  x = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;),
+  y = c(&#39;trcQTL&#39;, &#39;ascQTL&#39;, &#39;mixQTL&#39;)
+)))</code></pre>
+<p>Plot the full grid (for supplement)</p>
+<pre class="r"><code>p = summary_causal %&gt;% mutate(fold_change = exp(beta)) %&gt;% ggplot(aes(color = method)) + 
+  geom_point(aes(x = factor(fold_change), y = power), alpha = .5) + 
+  geom_line(aes(x = factor(fold_change), y = power, group = method), alpha = .5) + 
+  scale_color_manual(values=cbPalette2) + 
+  facet_grid(sample_size~theta)
+p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1, size = 8)) # + ggtitle(&#39;Power&#39;)
+p = p + th
+p = p + xlab(&#39;True aFC&#39;) + ylab(&#39;Power&#39;)
+p = p + theme(legend.position = &#39;bottom&#39;) + theme(aspect.ratio = 1)
+p</code></pre>
+<p><img src="sim_mixqtl_files/figure-html/power%20plot-1.png" width="576" /></p>
+<pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_power_full.png&#39;, p, height = 6, width = 6)</code></pre>
+<p>Plot a sub-grid for main text.</p>
+<pre class="r"><code>p = summary_causal %&gt;% filter(theta %in% sub_thetas, sample_size %in% sub_samplesizes) %&gt;% mutate(fold_change = exp(beta)) %&gt;% 
+  ggplot(aes(color = method)) + 
+  geom_point(aes(x = factor(fold_change), y = power), alpha = .5) + 
+  geom_line(aes(x = factor(fold_change), y = power, group = method), alpha = .5) +
+  scale_color_manual(values=cbPalette2) + 
+  facet_grid(sample_size~theta, labeller = label_both)
+p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1)) # + ggtitle(&#39;Power&#39;)
+p = p + th
+p = p + xlab(&#39;True aFC&#39;) + ylab(&#39;Power&#39;)
+p = p + theme(legend.position = &#39;bottom&#39;) + theme(aspect.ratio = 1)
+ggsave(&#39;../output/grid_sim_0615-matrix_power.png&#39;, p, height = 5.5, width = 3.5)</code></pre>
+</div>
+<div id="estimates" class="section level1">
+<h1><span class="header-section-number">4</span> Estimates</h1>
+<p>Organize the data</p>
+<pre class="r"><code>dat_est = dat %&gt;% mutate(idx = 1 : nrow(.))
+melt_est = dat_est %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;, &#39;beta&#39;), measure.vars = c(&#39;bhat.trc&#39;, &#39;bhat.asc&#39;, &#39;bhat.meta&#39;))
+melt_est = melt_est %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
+  x = c(&#39;bhat.trc&#39;, &#39;bhat.asc&#39;, &#39;bhat.meta&#39;),
+  y = c(&#39;trcQTL&#39;, &#39;ascQTL&#39;, &#39;mixQTL&#39;)
+)))</code></pre>
+<p>Plot the full grid.</p>
+<pre class="r"><code>p = melt_est %&gt;% filter((round(exp(beta) * 100)) %in% c(100, 110, 200)) %&gt;% mutate(fold_change = exp(beta), fold_change_estimate = exp(value), diff = value - beta) %&gt;% ggplot() + geom_hline(yintercept = 0, color = &#39;lightgray&#39;) + geom_violin(aes(x = factor(fold_change), y = diff, color = method)) + scale_color_manual(values=cbPalette2) + facet_grid(sample_size~theta) # + ggtitle(&#39;Estimated effect size&#39;)
+p = p + theme(axis.text.x=element_text(angle = 45, hjust = .5, vjust = .5))
+p = p + th
+p = p + theme(legend.position = &#39;bottom&#39;)
+p = p + xlab(&#39;True aFC&#39;) + ylab(expression(hat(beta) - beta[true])) + theme(aspect.ratio = 1) 
+p</code></pre>
+<pre><code>## Warning: Removed 6 rows containing non-finite values (stat_ydensity).</code></pre>
+<p><img src="sim_mixqtl_files/figure-html/estimate%20plot-1.png" width="576" /></p>
+<pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_estimate_full.png&#39;, p, height = 6, width = 6)</code></pre>
+<pre><code>## Warning: Removed 6 rows containing non-finite values (stat_ydensity).</code></pre>
+<p>Plot sub-grid for main text.</p>
+<pre class="r"><code>p = melt_est %&gt;% filter((round(exp(beta) * 100)) %in% c(125, 150, 200, 300)) %&gt;% filter(theta %in% sub_thetas, sample_size %in% sub_samplesizes) %&gt;% mutate(fold_change = exp(beta), fold_change_estimate = exp(value), diff = value - beta) %&gt;% ggplot() + geom_boxplot(aes(x = factor(fold_change), y = fold_change_estimate, color = method)) + scale_color_manual(values=cbPalette2) + geom_point(aes(x = factor(fold_change), fold_change), shape = 3) + facet_grid(sample_size~theta, labeller = label_both) # + ggtitle(&#39;Estimated effect size&#39;)
+p = p + theme(axis.text.x=element_text(angle = 45, hjust = .5, vjust = .5))
+p = p + th
+p = p + theme(legend.position = &#39;bottom&#39;)
+p = p + xlab(&#39;True aFC&#39;) + ylab(&#39;Estimated aFC&#39;) + theme(aspect.ratio = 1)
+p</code></pre>
+<p><img src="sim_mixqtl_files/figure-html/estimate%20sub-1.png" width="336" /></p>
+<pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_estimate.png&#39;, p, height = 5.5, width = 3.5)</code></pre>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
