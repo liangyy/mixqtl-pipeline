@@ -29,3 +29,9 @@ It should be generated for each submission in `configs/config_samplesize[Nsample
 ## Implementation 
 
 All these steps are realized in `submit.sh` along with a light `qsub` file `run.qsub`
+
+Example submission:
+
+```
+$ bash submit.sh /scratch/t.cri.yliang/mixqtl-pipeline-results/simulation-single
+```
