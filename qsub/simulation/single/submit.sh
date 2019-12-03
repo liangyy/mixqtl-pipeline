@@ -10,6 +10,7 @@ ratio=4
 OUTDIR=$1
 
 mkdir -p logs
+mkdir -p configs
 
 for t in "${theta[@]}"
 do
