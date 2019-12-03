@@ -43,8 +43,8 @@ for(i in 1 : length(data_collector)) {
     ytotal = df_obs$y_trc,
     lib_size = df_obs$lib_size,
     trc_cutoff = 20,
-    asc_cutoff = 10
-  )
+    asc_cutoff = 2
+ )
 
   mix$beta = beta
   mix$fG = fG

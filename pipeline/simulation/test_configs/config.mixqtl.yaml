@@ -2,4 +2,4 @@
 path: '/scratch/t.cri.yliang/mixqtl-pipeline-results/simulation-single/samplesize100_x_theta1e-6__readcount.{m}.rds'
 M_from: 1
 M_to: 2
-name: '$name'
+name: 'test'

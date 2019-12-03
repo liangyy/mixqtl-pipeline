@@ -6,20 +6,20 @@ if 'outdir' not in config:
 
 rule all:
     input:
-        '{outdir}/mixqtl.{data}__from_{a}_to_{b}.txt.gz'.format(data = config['name'], a = config['M_from'], b = config['M_to'])
+        '{outdir}/mixqtl.{data}__from_{a}_to_{b}.txt.gz'.format(data = config['name'], a = config['M_from'], b = config['M_to'], outdir = config['outdir'])
 
 rule test:
     input:
         config['path']
     output:
-        '{outdir}/{data}__{m}.rds'
+        temp('{outdir}/tmp-{data}__{m}.rds')
     shell:
         'Rscript ../../code/sim_mixqtl.R --data {input[0]} --output {output[0]}'
 
 rule merge:
     input:
-        lambda wildcards: [ '{outdir}/{data}__{m}.rds'.format(m = i, data = wildcards.data, outdir = wildcards.outdir) for i in range(int(wildcards.a), int(wildcards.b) + 1) ]
+        lambda wildcards: [ '{outdir}/tmp-{data}__{m}.rds'.format(m = i, data = wildcards.data, outdir = wildcards.outdir) for i in range(int(wildcards.a), int(wildcards.b) + 1) ]
     output:
         '{outdir}/mixqtl.{data}__from_{a}_to_{b}.txt.gz'
     shell:
-        'Rscript ../../code/sim_mixqtl_merge.R --input_prefix {wildcards.outdir}/{wildcards.data}__ --output {output[0]} --from {wildcards.a} --to {wildcards.b}'
+        'Rscript ../../code/sim_mixqtl_merge.R --input_prefix {wildcards.outdir}/tmp-{wildcards.data}__ --output {output[0]} --from {wildcards.a} --to {wildcards.b}'
