@@ -11,4 +11,4 @@ source ~/.bashrc
 cd /home/t.cri.yliang/scratch/GitHub/mixqtl-pipeline/pipeline/simulation
 conda activate mixqtl 
 
-snakemake -s mixqtl.snmk --configfile ../../qsub/simulation/mixqtl/configs/config_$NAME.yaml --cores 16 -p --config outdir=$OUTDIR > ../../qsub/simulation/single/logs/$NAME.log 2>&1
+snakemake -s mixqtl.snmk --configfile ../../qsub/simulation/mixqtl/configs/config_$NAME.yaml --cores 16 -p --config outdir=$OUTDIR > ../../qsub/simulation/mixqtl/logs/$NAME.log 2>&1
