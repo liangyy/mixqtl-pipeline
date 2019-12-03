@@ -10,7 +10,7 @@ if 'outdir' not in config:
 
 rule all:
     input:
-        [ '{outdir}/{name}__readcount.{m}.rds'.format(m = i + 1, name = config['parameter_file']['name']) for i in range(config['M']) ]
+        [ '{outdir}/{name}__readcount.{m}.rds'.format(m = i + 1, name = config['parameter_file']['name'], outdir = config['outdir']) for i in range(config['M']) ]
 
 rule prepare_gene_param:
     input:

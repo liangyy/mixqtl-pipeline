@@ -17,3 +17,4 @@ y_dist:
   type: 'negbinom'
   prob: 2/3
   size_factor: 2
+

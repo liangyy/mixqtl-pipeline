@@ -35,7 +35,7 @@ if(is.character(param$theta_sd)) {
 } else {
   theta_sd = param$theta_sd
 }
-theta_dist = list(type = theta_dist, mu = theta_mu, sd = theta_sd)
+theta_dist = list(type = param$theta_type, mu = theta_mu, sd = theta_sd)
 f = param$f  # frequency of heterozygous sites
 maf = c(param$maf_l, param$maf_h) 
 p = rep(1, L_gene) / L_gene 

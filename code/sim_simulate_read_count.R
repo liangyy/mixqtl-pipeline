@@ -12,6 +12,9 @@ option_list <- list(
                 metavar="character"),
     make_option(c("-g", "--gene"), type="character", default=NULL,
                 help="simulated genotype file",
+                metavar="character"),
+    make_option(c("-t", "--type"), type="character", default='single',
+                help="specify [single] or [multi] to perform single-snp or milti-snp simulation",
                 metavar="character")
 )
 
@@ -34,13 +37,19 @@ gene = create_gene(gene_param$L_gene, gene_param$library_dist, gene_param$theta_
 
 # load genotypes
 genotype = readRDS(opt$genotype)
-fG = genotype$fG
-geno = genotype$genotype
+if(opt$type == 'single') {
+  fG = genotype$fG
+  geno = genotype$genotype
+} else if(opt$type == 'multi') {
+}
 
 # Simulate reads
 data_collector = list()
 for(beta in betas) {
-  df = simulate_read_count(gene, geno, beta, L_read, param$y_dist)
-  data_collector[[length(data_collector) + 1]] = list(data = df, fG = fG, beta = beta)
+  if(opt$type == 'single') {
+    df = simulate_read_count(gene, geno, beta, L_read, param$y_dist)
+    data_collector[[length(data_collector) + 1]] = list(data = df, fG = fG, beta = beta)
+  } else if(opt$type == 'multi') {
+  }
 }
 saveRDS(data_collector, opt$output)
