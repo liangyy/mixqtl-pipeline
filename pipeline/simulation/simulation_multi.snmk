@@ -7,34 +7,51 @@
 #   2. Generate gene configuration (for this part, it does not rely on genotype input)
 #   3. Simulate read count
 
+
+
+def read_in_genes(genelist, gene_col):
+    genes = []
+    with open(genelist, 'r') as f:
+        for i in f:
+            i = i.strip().split('\t')
+            genes.append(i[gene_col - 1])
+    return genes
+    
+genes = read_in_genes(config['gene-list'])    
+
+
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+
 rule all:
     input:
         [ 'output/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'.format(m = i + 1, simulation_name = config['parameter_file']['name'], genotype_name = config['genotype']['name'], nsample = config['genotype']['nsample']) for i in range(config['M']) ]
 
 
+    
 rule format_genotype:
     input:
-        config['genotype']['path'],
+        lambda wildcards: config['genotype']['path'].format(gene = wildcards.m),
         config['genotype']['indiv-list']
     output:
-        'output/genotype__{genotype_name}.size_{nsample}.rds'
+        '{outdir}/genotype__{genotype_name}.size_{nsample}.{m}.rds'
     shell:
-        'Rscript scripts/format_genotype.R --input {input[0]} --output {output[0]} --indiv {input[1]} --nsample {config[genotype][nsample]}'
+        'Rscript ../../code/sim_format_genotype.R --input {input[0]} --output {output[0]} --indiv {input[1]} --nsample {config[genotype][nsample]}'
 
-rule simulate_gene:
+rule prepare_gene_param:
     input:
         config['parameter_file']['path']
     output:
-        'output/gene__{simulation_name}.rds'
+        '{outdir}/{simulation_name}__gene.rds'
     shell:
-        'Rscript ../../implement_three_strategies/simulate_data/scripts/simulate_gene.R --param {input[0]} --output {output[0]}'
+        'Rscript ../../code/sim_prepare_gene_param.R --param {input[0]} --output {output[0]}'
 
 rule simulate:
     input:
         config['parameter_file']['path'],
-        'output/gene__{simulation_name}.rds',
-        'output/genotype__{genotype_name}.size_{nsample}.rds'
+        '{outdir}/gene__{simulation_name}.rds',
+        '{outdir}/genotype__{genotype_name}.size_{nsample}.{m}.rds'
     output:
-        'output/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'
+        '{outdir}/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'
     shell:
-        'Rscript scripts/simulate_{config[simulate-type]}.R --param {input[0]} --gene {input[1]} --genotype {input[2]} --output {output[0]}'
+        'Rscript ../../code/sim_simulate_read_count.R --param {input[0]} --gene {input[1]} --genotype {input[2]} --output {output[0]} --type multi'

@@ -1,0 +1,21 @@
+seed: 1
+L_gene: 1e4
+L_read: 75
+library_dist:
+  type: 'negbinom'
+  prob: 1.6e-07
+  size: 15
+theta_type: 'beta'
+theta_mu: $t
+theta_sd: $tsd
+genetic_var_l: 0.015
+genetic_var_h: 0.075
+f: 0.001
+maf_l: 0.05
+maf_h: 0.3
+y_dist:
+  type: 'negbinom'
+  prob: 2/3
+  size_factor: 2
+ncausal_l: 1
+ncausal_h: 3

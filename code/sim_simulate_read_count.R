@@ -41,15 +41,37 @@ if(opt$type == 'single') {
   fG = genotype$fG
   geno = genotype$genotype
 } else if(opt$type == 'multi') {
+  maf = rowMeans(cbind(genotype$h1, genotype$h2), na.rm = T)
+  betas = create_betas(
+    maf = maf,
+    genetic_var = c(param$genetic_var_l, param$genetic_var_h),
+    ncausal = c(param$ncausal_l, param$ncausal_h)
+  )
+  
 }
 
 # Simulate reads
-data_collector = list()
-for(beta in betas) {
-  if(opt$type == 'single') {
-    df = simulate_read_count(gene, geno, beta, L_read, param$y_dist)
-    data_collector[[length(data_collector) + 1]] = list(data = df, fG = fG, beta = beta)
-  } else if(opt$type == 'multi') {
+if(opt$type == 'single') {
+  data_collector = list()
+  for(beta in betas) {
+      df = simulate_read_count(gene, geno, beta, L_read, param$y_dist)
+      data_collector[[length(data_collector) + 1]] = list(data = df, fG = fG, beta = beta)
   }
+} else if(opt$type == 'multi') {
+  data_collector = list()
+  data_collector[[1]] = simulate_read_count_multi(
+    gene = gene,
+    genotype = genotype,
+    betas = rep(0, length(betas),
+    L_read = L_read,
+    param$y_dist
+  )
+  data_collector[[2]] = simulate_read_count_multi(
+    gene = gene,
+    genotype = genotype,
+    betas = betas,
+    L_read = L_read,
+    param$y_dist
+  )
 }
 saveRDS(data_collector, opt$output)
