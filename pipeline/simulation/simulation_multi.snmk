@@ -1,0 +1,40 @@
+# this module simulation read count under weak multiplicative effect across multiple causal variants
+# Inputs:
+#   1. phased genotype VCF for a list of candidate genes  
+#   2. parameter file of the simulation
+# Steps:
+#   1. Read-in and format genotype
+#   2. Generate gene configuration (for this part, it does not rely on genotype input)
+#   3. Simulate read count
+
+rule all:
+    input:
+        [ 'output/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'.format(m = i + 1, simulation_name = config['parameter_file']['name'], genotype_name = config['genotype']['name'], nsample = config['genotype']['nsample']) for i in range(config['M']) ]
+
+
+rule format_genotype:
+    input:
+        config['genotype']['path'],
+        config['genotype']['indiv-list']
+    output:
+        'output/genotype__{genotype_name}.size_{nsample}.rds'
+    shell:
+        'Rscript scripts/format_genotype.R --input {input[0]} --output {output[0]} --indiv {input[1]} --nsample {config[genotype][nsample]}'
+
+rule simulate_gene:
+    input:
+        config['parameter_file']['path']
+    output:
+        'output/gene__{simulation_name}.rds'
+    shell:
+        'Rscript ../../implement_three_strategies/simulate_data/scripts/simulate_gene.R --param {input[0]} --output {output[0]}'
+
+rule simulate:
+    input:
+        config['parameter_file']['path'],
+        'output/gene__{simulation_name}.rds',
+        'output/genotype__{genotype_name}.size_{nsample}.rds'
+    output:
+        'output/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'
+    shell:
+        'Rscript scripts/simulate_{config[simulate-type]}.R --param {input[0]} --gene {input[1]} --genotype {input[2]} --output {output[0]}'
