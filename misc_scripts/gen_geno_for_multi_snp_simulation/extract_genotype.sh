@@ -4,16 +4,16 @@
 # ARGV4: exclude string, e.g. EUR_AF<0.01
 
 counter=1
-for i in `zcat $1 | sed 's#\t#-x-#g'`
+for i in `cat $1 | sed 's#\t#-x-#g'`
 do
-  line=($i | sed 's#-x-# #g')
-  region="${line[1]}":"${line[2]}"-"${line[3]}"
-  outfile=$3."${line[4]}".gz
-  if [[ -f $outfile]]
+  line=(`echo $i | sed 's#-x-# #g'`)
+  region="${line[0]}":"${line[1]}"-"${line[2]}"
+  outfile=$3."${line[3]}".gz
+  if [[ -f $outfile ]]
   then 
     echo $outfile exists, skip
   else
-    echo bcftools view -r $region -e '$4' $2 | grep -v '##' | gzip > $outfile
+    bcftools view -r $region -e $4 $2 | grep -v '##' | gzip > $outfile
     echo finish $outfile
   fi
   ((counter++))
