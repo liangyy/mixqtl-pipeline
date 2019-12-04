@@ -23,7 +23,7 @@ library(dplyr)
 library(stringr)
 options(datatable.fread.datatable=FALSE)
 source('../../code/rlib_simulation.R')
-set.seed(1)
+# set.seed(1)
 
 # load individuals
 indiv = read.table(opt$indiv, header = F)
