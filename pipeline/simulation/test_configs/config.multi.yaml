@@ -1,10 +1,11 @@
 genotype:
-  name: 'ENSG00000000457-cis-1Mb'
+  # name: 'testlist'
   path: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gen_geno_for_multi_snp_simulation/genotype.{gene}.gz'
   indiv-list: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gen_geno_for_multi_snp_simulation/EUR.sample_list_in_phase3.txt'
   nsample: 100
-M: 10
+M: 2
 gene-list: 
+  name: 'testlist'
   path: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gen_geno_for_multi_snp_simulation/selected_genes.txt'
   col: 4  # index of column that contains the gene id
 parameter_file:

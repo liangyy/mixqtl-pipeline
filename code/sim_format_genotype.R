@@ -27,6 +27,7 @@ set.seed(1)
 
 # load individuals
 indiv = read.table(opt$indiv, header = F)
+indiv = indiv$V1
 # indiv = str_extract(indiv$V1, '[0-9A-Za-z]+-[0-9A-Za-z]+')
 
 # load genotype

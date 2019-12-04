@@ -17,7 +17,7 @@ def read_in_genes(genelist, gene_col):
             genes.append(i[gene_col - 1])
     return genes
     
-genes = read_in_genes(config['gene-list'])    
+genes = read_in_genes(config['gene-list']['path'], config['gene-list']['col'])    
 
 
 if 'outdir' not in config:
@@ -25,13 +25,13 @@ if 'outdir' not in config:
 
 rule all:
     input:
-        [ 'output/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'.format(m = i + 1, simulation_name = config['parameter_file']['name'], genotype_name = config['genotype']['name'], nsample = config['genotype']['nsample']) for i in range(config['M']) ]
+        [ 'output/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'.format(m = i + 1, simulation_name = config['parameter_file']['name'], genotype_name = config['gene-list']['name'], nsample = config['genotype']['nsample']) for i in range(config['M']) ]
 
 
     
 rule format_genotype:
     input:
-        lambda wildcards: config['genotype']['path'].format(gene = wildcards.m),
+        lambda wildcards: config['genotype']['path'].format(gene = genes[int(wildcards.m) - 1]),
         config['genotype']['indiv-list']
     output:
         '{outdir}/genotype__{genotype_name}.size_{nsample}.{m}.rds'
@@ -49,7 +49,7 @@ rule prepare_gene_param:
 rule simulate:
     input:
         config['parameter_file']['path'],
-        '{outdir}/gene__{simulation_name}.rds',
+        '{outdir}/{simulation_name}__gene.rds',
         '{outdir}/genotype__{genotype_name}.size_{nsample}.{m}.rds'
     output:
         '{outdir}/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'

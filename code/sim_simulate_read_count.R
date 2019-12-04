@@ -29,7 +29,9 @@ set.seed(param$seed)
 
 ## Pre-fixed parameters
 L_read = param$L_read
-betas = log(eval(parse(text = param$betas)))  # effect size (log fold change)
+if(opt$type == 'single') {
+  betas = log(eval(parse(text = param$betas)))  # effect size (log fold change)
+}
 
 # load the gene
 gene_param = readRDS(opt$gene)
@@ -41,7 +43,7 @@ if(opt$type == 'single') {
   fG = genotype$fG
   geno = genotype$genotype
 } else if(opt$type == 'multi') {
-  maf = rowMeans(cbind(genotype$h1, genotype$h2), na.rm = T)
+  maf = colMeans(rbind(genotype$h1, genotype$h2), na.rm = T)
   betas = create_betas(
     maf = maf,
     genetic_var = c(param$genetic_var_l, param$genetic_var_h),
@@ -62,7 +64,7 @@ if(opt$type == 'single') {
   data_collector[[1]] = simulate_read_count_multi(
     gene = gene,
     genotype = genotype,
-    betas = rep(0, length(betas),
+    betas = rep(0, length(betas)),
     L_read = L_read,
     param$y_dist
   )

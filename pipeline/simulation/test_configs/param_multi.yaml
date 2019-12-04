@@ -6,8 +6,8 @@ library_dist:
   prob: 1.6e-07
   size: 15
 theta_type: 'beta'
-theta_mu: $t
-theta_sd: $tsd
+theta_mu: 1e-5
+theta_sd: 5e-6
 genetic_var_l: 0.015
 genetic_var_h: 0.075
 f: 0.001
