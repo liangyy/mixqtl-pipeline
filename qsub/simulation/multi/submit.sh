@@ -27,7 +27,9 @@ do
     echo theta_sd: "$tsd" >> configs/param_$jobname.yaml
     
     # complete config file
-    echo M: 100 > configs/config_$jobname.yaml
+    cat config_in_common.yaml > configs/config_$jobname.yaml
+    echo M: 100 >> configs/config_$jobname.yaml
+    echo Nsample: "$s" >> configs/config_$jobname.yaml
     echo parameter_file: >> configs/config_$jobname.yaml
     echo '  name: '"$jobname" >> configs/config_$jobname.yaml
     echo '  path: ../../qsub/simulation/multi/configs/param_'"$jobname".yaml >> configs/config_$jobname.yaml

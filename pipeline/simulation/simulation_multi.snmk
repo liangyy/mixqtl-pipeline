@@ -25,7 +25,7 @@ if 'outdir' not in config:
 
 rule all:
     input:
-        [ 'output/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'.format(m = i + 1, simulation_name = config['parameter_file']['name'], genotype_name = config['gene-list']['name'], nsample = config['genotype']['nsample']) for i in range(config['M']) ]
+        [ 'output/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'.format(m = i + 1, simulation_name = config['parameter_file']['name'], genotype_name = config['gene-list']['name'], nsample = config['Nsample']) for i in range(config['M']) ]
 
 
     
@@ -36,7 +36,7 @@ rule format_genotype:
     output:
         '{outdir}/genotype__{genotype_name}.size_{nsample}.{m}.rds'
     shell:
-        'Rscript ../../code/sim_format_genotype.R --input {input[0]} --output {output[0]} --indiv {input[1]} --nsample {config[genotype][nsample]}'
+        'Rscript ../../code/sim_format_genotype.R --input {input[0]} --output {output[0]} --indiv {input[1]} --nsample {config[Nsample]}'
 
 rule prepare_gene_param:
     input:

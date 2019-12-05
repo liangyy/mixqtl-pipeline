@@ -1,14 +1,8 @@
 genotype:
-  # name: 'testlist'
   path: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gen_geno_for_multi_snp_simulation/genotype.{gene}.gz'
   indiv-list: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gen_geno_for_multi_snp_simulation/EUR.sample_list_in_phase3.txt'
-Nsample: 100
-M: 2
+M: 100
 gene-list: 
-  name: 'testlist'
+  name: 'SelectedGenes'
   path: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gen_geno_for_multi_snp_simulation/selected_genes.txt'
   col: 4  # index of column that contains the gene id
-parameter_file:
-  name: 'test'
-  path: 'test_configs/param_multi.yaml'
-
