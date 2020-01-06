@@ -4,5 +4,5 @@ data:
   M_from: 1
   M_to: 2
   name: 'test'
-finemapper: 'mixfine'
+finemapper: 'trcfine'  # 'mixfine'
 
