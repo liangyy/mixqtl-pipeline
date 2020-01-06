@@ -27,12 +27,22 @@ for t in "${theta[@]}"
 do
   for s in "${samplesize[@]}"
   do
-    name=theta_$t--samplesize_$s
+    name=samplesize$s\_x_theta$t
     samplesizename=size_$s
     for ((i = 0; i < ${#method[@]}; ++i))
     do
       m=${method[$i]}
       f=${finemap[$i]}
+      logf=logs/$name-$m.out
+       
+      if [[ -f $logf ]]
+      then 
+        e=`cat $logf|grep Exit|tail -n 1|grep 1` 
+        if [[ -z $e ]]
+        then 
+          continue
+        fi
+      fi 
       echo "data:
   genotype: '$genoprefix$samplesizename$genosuffix'
   readcount: '$rcprefix$name$rcmiddle$samplesizename$rcsuffix'
@@ -40,7 +50,7 @@ do
   M_to: 100
   name: '$name'
 " > configs/config_$name.yaml
-      qsub -v NAME=$name,METHOD=$m -N $name-$m run.qsub
+      echo qsub -v NAME=$name,METHOD=$m,OUTDIR=$outdir -N $name-$m run.qsub
     done
   done
 done
