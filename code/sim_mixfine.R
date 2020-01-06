@@ -24,13 +24,11 @@ genotype = readRDS(opt$geno)
 readcount = readRDS(opt$readcount)[[2]]
 
 # get true_beta
-nsnp = nrow(genotype$h2)
-true_beta = rep(0, nsnp)
-true_beta[readcount$hidden$causals] = causal_log_betas
+true_beta = readcount$hidden$betas
 
 # prepare inputs
-h1 = t(genotype$h1)
-h2 = t(genotype$h2)
+h1 = genotype$h1
+h2 = genotype$h2
 class(h1) = 'numeric'
 class(h2) = 'numeric'
 df = data.frame(

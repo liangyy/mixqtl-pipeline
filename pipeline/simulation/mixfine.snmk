@@ -5,7 +5,7 @@ if 'outdir' not in config:
 
 rule all:
     input:
-        '{outdir}/{dataname}/merge-{finemapper}.from{fm}_to{tm}.rds'.format(finemapper = config['finemapper'], predictor = config['predictor'], dataname = config['data']['name'], fm = config['data']['M_from'], tm = config['data']['M_to'], outdir = config['outdir'])
+        '{outdir}/{dataname}/merge-{finemapper}.from{fm}_to{tm}.rds'.format(finemapper = config['finemapper'], dataname = config['data']['name'], fm = config['data']['M_from'], tm = config['data']['M_to'], outdir = config['outdir'])
 
 rule finemap:
     input:
@@ -25,4 +25,5 @@ rule merge:
     output:
         '{outdir}/{dataname}/merge-{finemapper}.from{fm}_to{tm}.rds'
     shell:
-        'Rscript ../../code/sim_mixfine_merge.R --prefix output/{wildcards.dataname}/finemap-{wildcards.predictor}__{wildcards.finemapper}. --from {wildcards.fm} --to {wildcards.tm} --output {output[0]}'
+        'Rscript ../../code/sim_mixfine_merge.R --prefix output/{wildcards.dataname}/finemap-{wildcards.finemapper}. --from {wildcards.fm} --to {wildcards.tm} --output {output[0]}'
+

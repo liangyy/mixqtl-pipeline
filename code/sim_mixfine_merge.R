@@ -22,7 +22,7 @@ opt <- parse_args(opt_parser)
 cs = data.frame()
 vars = data.frame()
 for(i in opt$from : opt$to) {
-  filename = paste0(opt$prefix, i, '.rds')
+  filename = paste0(opt$input_prefix, i, '.rds')
   df_sub = readRDS(filename)
   if(!is.null(ncol(df_sub$vars))) {
     df_sub$vars$simulation =i
