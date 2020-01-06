@@ -1,0 +1,28 @@
+# Run mixFine on simulated data (simulation_multi.snmk)
+
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+
+rule all:
+    input:
+        '{outdir}/{dataname}/merge-{finemapper}.from{fm}_to{tm}.rds'.format(finemapper = config['finemapper'], predictor = config['predictor'], dataname = config['data']['name'], fm = config['data']['M_from'], tm = config['data']['M_to'], outdir = config['outdir'])
+
+rule finemap:
+    input:
+        geno = config['data']['genotype'],
+        rc = config['data']['readcount']
+    output:
+        '{outdir}/{dataname}/finemap-{finemapper}.{m}.rds'
+    shell:
+        'Rscript ../../code/sim_{wildcards.finemapper}.R \
+        --geno {input.geno} \
+        --readcount {input.rc} \
+        --output {output[0]}'
+
+rule merge:
+    input:
+        lambda wildcards: [ 'output/{dataname}/finemap-{finemapper}.{m}.rds'.format(m = i, dataname = wildcards.dataname, finemapper = wildcards.finemapper) for i in range(int(wildcards.fm), int(wildcards.tm) + 1) ]
+    output:
+        '{outdir}/{dataname}/merge-{finemapper}.from{fm}_to{tm}.rds'
+    shell:
+        'Rscript ../../code/sim_mixfine_merge.R --prefix output/{wildcards.dataname}/finemap-{wildcards.predictor}__{wildcards.finemapper}. --from {wildcards.fm} --to {wildcards.tm} --output {output[0]}'
