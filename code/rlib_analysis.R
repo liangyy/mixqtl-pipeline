@@ -18,3 +18,9 @@ add_new_name_by_map = function(col, map) {
   }
   out
 }
+
+inclusion_curve = function(is_true, first_n = 50) {
+  nsig = sum(is_true)
+  is_true_first = is_true[1 : first_n]
+  return(data.frame(number_of_signals = 1 : length(is_true_first), inclusion_rate = cumsum(is_true_first) / nsig))
+}

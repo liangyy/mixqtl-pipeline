@@ -31,6 +31,8 @@ h1 = genotype$h1
 h2 = genotype$h2
 class(h1) = 'numeric'
 class(h2) = 'numeric'
+h1[is.na(h1)] = 0.5
+h2[is.na(h2)] = 0.5
 df = data.frame(
   y1 = readcount$observed$y1,
   y2 = readcount$observed$y2,
@@ -40,7 +42,7 @@ df = data.frame(
 
 
 # run mixFine
-mod = mixfine(h1, h2, df$y1, df$y2, df$ytotal, df$lib_size, trc_cutoff = 20, asc_cutoff = 2)
+mod = mixfine(h1, h2, df$y1, df$y2, df$ytotal, df$lib_size, trc_cutoff = 20, asc_cutoff = 2, weight_cap = Inf, asc_cap = Inf)
 
 
 # record output
