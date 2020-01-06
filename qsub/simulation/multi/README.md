@@ -35,3 +35,4 @@ Example submission:
 ```
 $ bash submit.sh /scratch/t.cri.yliang/mixqtl-pipeline-results/simulation-multi
 ```
+
