@@ -50,7 +50,7 @@ do
   M_to: 100
   name: '$name'
 " > configs/config_$name.yaml
-      echo qsub -v NAME=$name,METHOD=$m,OUTDIR=$outdir -N $name-$m run.qsub
+      qsub -v NAME=$name,METHOD=$m,OUTDIR=$outdir -N $name-$m run.qsub
     done
   done
 done

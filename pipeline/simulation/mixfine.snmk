@@ -21,9 +21,9 @@ rule finemap:
 
 rule merge:
     input:
-        lambda wildcards: [ 'output/{dataname}/finemap-{finemapper}.{m}.rds'.format(m = i, dataname = wildcards.dataname, finemapper = wildcards.finemapper) for i in range(int(wildcards.fm), int(wildcards.tm) + 1) ]
+        lambda wildcards: [ '{outdir}/{dataname}/finemap-{finemapper}.{m}.rds'.format(m = i, dataname = wildcards.dataname, finemapper = wildcards.finemapper, outdir = wildcards.outdir) for i in range(int(wildcards.fm), int(wildcards.tm) + 1) ]
     output:
         '{outdir}/{dataname}/merge-{finemapper}.from{fm}_to{tm}.rds'
     shell:
-        'Rscript ../../code/sim_mixfine_merge.R --prefix output/{wildcards.dataname}/finemap-{wildcards.finemapper}. --from {wildcards.fm} --to {wildcards.tm} --output {output[0]}'
+        'Rscript ../../code/sim_mixfine_merge.R --prefix {wildcards.outdir}/{wildcards.dataname}/finemap-{wildcards.finemapper}. --from {wildcards.fm} --to {wildcards.tm} --output {output[0]}'
 
