@@ -44,7 +44,7 @@ for(theta in thetas) {
       inclusion_sub$sample_size = samplesize
       inclusion_sub$theta = theta
       inclusion[[length(inclusion) + 1]] = inclusion_sub
-      calibration[[length(calibration) + 1]] = data.frame(pip = temp$vars$variable_prob, is_true = temp$vars$beta_true != 0) %>% mutate(pip_bin = floor(pip * 10)) %>% group_by(pip_bin) %>% summarise(total = n(), nsig = sum(is_true)) %>% ungroup() %>% mutate(method = m)
+      calibration[[length(calibration) + 1]] = data.frame(pip = temp$vars$variable_prob, is_true = temp$vars$beta_true != 0) %>% mutate(pip_bin = floor(pip * 10)) %>% group_by(pip_bin) %>% summarise(total = n(), nsig = sum(is_true)) %>% ungroup() %>% mutate(method = m, theta = theta, sample_size = samplesize)
       # size of credible set
       cs_temp = temp$vars %>% group_by(cs, simulation) %>% filter(cs != -1) %>% summarise(is_true = sum(beta_true != 0) > 0, size = n()) %>% ungroup() %>% filter(is_true)
       cs_sub = data.frame(cs_size = cs_temp$size)
@@ -76,8 +76,38 @@ inclusion %>% group_by(theta, sample_size, method, number_of_signals) %>% summar
 ## Calibration of PIP
 
 ```{r}
+calibration %>% mutate(obs_fraction = nsig / n) %>% mutate(obs_fraction_se = sqrt(obs_fraction * (1 - obs_fraction) / n)) %>% ggplot() + geom_point(aes(x = (pip_bin + .5) / 10, y = obs_fraction, color = method)) + geom_abline(slope = 1, intercept = 0) + geom_errorbar(aes(x = (pip_bin + .5) / 10, ymin = obs_fraction - 1.96 * obs_fraction_se, ymax = obs_fraction + 1.96 * obs_fraction_se, color = method)) + theme(legend.position = c(0.8, 0.2)) + xlab('PIP bin (bin size = 0.1)')
+```
+
+## Size of credible set
+
+```{r}
+cs_size %>% ggplot() + geom_density(aes(x = cs_size, color = method)) + facet_grid(theta ~ sample_size, labeller = label_both) + coord_cartesian(xlim = c(0, 50)) 
+```
+
+# Summary with TRC and mixFine (for main text)
+
+## Inclusion rate
+
+```{r}
 source('https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R')
 th$panel.border = element_rect(colour = th$axis.line$colour)
+methods = c('trcFine', 'mixFine')
+thetas = c('1e-5', '2.5e-6')
+sample_sizes = c(100, 300, 500)
+this_in = inclusion
+this_in$method[this_in$method == 'glmnet_cv'] = 'trcFine'
+this_in$method[this_in$method == 'mixnet_metafine_full'] = 'mixFine'
+p = this_in %>% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %>% group_by(theta, sample_size, method, number_of_signals) %>% summarize(inclusion_rate = mean(inclusion_rate), n = n()) %>% ungroup() %>% mutate(rate_se = sqrt(inclusion_rate * (1 - inclusion_rate) / n)) %>% ggplot() + geom_line(aes(x = number_of_signals, y = inclusion_rate, color = method)) + facet_grid(sample_size~theta, labeller = label_both) + geom_errorbar(aes(x = number_of_signals, ymin = inclusion_rate - 1.96 * rate_se, ymax = inclusion_rate + 1.96 * rate_se, color = method), alpha = .7) + scale_color_manual(values=cbPalette2)
+p = p + theme(legend.position = 'bottom')
+p = p + th
+p = p + xlab('Number of SNPs considered as positive') + ylab('Power') + theme(aspect.ratio = 1)
+ggsave('../output/grid_sim-multi_0613_finemap_inclusion.png', p, height = 5.5, width = 3.5)
+```
+
+## Calibration of PIP
+
+```{r}
 shift_x = 0.01
 this_ca = calibration
 this_ca$method[this_ca$method == 'glmnet_cv'] = 'trcFine'
@@ -87,14 +117,64 @@ this_ca$shift[this_ca$method == 'mixFine'] = -1
 p = this_ca %>% filter(method %in% methods) %>% mutate(obs_fraction = nsig / n, x = (pip_bin + .5) / 10) %>% mutate(obs_fraction_se = sqrt(obs_fraction * (1 - obs_fraction) / n)) %>% mutate(x_pos = x + shift * shift_x) %>% ggplot(aes(x = x_pos)) + geom_abline(slope = 1, intercept = 0, linetype = 2) + geom_point(aes(y = obs_fraction, color = method, group = method), position = position_dodge(.2)) + geom_errorbar(aes(ymin = obs_fraction - 1.96 * obs_fraction_se, ymax = obs_fraction + 1.96 * obs_fraction_se, color = method, group = method), width = .01, position = position_dodge(.2)) + theme(legend.position = c(0.8, 0.2)) + scale_color_manual(values=cbPalette2) + theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 p = p + th
 p = p + ylab('Fraction of true positives') + xlab('PIP bin (bin size = 0.1)') + coord_equal(xlim = c(0, 1), ylim = c(0, 1))
-```
-
-```{r}
-calibration %>% mutate(obs_fraction = nsig / n) %>% mutate(obs_fraction_se = sqrt(obs_fraction * (1 - obs_fraction) / n)) %>% ggplot() + geom_point(aes(x = (pip_bin + .5) / 10, y = obs_fraction, color = method)) + geom_abline(slope = 1, intercept = 0) + geom_errorbar(aes(x = (pip_bin + .5) / 10, ymin = obs_fraction - 1.96 * obs_fraction_se, ymax = obs_fraction + 1.96 * obs_fraction_se, color = method)) + theme(legend.position = c(0.8, 0.2)) + xlab('PIP bin (bin size = 0.1)')
+ggsave('../output/grid_sim-multi_0613_finemap_calibration.png', p, height = 3.5, width = 3.5)
 ```
 
 ## Size of credible set
 
 ```{r}
-cs_size %>% ggplot() + geom_density(aes(x = cs_size, color = method)) + facet_grid(theta ~ sample_size, labeller = label_both) + coord_cartesian(xlim = c(0, 50)) 
+this_cs = cs_size
+this_cs$method[this_cs$method == 'glmnet_cv'] = 'trcFine'
+this_cs$method[this_cs$method == 'mixnet_metafine_full'] = 'mixFine'
+p = this_cs %>% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %>% ggplot() + geom_histogram(aes(x = cs_size, fill = method), binwidth = 5) + facet_grid(sample_size~theta, labeller = label_both) + coord_cartesian(xlim = c(0, 50))  + scale_fill_manual(values=cbPalette2)
+p = p + th
+p = p + theme(legend.position = 'bottom')
+p = p + xlab('Size of 95% credible set') + ylab('Count of occurence') + theme(aspect.ratio = 1)
+ggsave('../output/grid_sim-multi_0613_finemap_cs.png', p, height = 5.5, width = 3.5)
+```
+
+<!-- ## Run time -->
+
+<!-- ```{r} -->
+<!-- this_rt = df_runtime -->
+<!-- this_rt$method = as.character(this_rt$method) -->
+<!-- this_rt$method[this_rt$method == 'glmnet_cv'] = 'TRC_only' -->
+<!-- this_rt$method[this_rt$method == 'mixnet_metafine_full'] = 'mixFine' -->
+<!-- p = this_rt %>% filter(method %in% methods, sample_size %in% sample_sizes) %>% mutate(second_per_gene = time / 6000) %>% ggplot(aes(fill = method)) + geom_bar(aes(x = method, y = second_per_gene), stat = 'identity') + scale_fill_manual(values=cbPalette2) + ggtitle('Runtime') + facet_grid(theta~sample_size, labeller = label_both) -->
+<!-- p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1))  -->
+<!-- p -->
+<!-- ggsave('../output/grid_sim-multi_0613_finemap_runtime.png', p, height = 6, width = 7) -->
+<!-- ``` -->
+
+
+
+# Summary with TRC and mixFine (full grid for supp)
+
+## Inclusion rate
+
+```{r}
+methods = c('trcFine', 'mixFine')
+thetas = unique(this_in$theta)   # c('1e-5', '2.5e-6')
+sample_sizes = unique(this_in$sample_size)  # c(100, 300, 500)
+this_in = inclusion
+this_in$method[this_in$method == 'glmnet_cv'] = 'trcFine'
+this_in$method[this_in$method == 'mixnet_metafine_full'] = 'mixFine'
+p = this_in %>% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %>% group_by(theta, sample_size, method, number_of_signals) %>% summarize(inclusion_rate = mean(inclusion_rate), n = n()) %>% ungroup() %>% mutate(rate_se = sqrt(inclusion_rate * (1 - inclusion_rate) / n)) %>% ggplot() + geom_line(aes(x = number_of_signals, y = inclusion_rate, color = method)) + facet_grid(sample_size~theta) + geom_errorbar(aes(x = number_of_signals, ymin = inclusion_rate - 1.96 * rate_se, ymax = inclusion_rate + 1.96 * rate_se, color = method), alpha = .7) + scale_color_manual(values=cbPalette2)
+p = p + theme(legend.position = 'bottom')
+p = p + th
+p = p + xlab('Number of SNPs considered as positive') + ylab('Power') + theme(aspect.ratio = 1)
+ggsave('../output/grid_sim-multi_0613_finemap_inclusion_full.png', p, height = 6.5, width = 5.5)
+```
+
+## Size of credible set
+
+```{r}
+this_cs = cs_size
+this_cs$method[this_cs$method == 'glmnet_cv'] = 'trcFine'
+this_cs$method[this_cs$method == 'mixnet_metafine_full'] = 'mixFine'
+p = this_cs %>% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %>% ggplot() + geom_histogram(aes(x = cs_size, fill = method), binwidth = 5) + facet_grid(sample_size~theta) + coord_cartesian(xlim = c(0, 50))  + scale_fill_manual(values=cbPalette2)
+p = p + th
+p = p + theme(legend.position = 'bottom')
+p = p + xlab('Size of 95% credible set') + ylab('Count of occurence') + theme(aspect.ratio = 1)
+ggsave('../output/grid_sim-multi_0613_finemap_cs_full.png', p, height = 6.5, width = 5.5)
 ```

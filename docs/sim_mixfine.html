@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Results on mixFine runs on simulated data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mixqtl-pipeline</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/liangyy/mixqtl-pipeline">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Results on mixFine runs on simulated data</h1>
+
+</div>
+
+
+<pre class="r"><code>rm(list = ls())
+library(ggplot2)
+theme_set(theme_bw(base_size = 12))
+library(dplyr)
+library(reshape2)
+options(stringsAsFactors = FALSE)
+source(&#39;../code/rlib_analysis.R&#39;)
+datadir = &#39;~/Desktop/mixqtl-pipeline-results/simulation-mixfine/&#39;
+cbPalette2 &lt;- c(&quot;ascFine&quot; = &quot;#999999&quot;, &quot;mixFine&quot; = &quot;#E69F00&quot;, &quot;trcFine&quot; = &quot;#56B4E9&quot;)
+source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R&#39;)
+th$panel.border = element_rect(colour = th$axis.line$colour)</code></pre>
+<div id="load-data" class="section level1">
+<h1><span class="header-section-number">1</span> Load data</h1>
+<pre class="r"><code>thetas = c(&#39;1e-5&#39;, &#39;5e-6&#39;, &#39;2.5e-6&#39;, &#39;1e-6&#39;)
+samplesizes = (1 : 5) * 100
+methods = list(trcfine = &#39;trcFine&#39;, mixfine = &#39;mixFine&#39;)
+inclusion = list()
+cs_size = list()
+calibration = list()
+for(theta in thetas) {
+  for(samplesize in samplesizes) {
+    for(method in names(methods)) {
+      m = methods[[method]]
+      jobname = paste0(&#39;samplesize&#39;, samplesize, &#39;_x_&#39;, &#39;theta&#39;, theta)
+      filename = paste0(datadir, &#39;/&#39;, jobname, &#39;/&#39;, &#39;merge-&#39;, method, &#39;.from1_to100.rds&#39;)
+      temp = readRDS(filename)
+      # inclusion curve
+      inclusion_sub = list()
+      for(i in unique(temp$vars$simulation)) {
+        pip = temp$vars[temp$vars$simulation == i, ]
+        inclusion_sub_temp = inclusion_curve(pip$beta_true != 0)
+        inclusion_sub[[length(inclusion_sub) + 1]] = inclusion_sub_temp
+      }
+      inclusion_sub = do.call(rbind, inclusion_sub)
+      inclusion_sub$method = m
+      inclusion_sub$sample_size = samplesize
+      inclusion_sub$theta = theta
+      inclusion[[length(inclusion) + 1]] = inclusion_sub
+      calibration[[length(calibration) + 1]] = data.frame(pip = temp$vars$variable_prob, is_true = temp$vars$beta_true != 0) %&gt;% mutate(pip_bin = floor(pip * 10)) %&gt;% group_by(pip_bin) %&gt;% summarise(total = n(), nsig = sum(is_true)) %&gt;% ungroup() %&gt;% mutate(method = m, theta = theta, sample_size = samplesize)
+      # size of credible set
+      cs_temp = temp$vars %&gt;% group_by(cs, simulation) %&gt;% filter(cs != -1) %&gt;% summarise(is_true = sum(beta_true != 0) &gt; 0, size = n()) %&gt;% ungroup() %&gt;% filter(is_true)
+      cs_sub = data.frame(cs_size = cs_temp$size)
+      cs_sub$method = m
+      cs_sub$sample_size = samplesize
+      cs_sub$theta = theta
+      cs_size[[length(cs_size) + 1]] = cs_sub
+    }
+  }
+}
+inclusion = do.call(rbind, inclusion)
+cs_size = do.call(rbind, cs_size)
+calibration = do.call(rbind, calibration)
+inclusion$theta = factor(inclusion$theta, levels = thetas)
+cs_size$theta = factor(cs_size$theta, levels = thetas)
+calibration$pip_bin[calibration$pip_bin == 10] = 9
+calibration = calibration %&gt;% group_by(method, pip_bin) %&gt;% summarise(nsig = sum(nsig), n = sum(total))</code></pre>
+</div>
+<div id="results" class="section level1">
+<h1><span class="header-section-number">2</span> Results</h1>
+<div id="inclusion-rate" class="section level2">
+<h2><span class="header-section-number">2.1</span> Inclusion rate</h2>
+<pre class="r"><code>inclusion %&gt;% group_by(theta, sample_size, method, number_of_signals) %&gt;% summarize(inclusion_rate = mean(inclusion_rate), n = n()) %&gt;% ungroup() %&gt;% mutate(rate_se = sqrt(inclusion_rate * (1 - inclusion_rate) / n)) %&gt;% ggplot() + geom_line(aes(x = number_of_signals, y = inclusion_rate, color = method)) + facet_grid(theta ~ sample_size, labeller = label_both) + geom_errorbar(aes(x = number_of_signals, ymin = inclusion_rate - 1.96 * rate_se, ymax = inclusion_rate + 1.96 * rate_se, color = method))</code></pre>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-83-1.png" width="672" /></p>
+</div>
+<div id="calibration-of-pip" class="section level2">
+<h2><span class="header-section-number">2.2</span> Calibration of PIP</h2>
+<pre class="r"><code>calibration %&gt;% mutate(obs_fraction = nsig / n) %&gt;% mutate(obs_fraction_se = sqrt(obs_fraction * (1 - obs_fraction) / n)) %&gt;% ggplot() + geom_point(aes(x = (pip_bin + .5) / 10, y = obs_fraction, color = method)) + geom_abline(slope = 1, intercept = 0) + geom_errorbar(aes(x = (pip_bin + .5) / 10, ymin = obs_fraction - 1.96 * obs_fraction_se, ymax = obs_fraction + 1.96 * obs_fraction_se, color = method)) + theme(legend.position = c(0.8, 0.2)) + xlab(&#39;PIP bin (bin size = 0.1)&#39;)</code></pre>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-84-1.png" width="672" /></p>
+</div>
+<div id="size-of-credible-set" class="section level2">
+<h2><span class="header-section-number">2.3</span> Size of credible set</h2>
+<pre class="r"><code>cs_size %&gt;% ggplot() + geom_density(aes(x = cs_size, color = method)) + facet_grid(theta ~ sample_size, labeller = label_both) + coord_cartesian(xlim = c(0, 50)) </code></pre>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-85-1.png" width="672" /></p>
+</div>
+</div>
+<div id="summary-with-trc-and-mixfine-for-main-text" class="section level1">
+<h1><span class="header-section-number">3</span> Summary with TRC and mixFine (for main text)</h1>
+<div id="inclusion-rate-1" class="section level2">
+<h2><span class="header-section-number">3.1</span> Inclusion rate</h2>
+<pre class="r"><code>source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R&#39;)
+th$panel.border = element_rect(colour = th$axis.line$colour)
+methods = c(&#39;trcFine&#39;, &#39;mixFine&#39;)
+thetas = c(&#39;1e-5&#39;, &#39;2.5e-6&#39;)
+sample_sizes = c(100, 300, 500)
+this_in = inclusion
+this_in$method[this_in$method == &#39;glmnet_cv&#39;] = &#39;trcFine&#39;
+this_in$method[this_in$method == &#39;mixnet_metafine_full&#39;] = &#39;mixFine&#39;
+p = this_in %&gt;% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %&gt;% group_by(theta, sample_size, method, number_of_signals) %&gt;% summarize(inclusion_rate = mean(inclusion_rate), n = n()) %&gt;% ungroup() %&gt;% mutate(rate_se = sqrt(inclusion_rate * (1 - inclusion_rate) / n)) %&gt;% ggplot() + geom_line(aes(x = number_of_signals, y = inclusion_rate, color = method)) + facet_grid(sample_size~theta, labeller = label_both) + geom_errorbar(aes(x = number_of_signals, ymin = inclusion_rate - 1.96 * rate_se, ymax = inclusion_rate + 1.96 * rate_se, color = method), alpha = .7) + scale_color_manual(values=cbPalette2)
+p = p + theme(legend.position = &#39;bottom&#39;)
+p = p + th
+p = p + xlab(&#39;Number of SNPs considered as positive&#39;) + ylab(&#39;Power&#39;) + theme(aspect.ratio = 1)
+ggsave(&#39;../output/grid_sim-multi_0613_finemap_inclusion.png&#39;, p, height = 5.5, width = 3.5)</code></pre>
+</div>
+<div id="calibration-of-pip-1" class="section level2">
+<h2><span class="header-section-number">3.2</span> Calibration of PIP</h2>
+<pre class="r"><code>shift_x = 0.01
+this_ca = calibration
+this_ca$method[this_ca$method == &#39;glmnet_cv&#39;] = &#39;trcFine&#39;
+this_ca$method[this_ca$method == &#39;mixnet_metafine_full&#39;] = &#39;mixFine&#39;
+this_ca$shift = 1
+this_ca$shift[this_ca$method == &#39;mixFine&#39;] = -1
+p = this_ca %&gt;% filter(method %in% methods) %&gt;% mutate(obs_fraction = nsig / n, x = (pip_bin + .5) / 10) %&gt;% mutate(obs_fraction_se = sqrt(obs_fraction * (1 - obs_fraction) / n)) %&gt;% mutate(x_pos = x + shift * shift_x) %&gt;% ggplot(aes(x = x_pos)) + geom_abline(slope = 1, intercept = 0, linetype = 2) + geom_point(aes(y = obs_fraction, color = method, group = method), position = position_dodge(.2)) + geom_errorbar(aes(ymin = obs_fraction - 1.96 * obs_fraction_se, ymax = obs_fraction + 1.96 * obs_fraction_se, color = method, group = method), width = .01, position = position_dodge(.2)) + theme(legend.position = c(0.8, 0.2)) + scale_color_manual(values=cbPalette2) + theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+p = p + th
+p = p + ylab(&#39;Fraction of true positives&#39;) + xlab(&#39;PIP bin (bin size = 0.1)&#39;) + coord_equal(xlim = c(0, 1), ylim = c(0, 1))
+ggsave(&#39;../output/grid_sim-multi_0613_finemap_calibration.png&#39;, p, height = 3.5, width = 3.5)</code></pre>
+<pre><code>## Warning: position_dodge requires non-overlapping x intervals</code></pre>
+</div>
+<div id="size-of-credible-set-1" class="section level2">
+<h2><span class="header-section-number">3.3</span> Size of credible set</h2>
+<pre class="r"><code>this_cs = cs_size
+this_cs$method[this_cs$method == &#39;glmnet_cv&#39;] = &#39;trcFine&#39;
+this_cs$method[this_cs$method == &#39;mixnet_metafine_full&#39;] = &#39;mixFine&#39;
+p = this_cs %&gt;% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %&gt;% ggplot() + geom_histogram(aes(x = cs_size, fill = method), binwidth = 5) + facet_grid(sample_size~theta, labeller = label_both) + coord_cartesian(xlim = c(0, 50))  + scale_fill_manual(values=cbPalette2)
+p = p + th
+p = p + theme(legend.position = &#39;bottom&#39;)
+p = p + xlab(&#39;Size of 95% credible set&#39;) + ylab(&#39;Count of occurence&#39;) + theme(aspect.ratio = 1)
+ggsave(&#39;../output/grid_sim-multi_0613_finemap_cs.png&#39;, p, height = 5.5, width = 3.5)</code></pre>
+<!-- ## Run time -->
+<!-- ```{r} -->
+<!-- this_rt = df_runtime -->
+<!-- this_rt$method = as.character(this_rt$method) -->
+<!-- this_rt$method[this_rt$method == 'glmnet_cv'] = 'TRC_only' -->
+<!-- this_rt$method[this_rt$method == 'mixnet_metafine_full'] = 'mixFine' -->
+<!-- p = this_rt %>% filter(method %in% methods, sample_size %in% sample_sizes) %>% mutate(second_per_gene = time / 6000) %>% ggplot(aes(fill = method)) + geom_bar(aes(x = method, y = second_per_gene), stat = 'identity') + scale_fill_manual(values=cbPalette2) + ggtitle('Runtime') + facet_grid(theta~sample_size, labeller = label_both) -->
+<!-- p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1))  -->
+<!-- p -->
+<!-- ggsave('../output/grid_sim-multi_0613_finemap_runtime.png', p, height = 6, width = 7) -->
+<!-- ``` -->
+</div>
+</div>
+<div id="summary-with-trc-and-mixfine-full-grid-for-supp" class="section level1">
+<h1><span class="header-section-number">4</span> Summary with TRC and mixFine (full grid for supp)</h1>
+<div id="inclusion-rate-2" class="section level2">
+<h2><span class="header-section-number">4.1</span> Inclusion rate</h2>
+<pre class="r"><code>methods = c(&#39;trcFine&#39;, &#39;mixFine&#39;)
+thetas = unique(this_in$theta)   # c(&#39;1e-5&#39;, &#39;2.5e-6&#39;)
+sample_sizes = unique(this_in$sample_size)  # c(100, 300, 500)
+this_in = inclusion
+this_in$method[this_in$method == &#39;glmnet_cv&#39;] = &#39;trcFine&#39;
+this_in$method[this_in$method == &#39;mixnet_metafine_full&#39;] = &#39;mixFine&#39;
+p = this_in %&gt;% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %&gt;% group_by(theta, sample_size, method, number_of_signals) %&gt;% summarize(inclusion_rate = mean(inclusion_rate), n = n()) %&gt;% ungroup() %&gt;% mutate(rate_se = sqrt(inclusion_rate * (1 - inclusion_rate) / n)) %&gt;% ggplot() + geom_line(aes(x = number_of_signals, y = inclusion_rate, color = method)) + facet_grid(sample_size~theta) + geom_errorbar(aes(x = number_of_signals, ymin = inclusion_rate - 1.96 * rate_se, ymax = inclusion_rate + 1.96 * rate_se, color = method), alpha = .7) + scale_color_manual(values=cbPalette2)
+p = p + theme(legend.position = &#39;bottom&#39;)
+p = p + th
+p = p + xlab(&#39;Number of SNPs considered as positive&#39;) + ylab(&#39;Power&#39;) + theme(aspect.ratio = 1)
+ggsave(&#39;../output/grid_sim-multi_0613_finemap_inclusion_full.png&#39;, p, height = 6.5, width = 5.5)</code></pre>
+</div>
+<div id="size-of-credible-set-2" class="section level2">
+<h2><span class="header-section-number">4.2</span> Size of credible set</h2>
+<pre class="r"><code>this_cs = cs_size
+this_cs$method[this_cs$method == &#39;glmnet_cv&#39;] = &#39;trcFine&#39;
+this_cs$method[this_cs$method == &#39;mixnet_metafine_full&#39;] = &#39;mixFine&#39;
+p = this_cs %&gt;% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %&gt;% ggplot() + geom_histogram(aes(x = cs_size, fill = method), binwidth = 5) + facet_grid(sample_size~theta) + coord_cartesian(xlim = c(0, 50))  + scale_fill_manual(values=cbPalette2)
+p = p + th
+p = p + theme(legend.position = &#39;bottom&#39;)
+p = p + xlab(&#39;Size of 95% credible set&#39;) + ylab(&#39;Count of occurence&#39;) + theme(aspect.ratio = 1)
+ggsave(&#39;../output/grid_sim-multi_0613_finemap_cs_full.png&#39;, p, height = 6.5, width = 5.5)</code></pre>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
