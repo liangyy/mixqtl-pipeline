@@ -21,7 +21,7 @@ declare -a theta=("5e-5" "2.5e-5" "1e-5" "5e-6" "2.5e-6" "1e-6")
 ## declare an array of sample size
 declare -a samplesize=("100" "200" "300" "400" "500")
 ## declare an array of methods to be used
-declare -a method=("mixfine" "trcfine")
+declare -a method=("mixpred" "trcpred")
 
 for t in "${theta[@]}"
 do
