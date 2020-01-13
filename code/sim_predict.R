@@ -20,6 +20,7 @@ options(datatable.fread.datatable = F)
 
 
 # load predictor
+data_collector = readRDS(opt$test_data)
 mod = readRDS(opt$predictor)
 snplist = mod$snplist
 beta = mod$model$beta
@@ -48,4 +49,4 @@ y = log(trc / 2 / test$readcount$observed$Ti_lib)
 
 
 # save results
-saveRDS(data.frame(y = y, ypred = ypred, genetic_var = data_collector$genetic_var, training_time = mod$time), opt$output)
+saveRDS(list(y = y, ypred = ypred, genetic_var = data_collector$genetic_var, training_time = mod$time), opt$output)

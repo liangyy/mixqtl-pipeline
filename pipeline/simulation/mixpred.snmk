@@ -3,9 +3,9 @@
 if 'outdir' not in config:
     config['outdir'] = 'output'
 
-# snplist_cmd = ''
-# if 'snplist' in config:
-#     snplist_cmd = '--snplist ' + config['snplist']
+snplist_cmd = ''
+if 'snplist' in config:
+    snplist_cmd = '--snplist ' + config['snplist']
     
 rule all:
     input:
@@ -48,9 +48,8 @@ rule train:
         'Rscript ../../code/sim_{wildcards.trainer}.R \
             --data {input[0]} \
             --output {output[0]} \
-            --timelog {log}'
-            #  \
-            # {snplist_cmd}
+            {snplist_cmd}'
+            # --timelog {log}'
 
 rule predict:
     input:

@@ -18,6 +18,8 @@ option_list <- list(
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
 
+source('../../code/rlib_simulation.R')
+
 library(data.table)
 options(datatable.fread.datatable = F)
 library(mixqtl)
@@ -25,6 +27,7 @@ library(dplyr)
 
 
 # prepare inputs
+data_collector = readRDS(opt$data)
 train = data_collector$train
 if(!is.null(opt$snplist)) {
   hm3snp = fread(opt$snplist, header = T)
@@ -55,7 +58,7 @@ timer = system.time({
 
 
 # return
-saveRDS(list(model = model, snplist = hm3snp, time = format_system_time(timer)), opt$output)
+saveRDS(list(model = mod, snplist = hm3snp, time = format_system_time(timer)), opt$output)
 
 # 
 # # write time used

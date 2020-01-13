@@ -50,8 +50,8 @@ format_system_time = function(my_proc_time) {
 get_pve_here = function(y, ypred) {
   mod = lm(ypred ~ 1 + y)
   mod0 = lm(ypred ~ 1)
-  sse = sum(residual(mod) ^ 2)
-  sse0 = sum(residual(mod0) ^ 2)
+  sse = sum(residuals(mod) ^ 2)
+  sse0 = sum(residuals(mod0) ^ 2)
   return(1 - sse / sse0)
 }
 
