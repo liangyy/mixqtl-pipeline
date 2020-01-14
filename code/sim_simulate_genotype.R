@@ -19,7 +19,7 @@ library(mixqtl)
 
 ## load parameter
 param = yaml::read_yaml(opt$param)
-set.seed(param$seed)
+# set.seed(param$seed)
 
 ## Sample size and number of replications
 N = param$Nsample  # number of individuals

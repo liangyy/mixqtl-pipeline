@@ -16,7 +16,7 @@ library(mixqtl)
 
 ## load parameter
 param = yaml::read_yaml(opt$param)
-set.seed(param$seed)
+# set.seed(param$seed)
 
 ## Pre-fixed parameters
 if(is.character(param$L_gene)) {
