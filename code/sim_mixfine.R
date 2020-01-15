@@ -18,6 +18,7 @@ opt <- parse_args(opt_parser)
 library(mixqtl)
 library(dplyr)
 
+source('../../code/rlib_simulation.R')
 
 # load data
 genotype = readRDS(opt$geno)
@@ -42,14 +43,17 @@ df = data.frame(
 
 
 # run mixFine
-mod = mixfine(h1, h2, df$y1, df$y2, df$ytotal, df$lib_size, cov_offset = rep(0, nrow(df)), trc_cutoff = 10, asc_cutoff = 5)  # , weight_cap = NULL)
-# mod = tmp$mod
+timer = system.time({
+  mod = mixfine(h1, h2, df$y1, df$y2, df$ytotal, df$lib_size, cov_offset = rep(0, nrow(df)), trc_cutoff = 10, asc_cutoff = 5)  # , weight_cap = NULL)
+  # mod = tmp$mod
+}, gcFirst = T)
+  
 
 # record output
 cs = summary(mod)$cs
 vars = summary(mod)$vars
 vars$beta_true = true_beta[vars$variable]
 # saveRDS(list(cs = cs, vars = vars, tmp = tmp), opt$output)
-saveRDS(list(cs = cs, vars = vars), opt$output)
+saveRDS(list(cs = cs, vars = vars, timer = format_system_time(timer)), opt$output)
 
 

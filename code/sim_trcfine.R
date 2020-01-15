@@ -18,6 +18,7 @@ opt <- parse_args(opt_parser)
 library(mixqtl)
 library(dplyr)
 
+source('../../code/rlib_simulation.R')
 
 # load data
 genotype = readRDS(opt$geno)
@@ -39,12 +40,14 @@ y = log(trc / 2 / readcount$observed$Ti_lib)
 
 
 # run trcFine
-mod = mixqtl:::run_susie_default(X, y)
+timer = system.time({
+  mod = mixqtl:::run_susie_default(X, y)
+}, gcFirst = T)
 
 
 # record output
 cs = summary(mod)$cs
 vars = summary(mod)$vars
 vars$beta_true = true_beta[vars$variable]
-saveRDS(list(cs = cs, vars = vars), opt$output)
+saveRDS(list(cs = cs, vars = vars, timer = format_system_time(timer)), opt$output)
 

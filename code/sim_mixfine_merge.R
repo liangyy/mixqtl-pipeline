@@ -21,6 +21,7 @@ opt <- parse_args(opt_parser)
 
 cs = data.frame()
 vars = data.frame()
+timer = data.frame()
 for(i in opt$from : opt$to) {
   filename = paste0(opt$input_prefix, i, '.rds')
   df_sub = readRDS(filename)
@@ -32,6 +33,10 @@ for(i in opt$from : opt$to) {
     df_sub$cs$simulation =i
     cs = rbind(cs, df_sub$cs)
   }
+  if(!is.null(ncol(df_sub$timer))) {
+    df_sub$timer$simulation =i
+    timer = rbind(timer, df_sub$timer)
+  }
 }
-saveRDS(list(vars = vars, cs = cs), opt$output)
+saveRDS(list(vars = vars, cs = cs, timer = timer), opt$output)
 
