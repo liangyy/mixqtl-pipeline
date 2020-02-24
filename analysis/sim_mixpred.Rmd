@@ -20,7 +20,7 @@ th$panel.border = element_rect(colour = th$axis.line$colour)
 
 ```{r load data}
 nt = 5; ra = 0.2
-theta = c('1e-5', '5e-6', '2.5e-6', '1e-6')
+theta = c('5e-5', '1e-5', '5e-6', '2.5e-6')  # , '1e-6')
 theta = factor(theta, levels = theta)
 sample_size = 1 : 5 * 100
 methods = c(trcpred = 'trcPred', mixpred = 'mixPred')

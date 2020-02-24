@@ -436,17 +436,17 @@ calibration = calibration %&gt;% group_by(method, pip_bin) %&gt;% summarise(nsig
 <div id="inclusion-rate" class="section level2">
 <h2><span class="header-section-number">2.1</span> Inclusion rate</h2>
 <pre class="r"><code>inclusion %&gt;% group_by(theta, sample_size, method, number_of_signals) %&gt;% summarize(inclusion_rate = mean(inclusion_rate), n = n()) %&gt;% ungroup() %&gt;% mutate(rate_se = sqrt(inclusion_rate * (1 - inclusion_rate) / n)) %&gt;% ggplot() + geom_line(aes(x = number_of_signals, y = inclusion_rate, color = method)) + facet_grid(theta ~ sample_size, labeller = label_both) + geom_errorbar(aes(x = number_of_signals, ymin = inclusion_rate - 1.96 * rate_se, ymax = inclusion_rate + 1.96 * rate_se, color = method))</code></pre>
-<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-83-1.png" width="672" /></p>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 <div id="calibration-of-pip" class="section level2">
 <h2><span class="header-section-number">2.2</span> Calibration of PIP</h2>
 <pre class="r"><code>calibration %&gt;% mutate(obs_fraction = nsig / n) %&gt;% mutate(obs_fraction_se = sqrt(obs_fraction * (1 - obs_fraction) / n)) %&gt;% ggplot() + geom_point(aes(x = (pip_bin + .5) / 10, y = obs_fraction, color = method)) + geom_abline(slope = 1, intercept = 0) + geom_errorbar(aes(x = (pip_bin + .5) / 10, ymin = obs_fraction - 1.96 * obs_fraction_se, ymax = obs_fraction + 1.96 * obs_fraction_se, color = method)) + theme(legend.position = c(0.8, 0.2)) + xlab(&#39;PIP bin (bin size = 0.1)&#39;)</code></pre>
-<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-84-1.png" width="672" /></p>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
 <div id="size-of-credible-set" class="section level2">
 <h2><span class="header-section-number">2.3</span> Size of credible set</h2>
 <pre class="r"><code>cs_size %&gt;% ggplot() + geom_density(aes(x = cs_size, color = method)) + facet_grid(theta ~ sample_size, labeller = label_both) + coord_cartesian(xlim = c(0, 50)) </code></pre>
-<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-85-1.png" width="672" /></p>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 </div>
 </div>
 <div id="summary-with-trc-and-mixfine-for-main-text" class="section level1">
