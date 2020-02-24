@@ -8,7 +8,8 @@
 
 source ~/.bash_profile
 source ~/.bashrc
-cd /home/t.cri.yliang/scratch/GitHub/mixqtl-pipeline/pipeline/simulation
+# cd /home/t.cri.yliang/scratch/GitHub/mixqtl-pipeline/pipeline/simulation
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/simulation
 conda activate mixqtl
 
 snakemake -s mixfine.snmk --configfile ../../qsub/simulation/mixfine/configs/config_$NAME.yaml --nolock --cores 16 -p --config finemapper=$METHOD outdir=$OUTDIR > ../../qsub/simulation/mixfine/logs/$NAME-$METHOD.log 2>&1

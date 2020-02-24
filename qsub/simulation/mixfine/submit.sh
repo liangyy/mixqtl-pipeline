@@ -39,8 +39,9 @@ do
       then 
         e=`cat $logf|grep Exit|tail -n 1|grep 1` 
         if [[ -z $e ]]
-        then 
-          continue
+        then
+          continue 
+          # echo 'hey'  # continue
         fi
       fi 
       echo "data:
