@@ -387,8 +387,8 @@ source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b26
 th$panel.border = element_rect(colour = th$axis.line$colour)</code></pre>
 <div id="load-data" class="section level1">
 <h1><span class="header-section-number">1</span> Load data</h1>
-<pre class="r"><code>nt = 5; ra = 0.2
-theta = c(&#39;1e-5&#39;, &#39;5e-6&#39;, &#39;2.5e-6&#39;, &#39;1e-6&#39;)
+<pre class="r"><code>nt = 2; ra = 0.2
+theta = c(&#39;5e-5&#39;, &#39;1e-5&#39;, &#39;5e-6&#39;, &#39;2.5e-6&#39;)  # , &#39;1e-6&#39;)
 theta = factor(theta, levels = theta)
 sample_size = 1 : 5 * 100
 methods = c(trcpred = &#39;trcPred&#39;, mixpred = &#39;mixPred&#39;)
@@ -397,7 +397,7 @@ for(t in theta) {
   for(s in sample_size) {
     for(m in names(methods)) {
       # message(t, s, m)
-      filename = paste0(datadir, &#39;samplesize&#39;, s, &#39;_x_theta&#39;, t, &#39;/merge_&#39;, m,&#39;-ntest5-ratio0.2.from1_to100.rds&#39;)
+      filename = paste0(datadir, &#39;samplesize&#39;, s, &#39;_x_theta&#39;, t, &#39;/merge_&#39;, m,&#39;-ntest&#39;, nt, &#39;-ratio0.2.from1_to100.rds&#39;)
       temp = readRDS(filename)
       temp$method = methods[[m]]; temp$theta = t; temp$sample_size = s
       df = rbind(df, temp)
@@ -418,20 +418,20 @@ df_pve = df %&gt;% select(method, m, replicate, pve, sample_size, theta) %&gt;% 
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
   theme(legend.position=&quot;bottom&quot;)</code></pre>
-<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <pre class="r"><code>df_pve %&gt;% melt(id.vars = c(&#39;sample_size&#39;, &#39;theta&#39;, &#39;m&#39;, &#39;replicate&#39;)) %&gt;% ggplot() + geom_boxplot(aes(x = variable, y = value, color = variable)) + facet_grid(theta ~ sample_size, labeller = label_both) + scale_color_manual(values=cbPalette2) +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
   theme(legend.position=&quot;bottom&quot;)</code></pre>
-<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-9-2.png" width="672" /></p>
+<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
 </div>
 <div id="mixpred-vs.glmnet-new" class="section level2">
 <h2><span class="header-section-number">2.2</span> mixPred vs. glmnet new</h2>
 <pre class="r"><code>df_pcor %&gt;% ggplot() + geom_point(aes(x = trcPred, y = mixPred), alpha = .2) + geom_abline(slope = 1, intercept = 0, color = &#39;red&#39;, linetype = 2) + facet_grid(theta ~ sample_size, labeller = label_both) + ggtitle(&#39;Pearson correlation&#39;)</code></pre>
-<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <pre class="r"><code>df_pve %&gt;% ggplot() + geom_point(aes(x = trcPred, y = mixPred), alpha = .2) + geom_abline(slope = 1, intercept = 0, color = &#39;red&#39;, linetype = 2) + facet_grid(theta ~ sample_size, labeller = label_both) + ggtitle(&#39;R2&#39;)</code></pre>
-<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
 </div>
 </div>
 <div id="r2-vs.heritability" class="section level1">
@@ -440,14 +440,14 @@ df_pve = df %&gt;% select(method, m, replicate, pve, sample_size, theta) %&gt;% 
 <div id="mixpred" class="section level2">
 <h2><span class="header-section-number">3.1</span> mixPred</h2>
 <pre class="r"><code>df %&gt;% filter(method == &#39;mixPred&#39;) %&gt;% ggplot() + geom_point(aes(x = heritability, y = pve), alpha = .2) + geom_abline(slope = 1, intercept = 0, linetype = 2, color = &#39;red&#39;) + facet_grid(theta ~ sample_size, labeller = label_both) + theme(legend.position = c(0.8, 0.2))</code></pre>
-<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 </div>
 <div id="cpu-time" class="section level1">
 <h1><span class="header-section-number">4</span> CPU time</h1>
 <pre class="r"><code>df_cpu = df %&gt;% group_by(method, theta, sample_size) %&gt;% summarize(mean_time = mean(user.self), median_time = median(user.self))
 df_cpu %&gt;% ggplot() + geom_bar(aes(x = method, y = mean_time, fill = method), stat = &#39;identity&#39;) + facet_grid(theta ~ sample_size, labeller = label_both) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_y_log10() + geom_text(aes(x = method, y = mean_time + 5, label = paste0(&#39;&#39;, signif(mean_time, digits = 2), &#39;s&#39;)), size = 3)</code></pre>
-<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p><img src="sim_mixpred_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 <div id="summary-with-trc-and-mixpred-for-main-text" class="section level1">
 <h1><span class="header-section-number">5</span> Summary with TRC and mixPred (for main text)</h1>
@@ -470,12 +470,12 @@ ggsave(&#39;../output/grid_sim-multi_0613_prediction_pearson.png&#39;, p, height
 p = p + th
 p = p + ylab(&#39;Pearson correlation in mixPred&#39;) + xlab(&#39;Pearson correlation in trcPred&#39;) + theme(axis.text.x=element_text(angle = 90, hjust = .5, vjust = .5)) + coord_equal()
 ggsave(&#39;../output/grid_sim-multi_0613_prediction_pearson_pair.png&#39;, p, height = 5.5, width = 3.5)</code></pre>
-<pre class="r"><code>sub_rt = df_cpu
-sub_rt$method = as.character(sub_rt$method)
+<pre class="r"><code># sub_rt = df_cpu
+# sub_rt$method = as.character(sub_rt$method)
 
-p = sub_rt %&gt;% filter(sample_size %in% sample_sizes, theta %in% thetas) %&gt;% ggplot() + geom_bar(aes(x = method, y = mean_time, fill = method), stat = &#39;identity&#39;) + facet_grid(sample_size~theta, labeller = label_both) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_fill_manual(values=cbPalette2)
-p = p + th
-ggsave(&#39;../output/grid_sim-multi_0613_prediction_runtime.png&#39;, p, width = 5, height = 6)</code></pre>
+p = df %&gt;% filter(sample_size %in% sample_sizes, theta %in% thetas) %&gt;% ggplot() + geom_violin(aes(x = method, y = user.self, fill = method), alpha = .5) + geom_boxplot(aes(x = method, y = user.self, fill = method), width = .1) + facet_grid(sample_size~theta, labeller = label_both, scales = &#39;free_y&#39;) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_fill_manual(values=cbPalette2)
+p = p + th + theme(legend.position=&quot;bottom&quot;)
+ggsave(&#39;../output/grid_sim-multi_0613_prediction_runtime.png&#39;, p, height = 5.5, width = 3.5)</code></pre>
 </div>
 <div id="summary-with-trc-and-mixpred-full-grid-for-supp" class="section level1">
 <h1><span class="header-section-number">6</span> Summary with TRC and mixPred (full grid for supp)</h1>
@@ -496,6 +496,12 @@ ggsave(&#39;../output/grid_sim-multi_0613_prediction_pearson_full.png&#39;, p, h
 p = p + th
 p = p + ylab(&#39;Pearson correlation in mixPred&#39;) + xlab(&#39;Pearson correlation in trcPred&#39;) + theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 1)) + coord_equal()
 ggsave(&#39;../output/grid_sim-multi_0613_prediction_pearson_pair_full.png&#39;, p, height = 6.5, width = 5.5)</code></pre>
+<pre class="r"><code># sub_rt = df_cpu
+# sub_rt$method = as.character(sub_rt$method)
+
+p = df %&gt;% filter(sample_size %in% sample_sizes, theta %in% thetas) %&gt;% ggplot() + geom_violin(aes(x = method, y = user.self, fill = method), alpha = .5) + geom_boxplot(aes(x = method, y = user.self, fill = method), width = .1) + facet_grid(sample_size~theta, scales = &#39;free_y&#39;) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_fill_manual(values=cbPalette2)
+p = p + th + theme(legend.position=&quot;bottom&quot;)
+ggsave(&#39;../output/grid_sim-multi_0613_prediction_runtime_full.png&#39;, p, height = 6.5, width = 5.5)</code></pre>
 </div>
 
 

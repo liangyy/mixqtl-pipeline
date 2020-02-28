@@ -80,7 +80,7 @@ p = summary_t1e %>% filter(theta %in% sub_thetas, sample_size %in% sub_samplesiz
   geom_errorbar(aes(x = method, ymin = t1e - t1e_se * 1.96, ymax = t1e + t1e_se * 1.96), width = .2) + 
   geom_hline(yintercept = 0.05, linetype = 2) + 
   scale_color_manual(values=cbPalette2) + 
-  ggtitle('Type I error') + 
+  # ggtitle('Type I error') + 
   facet_grid(sample_size~theta, labeller = label_both)
 p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1))
 p = p + th
