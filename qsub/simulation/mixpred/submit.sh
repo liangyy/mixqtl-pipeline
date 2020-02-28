@@ -41,6 +41,7 @@ do
         if [[ -z $e ]]
         then 
           continue
+          # echo hi
         fi
       fi 
       echo "data:

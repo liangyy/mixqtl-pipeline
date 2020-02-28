@@ -51,8 +51,9 @@ timer = system.time({
     train$readcount$observed$y2, 
     train$readcount$observed$y1 + train$readcount$observed$y2 + train$readcount$observed$ystar,
     train$readcount$observed$Ti_lib, 
-    trc_cutoff = 10, 
-    asc_cutoff = 5
+    trc_cutoff = 0, 
+    asc_cutoff = 0,
+    nobs_asc_cutoff = 1
   )
 }, gcFirst = T)
 
