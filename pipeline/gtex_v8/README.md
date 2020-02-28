@@ -17,8 +17,8 @@ The followings are **Only used for comparing to vanilla method)**:
 
 For total count, we run:
  
-* PEER factor analysis to obtain covariates for mixQTL. (`get_peer_factor.snmk`)
 * Format the matrix. (`expression.snmk`)
+* PEER factor analysis to obtain covariates for mixQTL. (`get_peer_factor.snmk`)
 
 For ASE count, we do:
 

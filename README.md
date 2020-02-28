@@ -26,3 +26,7 @@ The pipeline is built using `snakemake`. The full conda environment is coming in
 * `code/`: scripts for the pipeline
 * `qsub/`: actual jobs running `pipeline`. It specifies all dependent files and parameters to reproduce the runs
 * `analysis/`: analysis and summary report of the runs
+
+# TODO
+
+* Pack up `misc_data` in the end.

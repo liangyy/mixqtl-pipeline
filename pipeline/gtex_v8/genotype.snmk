@@ -1,0 +1,46 @@
+# this module extract genotype for each gene
+
+genes = {}
+tss_dic = {}
+with open(config['genelist'], 'r') as f:
+    for i in f:
+        i = i.strip()
+        i = i.split('.')[0]
+        genes[i] = None
+with open(config['gene-annotation'], 'r') as f:
+    for i in f:
+        i = i.strip()
+        i = i.split('\t')
+        if i[0].split('.')[0] in genes:
+            start = i[4]
+            end = i[5]
+            strand = i[6]
+            chr = i[3]
+            tss = None
+            if strand == '+':
+                tss = [int(start), chr]
+            else:
+                tss = [int(end), chr]
+            tss_dic[i[0].split('.')[0]] = tss
+def get_all_genes(config, tss):
+    out = []
+    for gene in tss.keys():
+        out.append('output/genotype/{gene}.txt.gz'.format(gene = gene))
+    return out
+
+rule all:
+    input:
+        get_all_genes(config, tss_dic)
+
+rule extract:
+    input:
+        config['genotype']['path']
+    params:
+        start = lambda wildcards: tss_dic[wildcards.gene][0] - config['window-size'],
+        end = lambda wildcards: tss_dic[wildcards.gene][0] + config['window-size'],
+        chr = lambda wildcards: tss_dic[wildcards.gene][1],
+        header = config['genotype']['header']
+    output:
+        'output/genotype/{gene}.txt.gz'
+    shell:
+        'bash ../minimal_test/extract_genotype/scripts/extract_genotype.sh {input[0]} {params.chr}:{params.start}-{params.end} {params.header} {output[0]}'

@@ -1,0 +1,54 @@
+# get peer factor from trc matrix (and library size)
+
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+
+rule all:
+    input:
+        '{outdir}/{tissue}/covariate-combined.txt'.format(tissue = config['tissue'], outdir = config['outdir'])
+
+rule prepare_mat:
+    input:
+        'output/expression/merge-{tissue}.rds'
+    output:
+        '{outdir}/{tissue}.mat.rds'  # '.logTRC.PEER_covariates.txt'
+    shell:
+        'Rscript scripts/peer_prepare_log_trc_mat.R --input {input[0]} --output {output[0]}'
+
+rule prepare_csv:
+    input:
+        '{outdir}/{tissue}.mat.rds'
+    output:
+        '{outdir}/{tissue}.mat.csv'
+    shell:
+        'Rscript scripts/rds2csv.R --rds {input[0]} --csv {output[0]}'
+
+rule run_peer:
+    input:
+        '{outdir}/{tissue}.mat.csv'
+    output:
+        '{outdir}/{tissue}/W.csv',
+        '{outdir}/{tissue}/X.csv',
+        '{outdir}/{tissue}/residuals.csv'
+    log:
+        '{outdir}/{tissue}/PEER.log'
+    shell:
+        '''
+        echo "START" > {log} 
+        stdbuf -oL peertool -f {input[0]} -n {config[nfactor]} -i 1000 -o {wildcards.outdir}/{wildcards.tissue} --e_pb 10 --e_pa 0.1 --a_pb 0.01 --a_pa 0.001 |
+        while IFS= read -r line
+        do
+          echo "$line" >> {log}
+        done
+        '''
+
+rule merge_with_other_covar:
+    input:
+        '{outdir}/{tissue}/X.csv',
+        config['covariate'],
+        '{outdir}/{tissue}.mat.rds'
+    output:
+        '{outdir}/{tissue}/covariate-combined.txt'
+    shell:
+        'Rscript scripts/merge_with_other_covar.R --input_peer {input[0]} --covariate {input[1]} --input_rds {input[2]} --output {output[0]}'
+

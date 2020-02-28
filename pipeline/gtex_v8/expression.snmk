@@ -1,0 +1,47 @@
+# this module extract read count data from total/allele-specific read count matrix
+
+rule all:
+    input:
+        'output/expression/merge-{tissue}.rds'.format(tissue = config['tissue'])
+
+rule get_id:
+    input:
+        config['sample-id']
+    output:
+        'output/expression/sample-id-{tissue}.txt'
+    shell:
+        'Rscript ../minimal_test/prepare_input/scripts/get_sample_id.R --table {input[0]} --tissue "{config[extract-name]}" --output {output[0]}'
+
+rule extract_trc:
+    input:
+        config['trc-matrix'],
+        'output/expression/sample-id-{tissue}.txt'
+    output:
+        'output/expression/trc-{tissue}.txt.gz'
+    shell:
+        'bash scripts/extract_trc.sh {input[0]} {input[1]} {output[0]}'
+
+rule extract_ase:
+    input:
+        config['ase-matrix'],
+        'output/expression/sample-id-{tissue}.txt'
+    output:
+        'output/expression/ase-{tissue}.txt.gz'
+    shell:
+        'bash scripts/extract_ase.sh {input[0]} {input[1]} {output[0]}'
+
+rule merge_trc_ase:
+    input:
+        trc = 'output/expression/trc-{tissue}.txt.gz',
+        ase = 'output/expression/ase-{tissue}.txt.gz',
+        ne = config['normalize-expression-matrix'],
+        lib = config['library-size']
+    output:
+        'output/expression/merge-{tissue}.rds'
+    shell:
+        'Rscript scripts/merge_trc_ase_ne.R \
+            --trc {input.trc} \
+            --ase {input.ase} \
+            --ne {input.ne} \
+            --library_size {input.lib} \
+            --output {output[0]}'
