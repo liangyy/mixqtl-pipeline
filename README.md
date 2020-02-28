@@ -10,6 +10,16 @@ It contains pipelines for
 * mixQTL, mixPred, and mixFine runs on simulated data
 * mixQTL and mixFine runs on GTEx V8 data (along with the pre-processing steps)
 
+## Dependencies
+
+It reproduces mixQTL results using `mixqtl` R package. To install, do
+
+```
+devtools::install_github('liangyy/mixqtl@reproduce')
+```
+
+The pipeline is built using `snakemake`. The full conda environment is coming in the future. 
+
 ## Directory structure
 
 * `pipeline/`: pipelines in `snakemake` 

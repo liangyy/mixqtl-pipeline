@@ -19,8 +19,8 @@ th$panel.border = element_rect(colour = th$axis.line$colour)
 # Load data
 
 ```{r load data}
-nt = 5; ra = 0.2
-theta = c('1e-5', '5e-6', '2.5e-6', '1e-6')
+nt = 2; ra = 0.2
+theta = c('5e-5', '1e-5', '5e-6', '2.5e-6')  # , '1e-6')
 theta = factor(theta, levels = theta)
 sample_size = 1 : 5 * 100
 methods = c(trcpred = 'trcPred', mixpred = 'mixPred')
@@ -29,7 +29,7 @@ for(t in theta) {
   for(s in sample_size) {
     for(m in names(methods)) {
       # message(t, s, m)
-      filename = paste0(datadir, 'samplesize', s, '_x_theta', t, '/merge_', m,'-ntest5-ratio0.2.from1_to100.rds')
+      filename = paste0(datadir, 'samplesize', s, '_x_theta', t, '/merge_', m,'-ntest', nt, '-ratio0.2.from1_to100.rds')
       temp = readRDS(filename)
       temp$method = methods[[m]]; temp$theta = t; temp$sample_size = s
       df = rbind(df, temp)
@@ -117,12 +117,12 @@ ggsave('../output/grid_sim-multi_0613_prediction_pearson_pair.png', p, height = 
 ```
 
 ```{r}
-sub_rt = df_cpu
-sub_rt$method = as.character(sub_rt$method)
+# sub_rt = df_cpu
+# sub_rt$method = as.character(sub_rt$method)
 
-p = sub_rt %>% filter(sample_size %in% sample_sizes, theta %in% thetas) %>% ggplot() + geom_bar(aes(x = method, y = mean_time, fill = method), stat = 'identity') + facet_grid(sample_size~theta, labeller = label_both) + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_fill_manual(values=cbPalette2)
-p = p + th
-ggsave('../output/grid_sim-multi_0613_prediction_runtime.png', p, width = 5, height = 6)
+p = df %>% filter(sample_size %in% sample_sizes, theta %in% thetas) %>% ggplot() + geom_violin(aes(x = method, y = user.self, fill = method), alpha = .5) + geom_boxplot(aes(x = method, y = user.self, fill = method), width = .1) + facet_grid(sample_size~theta, labeller = label_both, scales = 'free_y') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_fill_manual(values=cbPalette2)
+p = p + th + theme(legend.position="bottom")
+ggsave('../output/grid_sim-multi_0613_prediction_runtime.png', p, height = 5.5, width = 3.5)
 ```
 
 # Summary with TRC and mixPred (full grid for supp)
@@ -149,4 +149,13 @@ p = df_pcor %>% filter(sample_size %in% sample_sizes, theta %in% thetas) %>% ggp
 p = p + th
 p = p + ylab('Pearson correlation in mixPred') + xlab('Pearson correlation in trcPred') + theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 1)) + coord_equal()
 ggsave('../output/grid_sim-multi_0613_prediction_pearson_pair_full.png', p, height = 6.5, width = 5.5)
+```
+
+```{r}
+# sub_rt = df_cpu
+# sub_rt$method = as.character(sub_rt$method)
+
+p = df %>% filter(sample_size %in% sample_sizes, theta %in% thetas) %>% ggplot() + geom_violin(aes(x = method, y = user.self, fill = method), alpha = .5) + geom_boxplot(aes(x = method, y = user.self, fill = method), width = .1) + facet_grid(sample_size~theta, scales = 'free_y') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) + scale_fill_manual(values=cbPalette2)
+p = p + th + theme(legend.position="bottom")
+ggsave('../output/grid_sim-multi_0613_prediction_runtime_full.png', p, height = 6.5, width = 5.5)
 ```
