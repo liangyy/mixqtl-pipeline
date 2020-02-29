@@ -14,7 +14,7 @@ with open(config['indiv-list'], 'r') as f:
 
 rule all:
     input:
-        '{outdir}/wasp2matrix/wasp.matrix.txt.gz'
+        '{outdir}/wasp2matrix/wasp.matrix.txt.gz'.format(outdir = config['outdir'])
 
 rule extract_by_indiv:
     input:
@@ -24,7 +24,7 @@ rule extract_by_indiv:
     output:
         temp('{outdir}/wasp2matrix_tmp/{indiv}.matrix.txt.gz')
     shell:
-        'Rscript ../../gtex_v8_preprocess/gen_matrix.R --wasp {input.wasp} --gene {input.gene} --sample {input.sample} --output {output[0]} --indiv {wildcards.indiv}'
+        'Rscript ../../misc_scripts/gtex_v8_preprocess/gen_matrix.R --wasp {input.wasp} --gene {input.gene} --sample {input.sample} --output {output[0]} --indiv {wildcards.indiv}'
 
 rule combine:
     input:
@@ -32,4 +32,4 @@ rule combine:
     output:
         '{outdir}/wasp.matrix.txt.gz'
     shell:
-        'bash ../../gtex_v8_preprocess/paste_all.sh {output[0]} {input}'
+        'bash ../../misc_scripts/gtex_v8_preprocess/paste_all.sh {output[0]} {input}'
