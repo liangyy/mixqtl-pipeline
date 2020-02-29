@@ -36,10 +36,14 @@ get_indiv_id = function(sample) {
   unlist(lapply(strsplit(sample, '-'), function(x) { paste0(x[1], '-', x[2]) }))
 }
 
+trim_dot = function(str) {
+  unlist(lapply(strsplit(str, '\\.'), function(x) { x[1] }))
+}
+
 library(data.table)
 options(datatable.fread.datatable = F)
 library(dplyr)
-source('../../scripts/rlib_minimal_test.R')
+
 gene = fread(opt$gene, header = F)
 gene = trim_dot(gene$V1)
 sample = fread(opt$sample, header = F)
