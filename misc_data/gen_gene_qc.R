@@ -16,3 +16,10 @@ df = df %>% mutate(pass_trc_qc = n_good_trc >= trc_nobs_cutoff, pass_asc_qc = n_
 write.table(df %>% filter(pass_asc_qc, pass_trc_qc) %>% select(-pass_asc_qc, -pass_trc_qc), 'gtex-v8-genes-passed-qc.txt', row = F, col = T, quo = F, sep = '\t')
 write.table(df %>% filter(pass_asc_qc, pass_trc_qc) %>% select(gene), 'gtex-v8-genes-passed-qc_gene_list.txt', row = F, col = F, quo = F, sep = '\t')
 
+trc_median_of_indiv_pass_qc = apply(dl$df_trc, 1, function(x) {
+  median(x[x >= trc_cutoff])
+})
+df2 = df %>% filter(pass_asc_qc, pass_trc_qc) %>% select(-pass_asc_qc, -pass_trc_qc)
+df2$median_trc = trc_median_of_indiv_pass_qc[match(df2$gene, names(trc_median_of_indiv_pass_qc))]
+write.table(df2, 'gtex-v8-genes-passed-qc-with-median-trc.txt', row = F, col = T, quo = F, sep = '\t')
+
