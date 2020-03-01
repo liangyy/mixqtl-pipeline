@@ -1,0 +1,6 @@
+nbatch: 1
+tissue: 'Whole_Blood'
+covariate: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/peer/Whole_Blood/covariate-combined.txt'
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex-results/mixqtl'
+expression: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/expression/merge-{tissue}.rds'
+genotype: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/genotype/{gene}.txt.gz'
