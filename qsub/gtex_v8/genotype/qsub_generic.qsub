@@ -1,0 +1,12 @@
+#PBS -S /bin/bash
+#PBS -l walltime=24:00:00
+#PBS -l nodes=1:ppn=1
+#PBS -l mem=8gb
+
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8
+conda activate mixqtl
+
+snakemake -s genotype.snmk --configfile ../../qsub/gtex_v8/genotype/config.yaml -p --config genelist=$GENELIST > ../../qsub/gtex_v8/genotype/logs/$MYNAME.log 2>&1
