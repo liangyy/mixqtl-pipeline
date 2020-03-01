@@ -1,0 +1,44 @@
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+    
+indiv_subset_cmd = ''
+if 'indiv_subset' in config:
+    indiv_subset_cmd = '--indiv_subset ' + config['indiv_subset']
+
+rule all:
+    input:
+        '{outdir}/{tissue}/result-{method}.{gene}.txt.gz'.format(method = config['method'], gene = config['gene'], tissue = config['tissue'], outdir = config['outdir'])
+
+rule all_prepare:
+    input:
+        [ '{outdir}/{tissue}/input--{method}--{gene}.{i}.rds'.format(i = i, method = config['method'], gene = config['gene'], tissue = config['tissue'], outdir = config['outdir']) for i in range(1, config['nbatch'] + 1) ]
+
+rule split_to_block:
+    input:
+        expression = config['expression'],  # 'output/expression/merge-{tissue}.rds',
+        genotype = config['genotype']  # 'output/genotype/{gene}.txt.gz'
+    output:
+        temp([ '{{outdir}}/{{tissue}}/input--{{method}}--{{gene}}.{i}.rds'.format(i = i) for i in range(1, config['nbatch'] + 1) ])
+    shell:
+        'Rscript ../../code/gtex_v8_split_into_batch.R --expression {input.expression} --genotype {input.genotype} --output_prefix {wildcards.outdir}/{wildcards.tissue}/input--{wildcards.method}--{wildcards.gene}. --nbatch {config[nbatch]} --gene {wildcards.gene}'
+
+rule run_regression:
+    input:
+        data = '{outdir}/{tissue}/input--{method}--{gene}.{i}.rds',
+        covariate = config['covariate']
+    output:
+        temp('{outdir}/{tissue}/temp-result-{method}.{gene}.{i}.rds')
+    shell:
+        'Rscript ../../code/gtex_v8_{wildcards.method}.R \
+            --data {input.data} \
+            --cov {input.covariate} \
+            --output {output[0]} \
+            {indiv_subset_cmd}'
+
+rule merge:
+    input:
+        [ '{{outdir}}/{{tissue}}/temp-result-{{method}}.{{gene}}.{i}.rds'.format(i = i) for i in range(1, config['nbatch'] + 1) ]
+    output:
+        '{outdir}/{tissue}/result-{method}.{gene}.txt.gz'
+    shell:
+        'Rscript ../../code/gtex_v8_mixqtl_merge.R --input_prefix {wildcards.outdir}/{wildcards.tissue}/temp-result-{wildcards.method}.{wildcards.gene}. --nbatch {config[nbatch]} --output {output[0]}'
