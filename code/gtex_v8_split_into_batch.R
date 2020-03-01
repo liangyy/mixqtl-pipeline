@@ -28,7 +28,7 @@ options(datatable.fread.datatable=FALSE)
 # source('../../scripts/rlib_minimal_test.R')
 # source('../../scripts/rlib_generic.R')
 trim_dot = function(str) {
-  unlist(lapply(strsplit(str, '\\.'), function(x) { x[1] }))
+  unlist(lapply(strsplit(as.character(str), '\\.'), function(x) { x[1] }))
 }
 decompose_ase = function(df, cols) {
   df_info = df[, -cols]
@@ -46,6 +46,29 @@ decompose_ase = function(df, cols) {
   colnames(df_h1)[cols] = colnames(df_ase)
   colnames(df_h2)[cols] = colnames(df_ase)
   return(list(h1 = df_h1, h2 = df_h2))
+}
+split_batch = function(n, nbatch) {
+  o = data.frame()
+  if(n >= nbatch) {
+    batch_size = floor(n / nbatch)
+    for(i in 1 : nbatch) {
+      start = 1 + ((i - 1) * batch_size)
+      if(i != nbatch) {
+        end = i * batch_size
+      } else {
+        end = nvar
+      }
+      o = rbind(o, data.frame(start = start, end = end))
+    }
+  } else {
+    batch_size = 1
+    start = 1 : n
+    end = 1 : n
+    start = c(start, rep(NA, nbatch - n))
+    end = c(end, rep(NA, nbatch - n))
+    o = data.frame(start = start, end = end)
+  }
+  o
 }
 # END
 

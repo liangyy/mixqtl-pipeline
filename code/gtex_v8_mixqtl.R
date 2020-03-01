@@ -55,14 +55,14 @@ if(!is.null(opt$cov)) {
   covariates = fread(opt$cov, header = T)
   covariate_names = str_replace(colnames(covariates), '\\.', '-')
   covariates = cbind(covariates[, 1], covariates[, match(colnames(data_collector$geno1_b), as.character(covariate_names))])
-  indiv_offset = regress_against_covariate(dat$trc_g, dat$nlib, covariates)
+  indiv_offset = regress_against_covariate(data_collector$trc_g, data_collector$nlib, covariates)
 } else {
   indiv_offset = NULL
 }
 
 
-geno1 = t(dat$geno1_b)
-geno2 = t(dat$geno2_b)
+geno1 = t(data_collector$geno1_b)
+geno2 = t(data_collector$geno2_b)
 class(geno1) = 'numeric'
 class(geno2) = 'numeric'
 is_na = is.na(geno1) | is.na(geno2)
@@ -71,21 +71,11 @@ geno2 = impute_geno(geno2)
 geno1[is_na] = (geno1[is_na] + geno2[is_na]) / 2
 geno2[is_na] = geno1[is_na]
 
-df = data.frame(y1 = dat$ase1_g, y2 = dat$ase2_g, trc = dat$trc_g, Ti_lib = dat$nlib) %>% mutate(y_trc = trc, lib_size = Ti_lib, y_ase1 = y1, y_ase2 = y2)
+df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, trc = data_collector$trc_g, Ti_lib = data_collector$nlib) %>% mutate(y_trc = trc, lib_size = Ti_lib, y_ase1 = y1, y_ase2 = y2)
 
-
-# run test for all data sets
-geno1 = t(data_collector$geno1_b)
-geno2 = t(data_collector$geno2_b)
-class(geno1) = 'numeric'
-class(geno2) = 'numeric'
-is_na = is.na(geno1) | is.na(geno2)
-geno1 = impute_geno(geno1)
-geno2 = impute_geno(geno2)
-
-df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, trc = data_collector$trc_g, Ti_lib = data_collector$nlib) %>% mutate(y_trc = trc, lib_size = Ti_lib, cov_offset = indiv_offset, y_ase1 = y1, y_ase2 = y2)
 
 mix_estimate = mixqtl(geno1, geno2, df$y_ase1, df$y_ase2, df$y_trc, df$lib_size, cov_offset = indiv_offset, trc_cutoff = 100, asc_cutoff = 50, weight_cap = 10, asc_cap = 1000)
 mix_estimate$variant_id = data_collector$geno_name
 
 saveRDS(mix_estimate, opt$output)
+
