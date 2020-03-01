@@ -1,0 +1,16 @@
+#PBS -S /bin/bash
+#PBS -l walltime=24:00:00
+#PBS -l nodes=1:ppn=1
+#PBS -l mem=8gb
+#PBS -e run.err
+#PBS -o run.out
+#PBS -N PEER
+
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8
+conda activate mixqtl
+
+snakemake -s get_peer_factor.snmk --configfile ../../qsub/gtex_v8/peer/config.yaml -p > ../../qsub/gtex_v8/peer/run.log 2>&1
+
