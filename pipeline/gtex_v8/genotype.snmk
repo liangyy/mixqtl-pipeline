@@ -1,5 +1,8 @@
 # this module extract genotype for each gene
 
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+
 genes = {}
 tss_dic = {}
 with open(config['genelist'], 'r') as f:
