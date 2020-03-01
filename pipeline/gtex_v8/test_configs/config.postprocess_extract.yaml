@@ -1,12 +1,12 @@
-target_name: 'test_extract'
-from_name: 'Whole_Blood--result-TRC_only'
+target_name: 'eqtlgen_pos.subsample100000-with-gene-qc'
+from_name: 'Whole_Blood-x-result-mixqtl'
 
 target_list:
-  path: '/home/t.cri.yliang/labshare/mv_from_scratch/repo/project-ase/test_scripts/postprocess/data/{target_name}.txt.gz'
+  path: '/gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/misc_data/{target_name}.txt.gz'
   varcol: 15
   genecol: 8
 from_list:
-  path: '/home/t.cri.yliang/scratch/mixQTL/merge-test/{from_name}.txt.gz'
+  path: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-mixqtl/{from_name}.txt.gz'
   varcol: 4
   genecol: 5
-outdir: '/home/t.cri.yliang/scratch/mixQTL/extract-test'
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-mixqtl'
