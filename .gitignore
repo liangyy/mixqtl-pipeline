@@ -3,4 +3,9 @@
 .Rhistory
 .DS_Store
 *.rds
+*.err
+*.log
+*.out
+*.txt
+*.tsv
 

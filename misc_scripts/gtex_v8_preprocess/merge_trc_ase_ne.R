@@ -21,12 +21,14 @@ option_list <- list(
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
 
+library(dplyr)
+library(stringr)
 library(data.table)
 options(datatable.fread.datatable=FALSE)
 # source('../../scripts/rlib_minimal_test.R')
 # r functions from rlib_minimal_test.R
 trim_dot = function(str) {
-  unlist(lapply(strsplit(str, '\\.'), function(x) { x[1] }))
+  unlist(lapply(strsplit(as.character(str), '\\.'), function(x) { x[1] }))
 }
 rearrange_columns = function(df, cols) {
   # rearrange the cols to the first n columns in df
@@ -58,7 +60,7 @@ get_indiv_from_sample = function(sampleid) {
   unlist(lapply(strsplit(sampleid, '-'), function(x) {paste0(x[1], '-', x[2])}))
 }
 is_par_y = function(str) {
-  unlist(lapply(strsplit(str, '_'), function(x) {
+  unlist(lapply(strsplit(as.character(str), '_'), function(x) {
     if(length(x) == 1) {
       return(FALSE)
     } else { 

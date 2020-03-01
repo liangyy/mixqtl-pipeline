@@ -25,7 +25,7 @@ with open(config['gene-annotation'], 'r') as f:
 def get_all_genes(config, tss):
     out = []
     for gene in tss.keys():
-        out.append('output/genotype/{gene}.txt.gz'.format(gene = gene))
+        out.append('{outdir}/genotype/{gene}.txt.gz'.format(gene = gene, outdir = config['outdir']))
     return out
 
 rule all:
@@ -41,6 +41,6 @@ rule extract:
         chr = lambda wildcards: tss_dic[wildcards.gene][1],
         header = config['genotype']['header']
     output:
-        'output/genotype/{gene}.txt.gz'
+        '{outdir}/genotype/{gene}.txt.gz'
     shell:
-        'bash ../minimal_test/extract_genotype/scripts/extract_genotype.sh {input[0]} {params.chr}:{params.start}-{params.end} {params.header} {output[0]}'
+        'bash ../../misc_scripts/gtex_v8_preprocess/extract_genotype.sh {input[0]} {params.chr}:{params.start}-{params.end} {params.header} {output[0]}'

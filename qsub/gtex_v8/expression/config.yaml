@@ -1,0 +1,8 @@
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess'
+tissue: 'Whole_Blood'
+extract-name: 'Whole Blood'
+sample-id: '/gpfs/data/gtex-group/v8/63507/gtex/exchange/GTEx_phs000424/exchange/analysis_releases/GTEx_Analysis_2017-06-05_v8/sample_annotations/GTEx_Analysis_2017-06-05_v8_Annotations_SampleAttributesDS.txt'
+ase-matrix: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/wasp2matrix/wasp.matrix.txt.gz'
+trc-matrix: '/gpfs/data/gtex-group/v8/61550/gtex/exchange/GTEx_phs000424/exchange/analysis_releases/GTEx_Analysis_2017-06-05_v8/rna_seq/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct.gz'
+normalize-expression-matrix: '/gpfs/data/gtex-group/v8/59349/gtex/exchange/GTEx_phs000424/exchange/analysis_releases/GTEx_Analysis_2017-06-05_v8/eqtl/GTEx_Analysis_v8_eQTL_expression_matrices/Whole_Blood.v8.normalized_expression.bed.gz'
+library-size: '../../misc_data/gtex_v8_library_size.txt'
