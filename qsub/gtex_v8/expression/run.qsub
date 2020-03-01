@@ -1,0 +1,15 @@
+#PBS -S /bin/bash
+#PBS -l walltime=24:00:00
+#PBS -l nodes=1:ppn=1
+#PBS -l mem=8gb
+#PBS -e run.err
+#PBS -o run.out
+#PBS -N expression
+
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8
+conda activate mixqtl 
+
+snakemake -s expression.snmk --configfile ../../qsub/gtex_v8/expression/config.yaml -p > ../../qsub/gtex_v8/expression/run.log 2>&1
