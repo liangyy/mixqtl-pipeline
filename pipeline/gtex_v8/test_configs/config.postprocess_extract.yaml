@@ -1,0 +1,12 @@
+target_name: 'test_extract'
+from_name: 'Whole_Blood--result-TRC_only'
+
+target_list:
+  path: '/home/t.cri.yliang/labshare/mv_from_scratch/repo/project-ase/test_scripts/postprocess/data/{target_name}.txt.gz'
+  varcol: 15
+  genecol: 8
+from_list:
+  path: '/home/t.cri.yliang/scratch/mixQTL/merge-test/{from_name}.txt.gz'
+  varcol: 4
+  genecol: 5
+outdir: '/home/t.cri.yliang/scratch/mixQTL/extract-test'

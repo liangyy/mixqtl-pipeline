@@ -1,0 +1,15 @@
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+    
+rule all:
+    input:
+        '{outdir}/{from_name}-IN-{target_name}.txt.gz'.format(from_name = config['from_name'], target_name = config['target_name'], outdir = config['outdir'])
+
+rule extract:
+    input:
+        target = config['target_list']['path'],
+        fromm = config['from_list']['path']
+    output:
+        '{outdir}/{from_name}-IN-{target_name}.txt.gz'
+    shell:
+        'bash ../../misc_scripts/extract.sh {input.target} {config[target_list][genecol]} {config[target_list][varcol]} {input.fromm} {config[from_list][genecol]} {config[from_list][varcol]} {output[0]}'

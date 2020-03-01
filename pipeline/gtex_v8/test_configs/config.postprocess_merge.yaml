@@ -1,0 +1,5 @@
+tissue: 'Whole_Blood'
+name: 'result-mixqtl'
+gene_list: '../../misc_data/gtex-v8-genes-passed-qc_gene_list.txt'
+gene_file: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/mixqtl/{{tissue}}/{{name}}.{gene}.txt.gz'
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-mixqtl'
