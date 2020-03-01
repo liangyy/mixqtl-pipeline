@@ -9,11 +9,11 @@ rule all:
 
 rule prepare_mat:
     input:
-        'output/expression/merge-{tissue}.rds'
+        config['expr_mat'],  # 'output/expression/merge-{tissue}.rds'
     output:
         '{outdir}/{tissue}.mat.rds'  # '.logTRC.PEER_covariates.txt'
     shell:
-        'Rscript scripts/peer_prepare_log_trc_mat.R --input {input[0]} --output {output[0]}'
+        'Rscript ../../misc_scripts/peer_prepare_log_trc_mat.R --input {input[0]} --output {output[0]}'
 
 rule prepare_csv:
     input:
@@ -21,7 +21,7 @@ rule prepare_csv:
     output:
         '{outdir}/{tissue}.mat.csv'
     shell:
-        'Rscript scripts/rds2csv.R --rds {input[0]} --csv {output[0]}'
+        'Rscript ../../misc_scripts/rds2csv.R --rds {input[0]} --csv {output[0]}'
 
 rule run_peer:
     input:
@@ -35,7 +35,7 @@ rule run_peer:
     shell:
         '''
         echo "START" > {log} 
-        stdbuf -oL peertool -f {input[0]} -n {config[nfactor]} -i 1000 -o {wildcards.outdir}/{wildcards.tissue} --e_pb 10 --e_pa 0.1 --a_pb 0.01 --a_pa 0.001 |
+        stdbuf -oL {config[path_to_peertool]} -f {input[0]} -n {config[nfactor]} -i 1000 -o {wildcards.outdir}/{wildcards.tissue} --e_pb 10 --e_pa 0.1 --a_pb 0.01 --a_pa 0.001 |
         while IFS= read -r line
         do
           echo "$line" >> {log}
@@ -50,5 +50,5 @@ rule merge_with_other_covar:
     output:
         '{outdir}/{tissue}/covariate-combined.txt'
     shell:
-        'Rscript scripts/merge_with_other_covar.R --input_peer {input[0]} --covariate {input[1]} --input_rds {input[2]} --output {output[0]}'
+        'Rscript ../../misc_scripts/merge_with_other_covar.R --input_peer {input[0]} --covariate {input[1]} --input_rds {input[2]} --output {output[0]}'
 
