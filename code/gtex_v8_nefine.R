@@ -21,11 +21,7 @@ option_list <- list(
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
 
-source('../../scripts/rlib_implement_three_strategies.R')
-source('../../scripts/rlib_minimal_test.R')
-source('../metaFine/rlib.R')
-source('../metaFine/metafine.R')
-library(ggplot2)
+library(mixqtl)
 library(dplyr)
 library(methods)
 library(data.table)
@@ -54,38 +50,27 @@ if(!is.null(opt$indiv_subset)) {
   data_collector$nlib = data_collector$nlib[sub_ind]
 }
 
-indiv_offset = NULL
 if(!is.null(opt$cov)) {
   covariates = fread(opt$cov, header = T)
   covariate_names = str_replace(colnames(covariates), '\\.', '-')
-  covariates = cbind(covariates[, 1], covariates[, match(colnames(data_collector$geno1), as.character(covariate_names))])
-  # get regression coefficients for lhs ~ 1 + covariates
-  df = data.frame(y = data_collector$ne_g)
-  df = df %>% mutate(indiv = 1 : nrow(df))
-  out = regress_out_covar(df$y, df$indiv, covariates)
-  selected = abs(out[-1, 3]) > 2
-  if(sum(selected) > 0) {
-    out = regress_out_covar(df$y, df$indiv, covariates[selected,])
-    indiv_offset = t(covariates[selected, -1]) %*% out[-1, 1]
-  } else {
-    indiv_offset = rep(0, ncol(covariates) - 1)  # t(covariates[selected, -1]) %*% out[-1, 1]
-  }
+  covariates = cbind(covariates[, 1], covariates[, match(colnames(data_collector$geno1_b), as.character(covariate_names))])
+  indiv_offset = regress_against_covariate(data_collector$trc_g, data_collector$nlib, covariates)
+} else {
+  indiv_offset = NULL
 }
 
 
-geno1 = t(data_collector$geno1)
-geno2 = t(data_collector$geno2)
+geno1 = t(data_collector$geno1_b)
+geno2 = t(data_collector$geno2_b)
 class(geno1) = 'numeric'
 class(geno2) = 'numeric'
-h1 = geno1
-h1[is.na(h1)] = 0.5
-h2 = geno2
-h2[is.na(h2)] = 0.5
+is_na = is.na(geno1) | is.na(geno2)
+geno1 = impute_geno(geno1)
+geno2 = impute_geno(geno2)
+geno1[is_na] = (geno1[is_na] + geno2[is_na]) / 2
+geno2[is_na] = geno1[is_na]
 
-df = data.frame(y = data_collector$ne_g)
-if(!is.null(indiv_offset)) {
-  df$y = df$y - indiv_offset
-}
+df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, trc = data_collector$trc_g, Ti_lib = data_collector$nlib) %>% mutate(y_trc = trc, lib_size = Ti_lib, y_ase1 = y1, y_ase2 = y2)
 
 
 mod = run_susie_default(x = h1 + h2, y = df$y)
