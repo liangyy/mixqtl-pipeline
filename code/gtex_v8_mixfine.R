@@ -23,6 +23,7 @@ opt <- parse_args(opt_parser)
 
 library(mixqtl)
 library(dplyr)
+library(stringr)
 library(methods)
 library(data.table)
 options(datatable.fread.datatable=FALSE)
@@ -53,15 +54,15 @@ if(!is.null(opt$indiv_subset)) {
 if(!is.null(opt$cov)) {
   covariates = fread(opt$cov, header = T)
   covariate_names = str_replace(colnames(covariates), '\\.', '-')
-  covariates = cbind(covariates[, 1], covariates[, match(colnames(data_collector$geno1_b), as.character(covariate_names))])
+  covariates = cbind(covariates[, 1], covariates[, match(colnames(data_collector$geno1), as.character(covariate_names))])
   indiv_offset = regress_against_covariate(data_collector$trc_g, data_collector$nlib, covariates)
 } else {
   indiv_offset = NULL
 }
 
 
-geno1 = t(data_collector$geno1_b)
-geno2 = t(data_collector$geno2_b)
+geno1 = t(data_collector$geno1)
+geno2 = t(data_collector$geno2)
 class(geno1) = 'numeric'
 class(geno2) = 'numeric'
 is_na = is.na(geno1) | is.na(geno2)
@@ -73,7 +74,7 @@ geno2[is_na] = geno1[is_na]
 df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, trc = data_collector$trc_g, Ti_lib = data_collector$nlib) %>% mutate(y_trc = trc, lib_size = Ti_lib, y_ase1 = y1, y_ase2 = y2)
 
 
-mod = mixfine(geno1, geno2, df$y1, df$y2, df$ytotal, df$lib_size, cov_offset = indiv_offset, trc_cutoff = 100, asc_cutoff = 50, weight_cap = 10, asc_cap = 1000)
+mod = mixfine(geno1, geno2, df$y1, df$y2, df$y_trc, df$lib_size, cov_offset = indiv_offset, trc_cutoff = 100, asc_cutoff = 50, weight_cap = 10, asc_cap = 1000)
 if('cs' %in% names(mod)) {
   cs = mod$cs
   vars = mod$vars
