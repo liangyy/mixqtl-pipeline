@@ -6,12 +6,9 @@
 #PBS -o logs/prep_gene--${MYID}.out
 
 
-# GENELIST=qsub/mixfine/$i,OUTDIR=$outdir,NAME=$name,CONFIG=$config
-
-
 source ~/.bash_profile
 source ~/.bashrc
-cd /home/t.cri.yliang/labshare/mv_from_scratch/repo/project-ase/test_scripts/gtex-v8-pipeline/
-conda activate pleio  # Being lazy to use envir of another project ...
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8 
+conda activate mixqtl
 
-snakemake -s mixfine.snmk --configfile ../../qsub/gtex_v8/mixfine/config.mixqtl.yaml all_input -p --nolock --config gene_list=$GENELIST >> ../../qsub/gtex_v8/mixfine/logs/prep_gene--$MYID.log 2>&1
+snakemake -s mixfine.snmk --configfile ../../qsub/gtex_v8/mixfine/config.mixfine.yaml all_input -p --nolock --config gene_list=$GENELIST >> ../../qsub/gtex_v8/mixfine/logs/prep_gene--$MYID.log 2>&1

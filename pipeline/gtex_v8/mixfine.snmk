@@ -49,12 +49,13 @@ elif 'gene_list' in config:
             expression = config['expression'],  
             genotype = [ config['genotype'].format(gene = g) for g in get_genes(config['gene_list']) ],  
             genelist = ancient(config['gene_list'])
-        params:
-            out_pattern = lambda wildcards: '{outdir}/{tissue}/input--{{gene}}.rds'.format(outdir = wildcards.outdir, tissue = wildcards.tissue)
+        # params:
+            # out_pattern = lambda wildcards: '{outdir}/{tissue}/input--{{gene}}.rds'.format(outdir = wildcards.outdir, tissue = wildcards.tissue)
         output:
             [ '{{outdir}}/{{tissue}}/input--{gene}.rds'.format(gene = g) for g in get_genes(config['gene_list']) ]
         shell:
-           'Rscript ../../code/gtex_v8_prepare_data.R --expression {input.expression} --genotype {config[genotype]} --output {params.out_pattern} --genelist {input.genelist}'
+           # 'Rscript ../../code/gtex_v8_prepare_data.R --expression {input.expression} --genotype {config[genotype]} --output {params.out_pattern} --genelist {input.genelist}'
+           'Rscript ../../code/gtex_v8_prepare_data.R --expression {input.expression} --genotype {config[genotype]} --output {wildcards.outdir}/{wildcards.tissue}/input--{{gene}}.rds --genelist {input.genelist}'
 
 
 if 'indiv_subset' in config:

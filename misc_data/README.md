@@ -11,4 +11,4 @@ The list of outputs:
 * `*_phaser_all.txt`: `bash misc_scripts/gtex_v8_misc_data/gen_sample_gene_indiv_list_phaser_all.sh`
 * `annotations_gencode_v26.tsv`: `wget https://bitbucket.org/yanyul/rotation-at-imlab/raw/7c966369cf9ac1f2563409b09625a2b3cf2d592e/data/annotations_gencode_v26.tsv`
 * `gtex_v8_library_size.txt`: `bash gen_library_size.sh` 
-* 
+* `eqtlgen_neg.*` and `eqtlgen_pos.*`: `bash gen_eqtlgen_neg-with-gene-qc.sh` and `bash gen_eqtlgen_pos-with-gene-qc.sh` 

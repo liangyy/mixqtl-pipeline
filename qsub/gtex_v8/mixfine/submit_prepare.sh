@@ -12,9 +12,9 @@ genelist=gtex-v8-genes-passed-qc_gene_list  # $1
 # config=$3
 # outdir=$4
 
-mkdir -p $outdir
-mkdir -p $outdir/logs
-mkdir -p $outdir/gene_list
+# mkdir -p $outdir
+mkdir -p logs
+mkdir -p gene_list
 
 cat ../../../misc_data/$genelist.txt > gene_list/all.txt
 cd gene_list/
@@ -24,5 +24,10 @@ cd ../
 
 for i in `ls gene_list/$genelist* | sed 's#gene_list/##g'`
 do
-  qsub -v GENELIST=../../qsub/gtex_v8/gene_list/$i,MYID=$i -N prep-$i prepare_genes.qsub
+  e=`cat logs/prep_gene--$i.out | grep Exit | tail -n 1 | grep 1`
+  if [[ -z $e ]]
+  then
+    continue
+  fi
+  qsub -v GENELIST=../../qsub/gtex_v8/mixfine/gene_list/$i,MYID=$i -N prep-$i prepare_genes.qsub
 done
