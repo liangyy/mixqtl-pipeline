@@ -1,0 +1,4 @@
+tissue: 'Whole_Blood'
+method: 'mixfine'
+gene: 'ENSG00000000457'
+covariate: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/peer/Whole_Blood/covariate-combined.txt'  
