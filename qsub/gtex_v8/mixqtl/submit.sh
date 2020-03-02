@@ -1,6 +1,6 @@
 genelist=gtex-v8-genes-passed-qc_gene_list
 
-TASKNAME=$2
+TASKNAME=$genelist
 
 if [ ! -d "logs" ]; then
   mkdir logs/
@@ -17,5 +17,17 @@ cd ../
 
 for i in `ls gene_list/$TASKNAME* | sed 's#gene_list/##g'`;
 do
+  if [[ -f logs/$i.out ]]
+  then
+    zzz=`cat logs/$i.out | grep Exit | tail -n 1 | grep 1`
+    if [[ ! -z $zzz ]]
+    then
+      echo $i 
+    else
+      # continue
+      echo $i
+    fi
+  fi
   qsub -v BATCH=$i -N $1--$i qsub_generic.qsub
+  
 done

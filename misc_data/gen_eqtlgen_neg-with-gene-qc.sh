@@ -4,7 +4,7 @@
 
 prefix=eqtlgen_neg
 genelist=gtex-v8-genes-passed-qc_gene_list.txt  # $2
-
+size=100000
 
 if [ ! -f $prefix.pval_gt_0.5.txt.gz ]; then
   zcat /gpfs/data/im-lab/nas40t2/yanyul/eQTLGen/cis-eQTLs_full_20180905_with_GTExV8ID.txt.gz | awk '{split($1,b,"E"); if($1>0.5 && b[2]=="") print $0}' | gzip > $prefix.pval_gt_0.5.txt.gz
@@ -16,7 +16,7 @@ fi
 
 nrow=`zcat $prefix.pval_gt_0.5-with-gene-qc.txt.gz | wc -l`
 
-Rscript subsample_idx.R --number_total $nrow --number_sub $1 --output $prefix.idx.subsample$1-with-gene-qc.txt
+Rscript subsample_idx.R --number_total $nrow --number_sub $size --output $prefix.idx.subsample$size-with-gene-qc.txt
 
-awk 'FNR==NR{a[$1]=1;next}{ if(FNR in a) print $0}' $prefix.idx.subsample$1-with-gene-qc.txt <(zcat $prefix.pval_gt_0.5-with-gene-qc.txt.gz) | gzip > $prefix.subsample$1-with-gene-qc.txt.gz
+awk 'FNR==NR{a[$1]=1;next}{ if(FNR in a) print $0}' $prefix.idx.subsample$size-with-gene-qc.txt <(zcat $prefix.pval_gt_0.5-with-gene-qc.txt.gz) | gzip > $prefix.subsample$size-with-gene-qc.txt.gz
 

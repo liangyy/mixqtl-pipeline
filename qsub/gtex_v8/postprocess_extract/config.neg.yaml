@@ -1,4 +1,4 @@
-target_name: 'eqtlgen_pos.subsample100000-with-gene-qc'
+target_name: 'eqtlgen_neg.subsample100000-with-gene-qc'
 from_name: 'Whole_Blood-x-result-mixqtl'
 
 target_list:

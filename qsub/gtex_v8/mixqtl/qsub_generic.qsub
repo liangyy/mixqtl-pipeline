@@ -12,7 +12,7 @@ cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8
 conda activate mixqtl
 
 
-for i in `cat ../../qsub/gtex_v8/gene_list/$BATCH`;
+for i in `cat ../../qsub/gtex_v8/mixqtl/gene_list/$BATCH`;
 do
   
   snakemake -s mixqtl.snmk --configfile ../../qsub/gtex_v8/mixqtl/config.yaml -p --nolock --config method=mixqtl gene=$i > ../../qsub/gtex_v8/mixqtl/logs/${BATCH}.log 2>&1
