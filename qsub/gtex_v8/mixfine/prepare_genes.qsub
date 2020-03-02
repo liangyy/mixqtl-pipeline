@@ -1,0 +1,17 @@
+#PBS -S /bin/bash
+#PBS -l walltime=12:00:00
+#PBS -l nodes=1:ppn=1
+#PBS -l mem=4gb
+#PBS -e logs/prep_gene--${MYID}.err
+#PBS -o logs/prep_gene--${MYID}.out
+
+
+# GENELIST=qsub/mixfine/$i,OUTDIR=$outdir,NAME=$name,CONFIG=$config
+
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /home/t.cri.yliang/labshare/mv_from_scratch/repo/project-ase/test_scripts/gtex-v8-pipeline/
+conda activate pleio  # Being lazy to use envir of another project ...
+
+snakemake -s mixfine.snmk --configfile ../../qsub/gtex_v8/mixfine/config.mixqtl.yaml all_input -p --nolock --config gene_list=$GENELIST >> ../../qsub/gtex_v8/mixfine/logs/prep_gene--$MYID.log 2>&1
