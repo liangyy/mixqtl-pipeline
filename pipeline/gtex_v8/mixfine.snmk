@@ -1,0 +1,121 @@
+# this module run mixFine given genotype, expression, and covariates
+
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+
+def get_genes(filename):
+    genes = []
+    with open(filename, 'r') as f:
+        for i in f:
+            i = i.strip()
+            genes.append(i)
+    return genes
+
+
+if 'indiv_subset' in config:
+    if 'gene' in config:
+        rule all:
+            input:
+                '{outdir}/{tissue}/indiv_subset-{subsetname}-result_pip-{method}.{gene}.txt.gz'.format(gene = config['gene'], tissue = config['tissue'], outdir = config['outdir'], method = config['method'], subsetname = config['indiv_subset_name'])
+    elif 'gene_list' in config:
+        rule all:
+            input:
+                [ '{outdir}/{tissue}/indiv_subset-{subsetname}-result_pip-{method}.{gene}.txt.gz'.format(gene = g, tissue = config['tissue'], outdir = config['outdir'], method = config['method'], subsetname = config['indiv_subset_name']) for g in get_genes(config['gene_list']) ]
+else:
+    if 'gene' in config:
+        rule all:
+            input:
+                '{outdir}/{tissue}/result_pip-{method}.{gene}.txt.gz'.format(gene = config['gene'], tissue = config['tissue'], outdir = config['outdir'], method = config['method'])
+    elif 'gene_list' in config:
+        rule all:
+            input:
+                [ '{outdir}/{tissue}/result_pip-{method}.{gene}.txt.gz'.format(gene = g, tissue = config['tissue'], outdir = config['outdir'], method = config['method']) for g in get_genes(config['gene_list']) ]
+
+if 'gene' in config:
+    rule prepare_data:
+        input:
+            expression = config['expression'],  # 'output/expression/merge-{tissue}.rds',
+            genotype = config['genotype']  # 'output/genotype/{gene}.txt.gz'
+        output:
+            temp('{outdir}/{tissue}/input--{gene}.rds')
+        shell:
+            'Rscript ../../code/gtex_v8_prepare_data.R --expression {input.expression} --genotype {input.genotype} --output {output[0]} --gene {wildcards.gene}'
+elif 'gene_list' in config:
+    rule all_input:
+        input:
+            [ '{outdir}/{tissue}/input--{gene}.rds'.format(gene = g, tissue = config['tissue'], outdir = config['outdir'], method = config['method']) for g in get_genes(config['gene_list']) ]
+    rule prepare_data_batch:
+        input:
+            expression = config['expression'],  
+            genotype = [ config['genotype'].format(gene = g) for g in get_genes(config['gene_list']) ],  
+            genelist = ancient(config['gene_list'])
+        params:
+            out_pattern = lambda wildcards: '{outdir}/{tissue}/input--{{gene}}.rds'.format(outdir = wildcards.outdir, tissue = wildcards.tissue)
+        output:
+            [ '{{outdir}}/{{tissue}}/input--{gene}.rds'.format(gene = g) for g in get_genes(config['gene_list']) ]
+        shell:
+           'Rscript ../../code/gtex_v8_prepare_data.R --expression {input.expression} --genotype {config[genotype]} --output {params.out_pattern} --genelist {input.genelist}'
+
+
+if 'indiv_subset' in config:
+    rule run_regression:
+        input:
+            data = '{outdir}/{tissue}/input--{gene}.rds',
+            covariate = config['covariate'],
+            subset = config['indiv_subset']
+        output:
+            '{outdir}/{tissue}/indiv_subset-{subsetname}-result_pip-{method}.{gene}.txt.gz',
+            '{outdir}/{tissue}/indiv_subset-{subsetname}-result_cs-{method}.{gene}.txt.gz'
+        shell:
+            'Rscript ../../code/gtex_v8_{wildcards.method}.R \
+                --data {input.data} \
+                --cov {input.covariate} \
+                --output_pip {output[0]} \
+                --output_cs {output[1]} \
+                --indiv_subset {input.subset}'
+else:
+    rule run_regression:
+        input:
+            data = '{outdir}/{tissue}/input--{gene}.rds',
+            covariate = config['covariate'],
+        output:
+            '{outdir}/{tissue}/result_pip-{method}.{gene}.txt.gz',
+            '{outdir}/{tissue}/result_cs-{method}.{gene}.txt.gz'
+        shell:
+            'Rscript ../../code/gtex_v8_{wildcards.method}.R \
+                --data {input.data} \
+                --cov {input.covariate} \
+                --output_pip {output[0]} \
+                --output_cs {output[1]}'
+
+if 'pack_name' in config:
+    if 'indiv_subset' in config:
+        rule all_pack_up:
+            input:
+                '{outdir}/{tissue}/pack/{pack_name}__indiv_subset-{indiv_subset_name}-result_pip-{method}.rds'.format(**config)
+    else:
+        rule all_pack_up:
+            input:
+                '{outdir}/{tissue}/pack/{pack_name}__result_pip-{method}.rds'.format(**config)
+    if 'indiv_subset' in config:
+        rule pack_up:
+            input:
+                genelist = config['gene_list']
+            output:
+                '{outdir}/{tissue}/pack/{pack_name}__indiv_subset-{subsetname}-result_pip-{method}.rds'
+            params:
+                prefix_pip = '{outdir}/{tissue}/indiv_subset-{subsetname}-result_pip-{method}.',
+                prefix_cs = '{outdir}/{tissue}/indiv_subset-{subsetname}-result_cs-{method}.'
+            shell:
+                'Rscript ../../code/gtex_v8_mixfine_collect_rds.R --prefix_cs {params.prefix_cs} --prefix_pip {params.prefix_pip} --output {output[0]} --genelist {input.genelist}'
+    else:
+        rule pack_up:
+            input:
+                genelist = config['gene_list']
+            output:
+                '{outdir}/{tissue}/pack/{pack_name}__result_pip-{method}.rds'
+            params:
+                prefix_pip = '{outdir}/{tissue}/result_pip-{method}.',
+                prefix_cs = '{outdir}/{tissue}/result_cs-{method}.',
+            shell:
+                'Rscript ../../code/gtex_v8_mixfine_collect_rds.R --prefix_cs {params.prefix_cs} --prefix_pip {params.prefix_pip} --output {output[0]} --genelist {input.genelist}'
