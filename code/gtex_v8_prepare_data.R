@@ -28,8 +28,31 @@ library(data.table)
 library(dplyr)
 library(stringr)
 options(datatable.fread.datatable=FALSE)
-source('../../scripts/rlib_minimal_test.R')
-source('../../scripts/rlib_generic.R')
+
+# source('../../scripts/rlib_minimal_test.R')
+# source('../../scripts/rlib_generic.R')
+# R functions in the scripts
+trim_dot = function(str) {
+  unlist(lapply(strsplit(as.character(str), '\\.'), function(x) { x[1] }))
+}
+decompose_ase = function(df, cols) {
+  df_info = df[, -cols]
+  df_ase = df[, cols]
+  temp_decomp = t(apply(df_ase, 1, function(x) {
+    temp = str_match(x, '([0-9]+)\\|([0-9]+)')
+    h1 = as.numeric(temp[, 2])
+    h2 = as.numeric(temp[, 3])
+    return(c(h1, h2))
+  }))
+  df_h1 = temp_decomp[, 1 : ncol(df_ase)]
+  df_h2 = temp_decomp[, (1 + ncol(df_ase)) : (2 * ncol(df_ase))]
+  df_h1 = cbind(df_info, df_h1)
+  df_h2 = cbind(df_info, df_h2)
+  colnames(df_h1)[cols] = colnames(df_ase)
+  colnames(df_h2)[cols] = colnames(df_ase)
+  return(list(h1 = df_h1, h2 = df_h2))
+}
+# END
 
 # load TRC, ASE, L, alpha RDS
 datalist = readRDS(opt$expression)
@@ -41,28 +64,6 @@ lib = datalist$df_lib
 
 # individuals
 indiv = colnames(ase1)
-
-
-# # load cis variants
-# geno = fread(paste0('zcat < ', opt$genotype), header = T)
-# geno = geno[, -c(1, 2, 4, 5, 6, 7, 8, 9)]
-# geno = as.data.frame(geno[, c(T, colnames(geno)[-1] %in% indiv)])
-# geno_as = decompose_ase(geno, 2 : ncol(geno))
-# geno1 = geno_as$h1
-# geno2 = geno_as$h2
-
-# # overlapped individuals
-# indiv_selected = indiv[indiv %in% colnames(geno2)[-1]]
-# variant_name = geno1[, 1]
-# geno1 = geno1[, -1]; geno1 = geno1[, match(indiv_selected, colnames(geno1))]; rownames(geno1) = variant_name
-# geno2 = geno2[, -1]; geno2 = geno2[, match(indiv_selected, colnames(geno2))]; rownames(geno2) = variant_name
-
-# trc = trc[, match(indiv_selected, colnames(trc))]
-# ne = ne[, match(indiv_selected, colnames(ne))]
-# ase1 = ase1[, match(indiv_selected, colnames(ase1))]
-# ase2 = ase2[, match(indiv_selected, colnames(ase2))]
-# lib = lib[match(indiv_selected, lib$indiv), ]
-# nlib = lib$SMMPPD
 
 # loop over gene
 if(!is.null(opt$genelist)) {

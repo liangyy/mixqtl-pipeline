@@ -21,11 +21,7 @@ option_list <- list(
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
 
-source('../../scripts/rlib_implement_three_strategies.R')
-source('../../scripts/rlib_minimal_test.R')
-source('../metaFine/rlib.R')
-source('../metaFine/metafine.R')
-library(ggplot2)
+library(mixqtl)
 library(dplyr)
 library(methods)
 library(data.table)
@@ -54,30 +50,27 @@ if(!is.null(opt$indiv_subset)) {
   data_collector$nlib = data_collector$nlib[sub_ind]
 }
 
-indiv_offset = NULL
 if(!is.null(opt$cov)) {
   covariates = fread(opt$cov, header = T)
   covariate_names = str_replace(colnames(covariates), '\\.', '-')
-  covariates = cbind(covariates[, 1], covariates[, match(colnames(data_collector$geno1), as.character(covariate_names))])
-  # get regression coefficients for lhs ~ 1 + covariates
-  df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, trc = data_collector$trc_g, Ti_lib = data_collector$nlib)
-  df = df %>% mutate(y_ase_y = (y1 + y2) / trc, indiv = 1 : nrow(df), trc_norm = trc / Ti_lib, y1_norm = y1 / Ti_lib, y2_norm = y2 / Ti_lib)
-  out = effect_size_trc_with_covariates_get_coef(df$trc_norm, df$y1_norm, df$y2_norm, NULL, NULL, df$indiv, covariates)
-  selected = abs(out[-1, 3]) > 2
-  if(sum(selected) > 0) {
-    out = effect_size_trc_with_covariates_get_coef(df$trc_norm, df$y1_norm, df$y2_norm, NULL, NULL, df$indiv, covariates[selected,])
-    indiv_offset = t(covariates[selected, -1]) %*% out[-1, 1]
-  } else {
-    indiv_offset = rep(0, ncol(covariates) - 1)  # t(covariates[selected, -1]) %*% out[-1, 1]
-  }
+  covariates = cbind(covariates[, 1], covariates[, match(colnames(data_collector$geno1_b), as.character(covariate_names))])
+  indiv_offset = regress_against_covariate(data_collector$trc_g, data_collector$nlib, covariates)
+} else {
+  indiv_offset = NULL
 }
 
 
-geno1 = t(data_collector$geno1)
-geno2 = t(data_collector$geno2)
+geno1 = t(data_collector$geno1_b)
+geno2 = t(data_collector$geno2_b)
 class(geno1) = 'numeric'
 class(geno2) = 'numeric'
-df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, ytotal = data_collector$trc_g, lib_size = data_collector$nlib)
+is_na = is.na(geno1) | is.na(geno2)
+geno1 = impute_geno(geno1)
+geno2 = impute_geno(geno2)
+geno1[is_na] = (geno1[is_na] + geno2[is_na]) / 2
+geno2[is_na] = geno1[is_na]
+
+df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, trc = data_collector$trc_g, Ti_lib = data_collector$nlib) %>% mutate(y_trc = trc, lib_size = Ti_lib, y_ase1 = y1, y_ase2 = y2)
 
 
 mod = mixfine(geno1, geno2, df$y1, df$y2, df$ytotal, df$lib_size, cov_offset = indiv_offset, trc_cutoff = 100, asc_cutoff = 50, weight_cap = 10, asc_cap = 1000)
