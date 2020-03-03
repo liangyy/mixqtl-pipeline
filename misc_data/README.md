@@ -13,3 +13,4 @@ The list of outputs:
 * `gtex_v8_library_size.txt`: `bash gen_library_size.sh` 
 * `eqtlgen_neg.*` and `eqtlgen_pos.*`: `bash gen_eqtlgen_neg-with-gene-qc.sh` and `bash gen_eqtlgen_pos-with-gene-qc.sh`
 * `subsample_whole_blood/`: `bash gen_subsample_whole_blood.sh` for subsample analysis on mixfine/nefine Whole Blood GTEx V8
+* `mapped-SuRE_SNP_table_LP190708.txt.gz`: `bash prep_SuRE.sh` for SuRE data cleaning
