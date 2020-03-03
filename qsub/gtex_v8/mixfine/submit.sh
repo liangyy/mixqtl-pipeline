@@ -26,5 +26,15 @@ mkdir -p gene_list
 
 for i in `ls gene_list/$genelist* | sed 's#gene_list/##g'`
 do
-  echo qsub -v GENELIST=../../qsub/gtex_v8/mixfine/gene_list/$i,MYID=$i,CONFIG=$METHODS -N run-$i run.qsub
+  if [[ ! -f logs/run--$i.err ]]
+  then
+    qsub -v GENELIST=../../qsub/gtex_v8/mixfine/gene_list/$i,MYID=$i,CONFIG=$METHODS -N run-$i run.qsub
+    continue 
+  fi
+  e=`cat logs/run--$i.err | grep Exit | tail -n 1 | grep 1`
+  if [[ ! -z $e ]]
+  then
+    echo qsub -v GENELIST=../../qsub/gtex_v8/mixfine/gene_list/$i,MYID=$i,CONFIG=$METHODS -N run-$i run.qsub 
+  fi
+  # qsub -v GENELIST=../../qsub/gtex_v8/mixfine/gene_list/$i,MYID=$i,CONFIG=$METHODS -N run-$i run.qsub
 done

@@ -9,12 +9,12 @@
 # ARGV7: output folder of log
 
 MYCONFIGS=config.mixfine.yaml:config.nefine.yaml  # $1
-TASKNAME=gtex-v8-genes-passed-qc_gene_list  # $2  # gene list name
+TASKNAME=gene_list_whole_blood_for_subsampling_with_qc  # this is the subset of genes passing QC # gtex-v8-genes-passed-qc_gene_list  # $2  # gene list name
 SUBSETDIR=subsample_whole_blood  # relative path to subsampled individual IDs  # $3
-OUTDIR=/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex-results/mixfine-subsample  # $4
-NGENE=20  # $4
+OUTDIR=/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/mixfine-subsample  # $4
+NGENE=30  # $4
 JOBNAME=mixfine-subsample  # $5
-OUTLOG=myrun-03-02-20  # $6
+OUTLOG=myrun-03-03-20  # $6
 
 if [ ! -d "logs" ]; then
   mkdir logs/

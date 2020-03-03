@@ -1,6 +1,6 @@
 tissue: 'Whole_Blood'
 method: 'nefine'
 covariate: '/gpfs/data/gtex-group/v8/59349/gtex/exchange/GTEx_phs000424/exchange/analysis_releases/GTEx_Analysis_2017-06-05_v8/eqtl/GTEx_Analysis_v8_eQTL_covariates/Whole_Blood.v8.covariates.txt'
-gene_list: 'data/gene_list_whole_blood_with_qc.txt'
 expression: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/expression/merge-Whole_Blood.rds'
-# outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex-results/mixfine'
+genotype: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/genotype/{gene}.txt.gz'
+
