@@ -15,5 +15,5 @@ namelist=('result_pip-mixfine' 'result_cs-mixfine' 'result_pip-nefine' 'result_c
 
 for i in "${namelist[@]}"
 do
-  echo snakemake -s postprocess_merge.snmk --configfile ../../qsub/gtex_v8/postprocess_merge/config.finemap.yaml -p --config name=$i # > ../../qsub/gtex_v8/postprocess_merge/run_finemap-$i.log 2>&1
+  snakemake -s postprocess_merge.snmk --configfile ../../qsub/gtex_v8/postprocess_merge/config.finemap.yaml -p --config name=$i > ../../qsub/gtex_v8/postprocess_merge/run_finemap-$i.log 2>&1
 done
