@@ -3,8 +3,8 @@
 
 target_list:
   path: '/gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/misc_data/{target_name}.txt.gz'
-  varcol: 15
-  genecol: 8
+  varcol: 18
+  genecol: -1
 from_list:
   path: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-finemap/{from_name}.txt.gz'
   varcol: 4
