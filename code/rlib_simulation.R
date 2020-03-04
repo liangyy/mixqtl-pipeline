@@ -39,6 +39,15 @@ split_data_here = function(genotype, readcount, ratio = 1 / 2) {
   return(list(test = list(readcount = readcount_test, genotype = genotype_test), train = list(readcount = readcount_train, genotype = genotype_train)))
 }
 
+subset_var_here = function(genotype, hapmap_snp) {
+  out_geno = genotype
+  is_hapmap = genotype$var_name %in% hapmap_snp
+  out_geno$var_name = out_geno$var_name[is_hapmap]
+  out_geno$h1 = out_geno$h1[is_hapmap, ]
+  out_geno$h2 = out_geno$h2[is_hapmap, ]
+  out_geno
+}
+
 format_system_time = function(my_proc_time) {
   val = as.vector(my_proc_time)[1 : 3]
   names(val) = names(my_proc_time)[1 : 3]
