@@ -10,3 +10,5 @@
 *.tsv
 gene_list/
 *.txt.gz
+*.gz
+

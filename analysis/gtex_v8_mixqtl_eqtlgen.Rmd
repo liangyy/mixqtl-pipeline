@@ -53,6 +53,22 @@ p$layers[[2]]$aes_params$size = 0.5
 p
 ```
 
+## $\chi^2$ plot: mixQTL vs eQTL
+
+```{r chisq}
+dfplot = df %>% mutate(chisq = qchisq(pval, df = 1, lower.tail = F)) %>% select(-pval) %>% filter(method %in% c('mixQTL', 'eQTL')) %>% dcast(gene + variant ~ method, value.var = 'chisq')
+p = dfplot %>% ggplot() + 
+  geom_point(aes(x = eQTL, y = mixQTL), alpha = 0.5) +
+  geom_point(data = dfplot %>% filter(gene %in% c('ENSG00000115607', 'ENSG00000145730')), aes(x = eQTL, y = mixQTL, color = gene)) + 
+  th +
+  xlab(expression(paste(chi^2, '(eQTL)')))+
+  ylab(expression(paste(chi^2, '(mixQTL)'))) +
+  theme(legend.position = 'bottom', legend.text = element_text(size = 8)) + 
+  coord_equal()
+dfplot %>% summarize(median_eqtl = median(eQTL), median_mixqtl = median(mixQTL)) %>% mutate(ratio = median_mixqtl / median_eqtl)
+ggsave(paste0('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.png'), p, height = 4, width = 4)
+```
+
 ## Save figure for paper
 
 ```{r save-pos}
