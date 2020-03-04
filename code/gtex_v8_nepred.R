@@ -65,7 +65,7 @@ if(!is.null(opt$cov)) {
   covariates = fread(opt$cov, header = T)
   covariate_names = str_replace(colnames(covariates), '\\.', '-')
   covariates = cbind(covariates[, 1], covariates[, match(colnames(data_collector$geno1), as.character(covariate_names))])
-  indiv_offset = regress_against_covariate(data_collector$trc_g, data_collector$nlib, covariates)
+  indiv_offset = regress_against_covariate(data_collector$ne_g, NULL, covariates)
 } else {
   indiv_offset = NULL
 }
@@ -82,7 +82,7 @@ geno1[is_na] = (geno1[is_na] + geno2[is_na]) / 2
 geno2[is_na] = geno1[is_na]
 X = geno1 + geno2
 
-y = log(data_collector$trc_g / 2 / data_collector$lib_size)
+y = data_collector$ne_g  # log(data_collector$trc_g / 2 / data_collector$lib_size)
 if(!is.null(indiv_offset)) {
   y = y - indiv_offset
 }
@@ -96,16 +96,17 @@ if(is.null(df_partition)) {
     standardize = T
   )
   gz1 = gzfile(opt$output_model, "w")
-  write.table(data.frame(beta = mod$model$beta), gz1, col = T, row = F, quo = F, sep = '\t')
+  write.table(data.frame(beta = mod$beta), gz1, col = T, row = F, quo = F, sep = '\t')
   close(gz1)
 } else {
   outlist = list()
   blist = list()
-  for(p in unique(df_partition$partition)) {
+  parts = sort(unique(df_partition$partition))
+  for(p in parts) {
+    message('working on partition ', p, '/', length(parts))
     indiv_subset = df_partition$indiv[df_partition$partition == p]
     test_ind = colnames(data_collector$geno1) %in% indiv_subset
     train_ind = ! test_ind
-    message(sum(train_ind))
     mod = mixqtl:::fit_glmnet_with_cv(
       X[train_ind, , drop = FALSE],
       y[train_ind], 
@@ -113,11 +114,11 @@ if(is.null(df_partition)) {
       standardize = T
     )
     Xtest = X[test_ind, , drop = FALSE]
-    ypred = Xtest %*% mod$model$beta[-1]
-    y = y[test_ind]
-    pve = get_pve_here(y, ypred)
-    spearman_correlation = get_spcor_here(y, ypred)
-    pearson_correlation = get_pcor_here(y, ypred)
+    ypred = Xtest %*% mod$beta[-1]
+    yobs = y[test_ind]
+    pve = get_pve_here(yobs, ypred)
+    spearman_correlation = get_spcor_here(yobs, ypred)
+    pearson_correlation = get_pcor_here(yobs, ypred)
     df_sub = data.frame(
       pve = pve, 
       spearman_correlation = spearman_correlation, 
@@ -125,7 +126,7 @@ if(is.null(df_partition)) {
       partition = p
     )
     outlist[[length(outlist) + 1]] = df_sub
-    blist[[length(blist) + 1]] = data.frame(beta = mod$model$beta, partition = p)
+    blist[[length(blist) + 1]] = data.frame(beta = mod$beta, partition = p)
   }
   out = do.call(rbind, outlist)
   bout = do.call(rbind, blist)

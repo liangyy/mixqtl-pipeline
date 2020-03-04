@@ -82,16 +82,22 @@ geno1[is_na] = (geno1[is_na] + geno2[is_na]) / 2
 geno2[is_na] = geno1[is_na]
 
 df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, trc = data_collector$trc_g, Ti_lib = data_collector$nlib) %>% mutate(y_trc = trc, lib_size = Ti_lib, y_ase1 = y1, y_ase2 = y2)
+y = log(df$y_trc / 2 / df$lib_size)
+if(!is.null(indiv_offset)) {
+  y = y - indiv_offset
+}
 
 if(is.null(df_partition)) {
   mod = mixpred(geno1, geno2, df$y1, df$y2, df$y_trc, df$lib_size, cov_offset = indiv_offset, trc_cutoff = 100, asc_cutoff = 50, weight_cap = 10, asc_cap = 1000, nobs_asc_cutoff = 3)
   gz1 = gzfile(opt$output_model, "w")
-  write.table(data.frame(beta = mod$model$beta), gz1, col = T, row = F, quo = F, sep = '\t')
+  write.table(data.frame(beta = mod$beta), gz1, col = T, row = F, quo = F, sep = '\t')
   close(gz1)
 } else {
   outlist = list()
   blist = list()
-  for(p in unique(df_partition$partition)) {
+  parts = sort(unique(df_partition$partition))
+  for(p in parts) {
+    message('working on partition ', p, '/', length(parts))
     indiv_subset = df_partition$indiv[df_partition$partition == p]
     test_ind = colnames(data_collector$geno1) %in% indiv_subset
     train_ind = ! test_ind
@@ -110,11 +116,11 @@ if(is.null(df_partition)) {
       nobs_asc_cutoff = 3
     )
     Xtest = (geno1[test_ind, , drop = FALSE] + geno2[test_ind, , drop = FALSE]) / 2 
-    ypred = Xtest %*% mod$model$beta[-1]
-    y = log(df$y_trc[test_ind] / 2 / df$lib_size[test_ind])
-    pve = get_pve_here(y, ypred)
-    spearman_correlation = get_spcor_here(y, ypred)
-    pearson_correlation = get_pcor_here(y, ypred)
+    ypred = Xtest %*% mod$beta[-1]
+    yobs = y[test_ind]
+    pve = get_pve_here(yobs, ypred)
+    spearman_correlation = get_spcor_here(yobs, ypred)
+    pearson_correlation = get_pcor_here(yobs, ypred)
     df_sub = data.frame(
       pve = pve, 
       spearman_correlation = spearman_correlation, 
@@ -122,7 +128,7 @@ if(is.null(df_partition)) {
       partition = p
     )
     outlist[[length(outlist) + 1]] = df_sub
-    blist[[length(blist) + 1]] = data.frame(beta = mod$model$beta, partition = p)
+    blist[[length(blist) + 1]] = data.frame(beta = mod$beta, partition = p)
   }
   out = do.call(rbind, outlist)
   bout = do.call(rbind, blist)
