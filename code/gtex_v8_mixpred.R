@@ -16,7 +16,9 @@ option_list <- list(
     make_option(c("-i", "--indiv_partition"), type="character", default=NULL,
                 help="partition of indiv id to use",
                 metavar="character"),
-    make_option(c("-m", "--snplist")
+    make_option(c("-m", "--snplist"), type="character", default=NULL,
+                help="If you'd like to limit the prediction to be built using a specific set of SNPs, set the path to the snp list (with column name SNP) here",
+                metavar="character")
 )
 
 opt_parser <- OptionParser(option_list=option_list)
@@ -95,6 +97,7 @@ if(is.null(df_partition)) {
     indiv_subset = df_partition$indiv[df_partition$partition == p]
     test_ind = colnames(data_collector$geno1) %in% indiv_subset
     train_ind = ! test_ind
+    message(sum(train_ind))
     mod = mixqtl:::fit_glmnet_with_cv(
       X[train_ind, , drop = FALSE],
       y[train_ind] - indiv_offset[train_ind], 

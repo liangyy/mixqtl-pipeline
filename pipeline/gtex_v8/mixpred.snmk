@@ -63,7 +63,7 @@ if 'indiv_partition' in config:
         input:
             data = '{outdir}/{tissue}/input--{gene}.rds',
             covariate = config['covariate'],
-            subset = config['indiv_subset']
+            subset = config['indiv_partition']
         output:
             '{outdir}/{tissue}/indiv_partition-{subsetname}-performance-{method}.{gene}.txt.gz',
             '{outdir}/{tissue}/indiv_partition-{subsetname}-model-{method}.{gene}.txt.gz'
@@ -71,8 +71,8 @@ if 'indiv_partition' in config:
             'Rscript ../../code/gtex_v8_{wildcards.method}.R \
                 --data {input.data} \
                 --cov {input.covariate} \
-                --output_pip {output[0]} \
-                --output_cs {output[1]} \
+                --output_perf {output[0]} \
+                --output_model {output[1]} \
                 --indiv_partition {input.subset}'
 else:
     rule run_regression:
@@ -85,8 +85,8 @@ else:
             'Rscript ../../code/gtex_v8_{wildcards.method}.R \
                 --data {input.data} \
                 --cov {input.covariate} \
-                --output_pip {output[0]} \
-                --output_cs {output[1]}'
+                --output_perf {output[0]} \
+                --output_model {output[1]}'
 
 # if 'pack_name' in config:
 #     if 'indiv_subset' in config:
