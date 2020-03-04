@@ -1,7 +1,7 @@
 #PBS -S /bin/bash
 #PBS -l walltime=48:00:00
 #PBS -l nodes=1:ppn=16
-#PBS -l mem=4gb
+#PBS -l mem=32gb
 #PBS -e ${OUTLOG}/${JOBNAME}--${GENELIST}.err
 #PBS -o ${OUTLOG}/${JOBNAME}--${GENELIST}.out
 
