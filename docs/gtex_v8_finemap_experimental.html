@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Results on mixFine runs on GTEx V8 (experimentally validated SNPs as true causal)</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mixqtl-pipeline</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/liangyy/mixqtl-pipeline">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Results on mixFine runs on GTEx V8 (experimentally validated SNPs as true causal)</h1>
+
+</div>
+
+
+<pre class="r"><code>rm(list = ls())
+library(ggplot2)
+theme_set(theme_bw(base_size = 12))
+library(dplyr)
+library(reshape2)
+library(data.table)
+options(datatable.fread.datatable = FALSE)
+options(stringsAsFactors = FALSE)
+source(&#39;../code/rlib_analysis.R&#39;)
+datadir = &#39;/Users/yanyul/Desktop/mixqtl-pipeline-results/postprocess-finemap&#39;
+cbPalette &lt;- c(&#39;ascQTL&#39; = &quot;#999999&quot;, &#39;mixFine&#39; = &quot;#E69F00&quot;, &#39;trcQTL&#39; = &quot;#56B4E9&quot;, &#39;vanilla&#39; = &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
+source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R&#39;)
+th$panel.border = element_rect(colour = th$axis.line$colour)
+ifrun = FALSE</code></pre>
+<div id="analysis-plan" class="section level1">
+<h1><span class="header-section-number">1</span> Analysis plan</h1>
+<p>Here the goal is to make similar figure as</p>
+<div class="figure">
+<img src="../figures/main_paper_fig3b.png" alt="Figure 3B of GTEx V8 main paper" />
+<p class="caption">Figure 3B of GTEx V8 main paper</p>
+</div>
+<p>I started with SuRE data. The preprocessing is at <code>misc_data/prep_SuRE.sh</code>.</p>
+</div>
+<div id="load-sure-and-finemapping-results" class="section level1">
+<h1><span class="header-section-number">2</span> Load SuRE and finemapping results</h1>
+<pre class="r"><code>method_df = data.frame(method = c(&#39;mixfine&#39;, &#39;nefine&#39;), tag = c(&#39;mixFine&#39;, &#39;vanilla&#39;))
+if(ifrun == TRUE) {
+sure_dir = &#39;../misc_data&#39;
+sure_data_df = data.frame(name = c(&#39;SuRE_SNP_table_LP190708&#39;))
+sure_data_collector = list()
+for(n in 1 : nrow(sure_data_df)) {
+  i = sure_data_df$name[n]
+  d1 = fread(paste0(&#39;zcat &lt; &#39;, sure_dir, &#39;/&#39;, &#39;mapped-&#39;, i, &#39;.txt.gz&#39;), header = T)
+  # colnames(d1) = stringr::str_remove(colnames(d1), sure_data_df$remove[n])
+  d1 = d1[!duplicated(d1$annotated_snpid), ]
+  for(m in 1 : nrow(method_df)) {
+    d2 = fread(paste0(&#39;zcat &lt; &#39;, datadir, &#39;/&#39;, &#39;Whole_Blood-x-result_pip-&#39;, method_df$method[m], &#39;-IN-mapped-&#39;, i, &#39;.txt.gz&#39;), header = T, stringsAsFactors = FALSE)
+    d2 = d2 %&gt;% group_by(variant_id) %&gt;% summarize(variable_prob = max(variable_prob, na.rm = TRUE)) %&gt;% ungroup()
+    merge = inner_join(d1, d2, by = c(&#39;annotated_snpid&#39; = &#39;variant_id&#39;))
+    sure_data_collector[[length(sure_data_collector) + 1]] = merge %&gt;% mutate(data = i, method = method_df$tag[m])
+  }
+  
+}
+df = do.call(rbind, sure_data_collector)
+}</code></pre>
+</div>
+<div id="plot--logp-againist-pip" class="section level1">
+<h1><span class="header-section-number">3</span> Plot -log(p) againist PIP</h1>
+<pre class="r"><code>if(ifrun == TRUE) {
+n = 500000
+snps = unique(df$annotated_snpid)
+snps_selected = snps[sample(1 : length(snps), n)]
+df %&gt;% filter(annotated_snpid %in% snps_selected) %&gt;% ggplot() + geom_point(aes(x = variable_prob, y = -log(k562.wilcox.p.value))) + facet_grid(data ~ method)
+}</code></pre>
+</div>
+<div id="plot--logp-for-pip-0.5-vs-pip-0.01" class="section level1">
+<h1><span class="header-section-number">4</span> Plot -log(p) for PIP &gt; 0.5 vs PIP &lt; 0.01</h1>
+<pre class="r"><code>if(ifrun == TRUE) {
+df_sub = df %&gt;% filter(annotated_snpid %in% snps_selected) %&gt;% filter(variable_prob &gt; 0.5 | variable_prob &lt; 0.01)
+df_sub$label = &#39;PIP&gt;0.5&#39;
+df_sub$label[df_sub$variable_prob &lt; 0.01] = &#39;PIP&lt;0.01&#39;
+df_sub %&gt;% ggplot() + geom_boxplot(aes(x = label, y = -log(k562.wilcox.p.value), color = method)) + facet_wrap(~data)
+df_sub %&gt;% group_by(label, method, data) %&gt;% summarize(median(-log(k562.wilcox.p.value)))
+}</code></pre>
+</div>
+<div id="generate-input-files-for-torus" class="section level1">
+<h1><span class="header-section-number">5</span> Generate input files for <code>torus</code></h1>
+<p>Summary statistics.</p>
+<pre class="r"><code>if(ifrun == TRUE) {
+p2z_with_sign = function(ref, alt, p) {
+  qnorm(p / 2) * sign(ref - alt)
+}
+signed_z_h = p2z_with_sign(df$hepg2.ref.mean, df$hepg2.alt.mean, df$hepg2.wilcox.p.value)
+signed_z_k = p2z_with_sign(df$k562.ref.mean, df$k562.alt.mean, df$k562.wilcox.p.value)
+sum_stat = df %&gt;% select(liftover_chr, liftover_pos, method, data, annotated_snpid, variable_prob) %&gt;% mutate(hepg2.z = signed_z_h, k562.z = signed_z_k, hepg2.p = df$hepg2.wilcox.p.value, k562.p = df$k562.wilcox.p.value) 
+}</code></pre>
+<p>Load LD blocks.</p>
+<pre class="r"><code>if(ifrun == TRUE) {
+library(SilverStandardPerformance)
+data(&quot;ld_block_pickrell_eur_b38&quot;)
+m = 1  # the two methods share the same set of SNPs
+df_this = sum_stat %&gt;% filter(method == method_df$tag[m])
+tmp_ = df_this %&gt;% select(liftover_chr, liftover_pos, annotated_snpid) %&gt;% rename(chromosome = liftover_chr, position = liftover_pos)
+o = SilverStandardPerformance:::gwas_hit_to_gwas_loci_by_ld_block(tmp_, ld_block_pickrell_eur_b38)
+o = o[!duplicated(o$annotated_snpid), ]
+df_this = left_join(df_this, o %&gt;% select(annotated_snpid, region_name), by = &#39;annotated_snpid&#39;)
+df_this$region_name[is.na(df_this$region_name)] = &#39;NA&#39;
+}</code></pre>
+<p>Output summary statistics.</p>
+<pre class="r"><code>if(ifrun == TRUE) {
+for(n in c(&#39;hepg2&#39;, &#39;k562&#39;)) {
+  out = data.frame(SNP = df_this$annotated_snpid, region = df_this$region_name, zscore = df_this[[paste0(n, &#39;.z&#39;)]])
+  gz1 = gzfile(paste0(&#39;../output/torus_input.&#39;, n, &#39;.sum_stat.gz&#39;), &quot;w&quot;)
+  write.table(out, gz1, quote = F, col.names = T, row.names = F, sep = &#39;\t&#39;)
+  close(gz1)
+}
+}</code></pre>
+<p>Annotations.</p>
+<pre class="r"><code>cutoffs = c(0.5, 0.8)
+if(ifrun == TRUE) {
+for(m in 1 : nrow(method_df)) {
+  tmp = sum_stat %&gt;% filter(method == method_df$tag[m])
+  for(cc in cutoffs) {
+    annot = data.frame(SNP = tmp$annotated_snpid, pip_d = (tmp$variable_prob &gt; cc) * 1)
+    gz1 = gzfile(paste0(&#39;../output/torus_input.&#39;, method_df$method[m], &#39;.pip_cutoff_&#39;, cc, &#39;.annot.gz&#39;), &quot;w&quot;)
+    write.table(annot, gz1, quote = F, col.names = T, row.names = F, sep = &#39;\t&#39;)
+    close(gz1)
+  }
+}
+}</code></pre>
+</div>
+<div id="run-torus" class="section level1">
+<h1><span class="header-section-number">6</span> Run torus</h1>
+<pre class="r"><code>if(ifrun == TRUE) {
+run_torus = function(gwas, annot, output) {
+  cmd = paste(&#39;/Users/yanyul/Documents/repo/github/torus/dev/torus&#39;, &#39;-est&#39;, &#39;-d&#39;, gwas, &#39;-annot&#39;, annot, &#39;--load_zval&#39;, &#39;&gt;&#39;, output)
+  message(&#39;Running: &#39;, cmd)
+  system(cmd)
+}
+for(g in c(&#39;hepg2&#39;, &#39;k562&#39;)) {
+  gwas = paste0(&#39;../output/torus_input.&#39;, g, &#39;.sum_stat.gz&#39;)
+  for(m in 1 : nrow(method_df)) {
+    method = method_df$method[m]
+    for(cc in cutoffs) {
+      annot = paste0(&#39;../output/torus_input.&#39;, method, &#39;.pip_cutoff_&#39;, cc, &#39;.annot.gz&#39;)
+      output = paste0(&#39;../output/torus_output.&#39;, method, &#39;.pip_cutoff_&#39;, cc, &#39;_x_&#39;, g, &#39;.log&#39;)
+      if(!file.exists(output)) {
+        run_torus(gwas, annot, output)
+      }
+    }
+  }
+}
+}</code></pre>
+</div>
+<div id="see-results" class="section level1">
+<h1><span class="header-section-number">7</span> See results</h1>
+<pre class="r"><code>parser = function(logfile) {
+  f = read.table(logfile, header = F, stringsAsFactors = FALSE)
+  colnames(f) = c(&#39;variable&#39;, &#39;logodds_ratio&#39;, &#39;ci95_low&#39;, &#39;ci95_high&#39;)
+  f
+}
+result = list()
+for(g in c(&#39;hepg2&#39;, &#39;k562&#39;)) {
+  gwas = paste0(&#39;../output/torus_input.&#39;, g, &#39;.sum_stat.gz&#39;)
+  for(m in 1 : nrow(method_df)) {
+    method = method_df$method[m]
+    for(cc in cutoffs) {
+      output = paste0(&#39;../output/torus_output.&#39;, method, &#39;.pip_cutoff_&#39;, cc, &#39;_x_&#39;, g, &#39;.log&#39;)
+      result[[length(result) + 1]] = parser(output) %&gt;% mutate(method = method, celltype = g, pip_cutoff = cc)
+    }
+  }
+}
+result = do.call(rbind, result)</code></pre>
+<pre class="r"><code>result %&gt;% filter(variable == &#39;pip.1&#39;) %&gt;% 
+  ggplot() + 
+  geom_point(aes(x = factor(pip_cutoff), y = logodds_ratio, group = method, color = method), position = position_dodge(width = 0.3)) + 
+  geom_errorbar(aes(x = factor(pip_cutoff), ymax = ci95_high, ymin = ci95_low, group = method, color = method), position = position_dodge(width = 0.3), width = 0.1) + 
+  facet_wrap(~celltype) +
+  th</code></pre>
+<p><img src="gtex_v8_finemap_experimental_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
