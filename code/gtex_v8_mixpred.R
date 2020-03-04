@@ -80,10 +80,8 @@ geno1 = impute_geno(geno1)
 geno2 = impute_geno(geno2)
 geno1[is_na] = (geno1[is_na] + geno2[is_na]) / 2
 geno2[is_na] = geno1[is_na]
-X = geno1 + geno2
 
-y = log(data_collector$trc_g / 2 / data_collector$lib_size)
-
+df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, trc = data_collector$trc_g, Ti_lib = data_collector$nlib) %>% mutate(y_trc = trc, lib_size = Ti_lib, y_ase1 = y1, y_ase2 = y2)
 
 if(is.null(df_partition)) {
   mod = mixpred(geno1, geno2, df$y1, df$y2, df$y_trc, df$lib_size, cov_offset = indiv_offset, trc_cutoff = 100, asc_cutoff = 50, weight_cap = 10, asc_cap = 1000, nobs_asc_cutoff = 3)
@@ -97,16 +95,23 @@ if(is.null(df_partition)) {
     indiv_subset = df_partition$indiv[df_partition$partition == p]
     test_ind = colnames(data_collector$geno1) %in% indiv_subset
     train_ind = ! test_ind
-    message(sum(train_ind))
-    mod = mixqtl:::fit_glmnet_with_cv(
-      X[train_ind, , drop = FALSE],
-      y[train_ind] - indiv_offset[train_ind], 
-      intercept = T, 
-      standardize = T
+    mod = mixpred(
+      geno1[train_ind, , drop = FALSE], 
+      geno2[train_ind, , drop = FALSE], 
+      df$y1[train_ind], 
+      df$y2[train_ind], 
+      df$y_trc[train_ind], 
+      df$lib_size[train_ind], 
+      cov_offset = indiv_offset[train_ind], 
+      trc_cutoff = 100, 
+      asc_cutoff = 50, 
+      weight_cap = 10, 
+      asc_cap = 1000, 
+      nobs_asc_cutoff = 3
     )
-    Xtest = X[test_ind, , drop = FALSE]
+    Xtest = (geno1[test_ind, , drop = FALSE] + geno2[test_ind, , drop = FALSE]) / 2 
     ypred = Xtest %*% mod$model$beta[-1]
-    y = y[test_ind]
+    y = log(df$y_trc[test_ind] / 2 / df$lib_size[test_ind])
     pve = get_pve_here(y, ypred)
     spearman_correlation = get_spcor_here(y, ypred)
     pearson_correlation = get_pcor_here(y, ypred)

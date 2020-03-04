@@ -15,6 +15,9 @@ option_list <- list(
                 metavar="character"),
     make_option(c("-i", "--indiv_partition"), type="character", default=NULL,
                 help="partition of indiv id to use",
+                metavar="character"),
+    make_option(c("-m", "--snplist"), type="character", default=NULL,
+                help="If you'd like to limit the prediction to be built using a specific set of SNPs, set the path to the snp list (with column name SNP) here",
                 metavar="character")
 )
 
@@ -40,6 +43,19 @@ if(nvar == 0) {
   data_collector$geno2 = matrix(data_collector$geno2, nrow = 1)
 }
 
+if(!is.null(opt$snplist)) {
+  hm3snp = fread(opt$snplist, header = T)
+  geno_ = list(
+    var_name = data_collector$geno_name,
+    h1 = data_collector$geno1,
+    h2 = data_collector$geno2
+  )
+  geno_o_ = subset_var_here(train$genotype, hm3snp$SNP)
+  data_collector$geno_name = geno_o_$var_name
+  data_collector$geno1 = geno_o_$geno1
+  data_collector$geno2 = geno_o_$geno2
+} 
+
 df_partition = NULL
 if(!is.null(opt$indiv_partition)) {
   df_partition = read.table(opt$indiv_partition, header = T, stringsAsFactors = F)
@@ -64,11 +80,21 @@ geno1 = impute_geno(geno1)
 geno2 = impute_geno(geno2)
 geno1[is_na] = (geno1[is_na] + geno2[is_na]) / 2
 geno2[is_na] = geno1[is_na]
+X = geno1 + geno2
 
-df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, trc = data_collector$trc_g, Ti_lib = data_collector$nlib) %>% mutate(y_trc = trc, lib_size = Ti_lib, y_ase1 = y1, y_ase2 = y2)
+y = log(data_collector$trc_g / 2 / data_collector$lib_size)
+if(!is.null(indiv_offset)) {
+  y = y - indiv_offset
+}
+
 
 if(is.null(df_partition)) {
-  mod = mixpred(geno1, geno2, df$y1, df$y2, df$y_trc, df$lib_size, cov_offset = indiv_offset, trc_cutoff = 100, asc_cutoff = 50, weight_cap = 10, asc_cap = 1000, nobs_asc_cutoff = 3)
+  mod = mixqtl:::fit_glmnet_with_cv(
+    X,
+    y, 
+    intercept = T, 
+    standardize = T
+  )
   gz1 = gzfile(opt$output_model, "w")
   write.table(data.frame(beta = mod$model$beta), gz1, col = T, row = F, quo = F, sep = '\t')
   close(gz1)
@@ -79,23 +105,16 @@ if(is.null(df_partition)) {
     indiv_subset = df_partition$indiv[df_partition$partition == p]
     test_ind = colnames(data_collector$geno1) %in% indiv_subset
     train_ind = ! test_ind
-    mod = mixpred(
-      geno1[train_ind, , drop = FALSE], 
-      geno2[train_ind, , drop = FALSE], 
-      df$y1[train_ind], 
-      df$y2[train_ind], 
-      df$y_trc[train_ind], 
-      df$lib_size[train_ind], 
-      cov_offset = indiv_offset[train_ind], 
-      trc_cutoff = 100, 
-      asc_cutoff = 50, 
-      weight_cap = 10, 
-      asc_cap = 1000, 
-      nobs_asc_cutoff = 3
+    message(sum(train_ind))
+    mod = mixqtl:::fit_glmnet_with_cv(
+      X[train_ind, , drop = FALSE],
+      y[train_ind], 
+      intercept = T, 
+      standardize = T
     )
-    Xtest = (geno1[test_ind, , drop = FALSE] + geno2[test_ind, , drop = FALSE]) / 2 
+    Xtest = X[test_ind, , drop = FALSE]
     ypred = Xtest %*% mod$model$beta[-1]
-    y = log(df$y_trc[test_ind] / 2 / df$lib_size[test_ind])
+    y = y[test_ind]
     pve = get_pve_here(y, ypred)
     spearman_correlation = get_spcor_here(y, ypred)
     pearson_correlation = get_pcor_here(y, ypred)
