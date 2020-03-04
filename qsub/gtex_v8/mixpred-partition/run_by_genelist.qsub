@@ -1,0 +1,19 @@
+#PBS -S /bin/bash
+#PBS -l walltime=48:00:00
+#PBS -l nodes=1:ppn=16
+#PBS -l mem=4gb
+#PBS -e ${OUTLOG}/${JOBNAME}--${GENELIST}.err
+#PBS -o ${OUTLOG}/${JOBNAME}--${GENELIST}.out
+
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8 
+conda activate mixqtl
+
+for myconf in `echo $MYCONFIGS | tr ':' '\n'`
+do
+
+  snakemake -s mixpred.snmk --configfile ../../qsub/gtex_v8/mixpred-partition/$myconf --cores 16 -p --nolock --nt --config gene_list=../../qsub/gtex_v8/mixpred-partition/gene_list/$GENELIST >> ../../qsub/gtex_v8/mixpred-partition/$OUTLOG/$JOBNAME--$GENELIST--$myconf.log 2>&1
+
+done
