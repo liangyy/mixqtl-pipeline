@@ -14,3 +14,4 @@ The list of outputs:
 * `eqtlgen_neg.*` and `eqtlgen_pos.*`: `bash gen_eqtlgen_neg-with-gene-qc.sh` and `bash gen_eqtlgen_pos-with-gene-qc.sh`
 * `subsample_whole_blood/`: `bash gen_subsample_whole_blood.sh` for subsample analysis on mixfine/nefine Whole Blood GTEx V8
 * `mapped-SuRE_SNP_table_LP190708.txt.gz`: `bash prep_SuRE.sh` for SuRE data cleaning
+* `prediction_partition_whole_blood.partition_10.txt`: `bash gen_gtex_v8_prediction_partition_whole_blood.sh` for partitioning individuals for mixpred performance run 

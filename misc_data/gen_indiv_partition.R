@@ -22,7 +22,7 @@ options(datatable.fread.datatable=FALSE)
 set.seed(2020)
 
 covariates = fread(opt$input, header = T)
-covariate_names = str_replace(colnames(covariates), '\\.', '-')
+covariate_names = str_replace(colnames(covariates), '\\.', '-')[-1]
 nindiv = length(covariate_names)
 
 # output_prefix = 'indiv_subset_for_whole_blood'
