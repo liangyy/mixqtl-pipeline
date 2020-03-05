@@ -1,0 +1,19 @@
+#PBS -S /bin/bash
+#PBS -l walltime=24:00:00
+#PBS -l nodes=1:ppn=1
+#PBS -l mem=8gb
+#PBS -e run_prediction.err
+#PBS -o run_prediction.out
+
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8
+conda activate mixqtl
+
+namelist=('indiv_partition-gtex_v8_whole_blood_partition_10-performance-mixpred' 'indiv_partition-gtex_v8_whole_blood_partition_10-performance-nepred')
+
+for i in "${namelist[@]}"
+do
+  snakemake -s postprocess_merge.snmk --configfile ../../qsub/gtex_v8/postprocess_merge/config.prediction.yaml -p --config name=$i > ../../qsub/gtex_v8/postprocess_merge/run_prediction-$i.log 2>&1
+done
