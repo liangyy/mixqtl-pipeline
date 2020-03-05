@@ -56,7 +56,17 @@ format_system_time = function(my_proc_time) {
   return(out)
 }
 
+clean_up_ = function(y, ypred) {
+  clean_ind = (! is.na(y)) & (! is.na(ypred)) & (! is.infinite(y)) & (! is.na(ypred)) & (! is.nan(y)) & (! is.nan(ypred))
+  y = y[clean_ind]
+  ypred = ypred[clean_ind]
+  return(list(y, ypred))
+}
+
 get_pve_here = function(y, ypred) {
+  o = clean_up_(y, ypred)
+  y = o[[1]]
+  ypred = o[[2]]
   mod = lm(ypred ~ 1 + y)
   mod0 = lm(ypred ~ 1)
   sse = sum(residuals(mod) ^ 2)
@@ -65,9 +75,15 @@ get_pve_here = function(y, ypred) {
 }
 
 get_spcor_here = function(y, ypred) {
+  o = clean_up_(y, ypred)
+  y = o[[1]]
+  ypred = o[[2]]
   cor(y, ypred, method = 'spearman')
 }
 
 get_pcor_here = function(y, ypred) {
+  o = clean_up_(y, ypred)
+  y = o[[1]]
+  ypred = o[[2]]
   cor(y, ypred, method = 'pearson')
 }
