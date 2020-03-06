@@ -86,9 +86,15 @@ y = log(df$y_trc / 2 / df$lib_size)
 if(!is.null(indiv_offset)) {
   y = y - indiv_offset
 }
+X = (geno1 + geno2) / 2
 
 if(is.null(df_partition)) {
-  mod = mixpred(geno1, geno2, df$y1, df$y2, df$y_trc, df$lib_size, cov_offset = indiv_offset, trc_cutoff = 100, asc_cutoff = 50, weight_cap = 10, asc_cap = 1000, nobs_asc_cutoff = 3)
+  mod = mixqtl:::fit_glmnet_with_cv(
+    X,
+    y, 
+    intercept = T, 
+    standardize = T
+  )
   gz1 = gzfile(opt$output_model, "w")
   write.table(data.frame(beta = mod$beta), gz1, col = T, row = F, quo = F, sep = '\t')
   close(gz1)
@@ -101,19 +107,11 @@ if(is.null(df_partition)) {
     indiv_subset = df_partition$indiv[df_partition$partition == p]
     test_ind = colnames(data_collector$geno1) %in% indiv_subset
     train_ind = ! test_ind
-    mod = mixpred(
-      geno1[train_ind, , drop = FALSE], 
-      geno2[train_ind, , drop = FALSE], 
-      df$y1[train_ind], 
-      df$y2[train_ind], 
-      df$y_trc[train_ind], 
-      df$lib_size[train_ind], 
-      cov_offset = indiv_offset[train_ind], 
-      trc_cutoff = 100, 
-      asc_cutoff = 50, 
-      weight_cap = 10, 
-      asc_cap = 1000, 
-      nobs_asc_cutoff = 3
+    mod = mixqtl:::fit_glmnet_with_cv(
+      X[train_ind, , drop = FALSE],
+      y[train_ind], 
+      intercept = T, 
+      standardize = T
     )
     Xtest = (geno1[test_ind, , drop = FALSE] + geno2[test_ind, , drop = FALSE]) / 2 
     ypred = Xtest %*% mod$beta[-1]

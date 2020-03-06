@@ -1,0 +1,49 @@
+---
+title: "Results on mixPred runs on GTEx V8 (performance comparison based on 10-fold CV)"
+---
+
+```{r setup}
+rm(list = ls())
+library(ggplot2)
+theme_set(theme_bw(base_size = 12))
+library(dplyr)
+library(reshape2)
+library(data.table)
+options(datatable.fread.datatable = FALSE)
+options(stringsAsFactors = FALSE)
+source('../code/rlib_analysis.R')
+datadir = '/Users/yanyul/Desktop/mixqtl-pipeline-results/postprocess-prediction'
+cbPalette <- c('ascQTL' = "#999999", 'mixPred' = "#E69F00", 'trcQTL' = "#56B4E9", 'vanilla' = "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+source('https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R')
+th$panel.border = element_rect(colour = th$axis.line$colour)
+ifrun = FALSE
+```
+
+# Analysis plan
+
+Regress out covariates as usual on the full data. 
+And split the data into 10-part partition.
+Run `mixPred` and `nePred` on each of the leave-one-part out data.
+And evaluate the performance on the held out one part of the data.
+
+# Load results
+
+```{r load}
+method_df = data.frame(method = c('mixpred', 'nepred'), tag = c('mixPred', 'vanilla'))
+out = list()
+for(i in 1 : nrow(method_df)) {
+  tmp_ = read.table(paste0(datadir, '/', 'Whole_Blood-x-indiv_partition-gtex_v8_whole_blood_partition_10-performance-', method_df$method[i], '.txt.gz'), header = T, )
+  out[[length(out) + 1]] = tmp_ %>% mutate(method = method_df$tag[i])
+}
+df = do.call(rbind, out)
+```
+
+# Plot Pearson correlation comparison
+
+```{r plot_pearson_scatter}
+df %>% group_by(gene, method) %>% summarize(pearson = median(pearson_correlation)) %>% select(gene, pearson, method) %>% dcast(gene ~ method, value.var = 'pearson') %>% ggplot(aes(x = vanilla, y = mixPred)) + geom_point() + geom_density2d() + geom_abline(slope = 1, intercept = 0)
+```
+
+```{r plot_pearson_box}
+df %>% group_by(gene, method) %>% summarize(pearson = median(pearson_correlation)) %>% select(gene, pearson, method) %>% dcast(gene ~ method, value.var = 'pearson') %>% ggplot(aes(x = vanilla, y = mixPred)) + geom_point() + geom_density2d() + geom_abline(slope = 1, intercept = 0)
+```
