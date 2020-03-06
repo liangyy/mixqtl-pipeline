@@ -111,7 +111,7 @@ if(is.null(df_partition)) {
       cov_offset = indiv_offset[train_ind], 
       trc_cutoff = 100, 
       asc_cutoff = 50, 
-      weight_cap = 10, 
+      weight_cap = NULL,  # 10, 
       asc_cap = 1000, 
       nobs_asc_cutoff = 3
     )
