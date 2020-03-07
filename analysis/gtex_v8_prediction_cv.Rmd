@@ -1,11 +1,11 @@
 ---
-title: "Results on mixPred runs on GTEx V8 (performance comparison based on 10-fold CV)"
+title: "Results on mixPred runs on GTEx V8 (performance comparison based on 10-fold and 2-fold CV)"
 ---
 
 ```{r setup}
 rm(list = ls())
 library(ggplot2)
-theme_set(theme_bw(base_size = 12))
+theme_set(theme_bw(base_size = 15))
 library(dplyr)
 library(reshape2)
 library(data.table)
@@ -22,7 +22,7 @@ ifrun = FALSE
 # Analysis plan
 
 Regress out covariates as usual on the full data. 
-And split the data into 10-part partition.
+And split the data into 10-part or 2-part partitions.
 Run `mixPred` and `nePred` on each of the leave-one-part out data.
 And evaluate the performance on the held out one part of the data.
 
@@ -30,20 +30,53 @@ And evaluate the performance on the held out one part of the data.
 
 ```{r load}
 method_df = data.frame(method = c('mixpred', 'nepred'), tag = c('mixPred', 'vanilla'))
+full_sample_size = 670
+partitions = c(10, 2)
 out = list()
-for(i in 1 : nrow(method_df)) {
-  tmp_ = read.table(paste0(datadir, '/', 'Whole_Blood-x-indiv_partition-gtex_v8_whole_blood_partition_10-performance-', method_df$method[i], '.txt.gz'), header = T, )
-  out[[length(out) + 1]] = tmp_ %>% mutate(method = method_df$tag[i])
+for(part in partitions) {
+  for(i in 1 : nrow(method_df)) {
+    tmp_ = read.table(paste0(datadir, '/', 'Whole_Blood-x-indiv_partition-gtex_v8_whole_blood_partition_', part, '-performance-', method_df$method[i], '.txt.gz'), header = T, )
+    out[[length(out) + 1]] = tmp_ %>% mutate(method = method_df$tag[i], split = part, sample_size = full_sample_size * (part - 1) / part)
+  }
 }
 df = do.call(rbind, out)
 ```
 
+<!-- # QC -->
+
+<!-- ```{r} -->
+<!-- passed_genes = df %>% filter(method == 'vanilla') %>% group_by(gene, sample_size, partition) %>% summarize(min_cor = min(pearson_correlation)) %>% filter(min_cor > -100) %>% pull(gene) -->
+<!-- ``` -->
+
 # Plot Pearson correlation comparison
 
+Median correlation across partitions.
+
 ```{r plot_pearson_scatter}
-df %>% group_by(gene, method) %>% summarize(pearson = median(pearson_correlation)) %>% select(gene, pearson, method) %>% dcast(gene ~ method, value.var = 'pearson') %>% ggplot(aes(x = vanilla, y = mixPred)) + geom_point() + geom_density2d() + geom_abline(slope = 1, intercept = 0)
+p = df %>% group_by(gene, method, sample_size) %>% summarize(pearson = median(pearson_correlation)) %>% select(gene, pearson, method, sample_size) %>% dcast(gene + sample_size ~ method, value.var = 'pearson') %>% ggplot(aes(x = vanilla, y = mixPred)) + geom_point(alpha = .3) + geom_density2d(color = 'gray') + geom_abline(slope = 1, intercept = 0, color = 'gray') + facet_wrap(~sample_size, labeller = label_both) + th + coord_equal()
+p 
+ggsave(filename = '../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson.png', height = 4, width = 7)
 ```
 
+All pairwise comparison.
+
 ```{r plot_pearson_box}
-df %>% group_by(gene, method) %>% summarize(pearson = median(pearson_correlation)) %>% select(gene, pearson, method) %>% dcast(gene ~ method, value.var = 'pearson') %>% ggplot(aes(x = vanilla, y = mixPred)) + geom_point() + geom_density2d() + geom_abline(slope = 1, intercept = 0)
+df %>% select(gene, pearson_correlation, method, partition, sample_size) %>% dcast(gene + partition + sample_size ~ method , value.var = 'pearson_correlation') %>% ggplot(aes(x = vanilla, y = mixPred)) + geom_point(alpha = .2) + geom_density2d(color = 'gray') + geom_abline(slope = 1, intercept = 0, color = 'gray') + facet_wrap(~sample_size, labeller = label_both) + th + coord_equal()
+```
+
+As violin plot.
+
+```{r plot_pearson_box2}
+p = df %>% select(gene, pearson_correlation, method, partition, sample_size) %>% ggplot(aes(x = method, y = pearson_correlation, fill = method)) + geom_violin() + geom_boxplot(width = .4) + facet_wrap(~sample_size, labeller = label_both) + th + scale_fill_manual(values = cbPalette) + theme(legend.position = 'bottom')
+p 
+ggsave(filename = '../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin.png', height = 4, width = 7)
+```
+
+Sample size comparison: 670 * 0.9 vs 670 * 0.5
+
+```{r}
+# two_cols = as.character(unique(df$sample_size))
+p = df %>% select(gene, pearson_correlation, method, partition, sample_size) %>% mutate(sample_size = paste('sample size =', sample_size)) %>% group_by(gene, sample_size, method) %>% summarize(pearson = median(pearson_correlation)) %>% dcast(gene + method ~ sample_size, value.var = 'pearson') %>% ggplot(aes(x = `sample size = 335`, y = `sample size = 603`)) + geom_point(alpha = .2) + geom_density2d(color = 'gray') + geom_abline(slope = 1, intercept = 0, color = 'gray') + facet_wrap(~method) + th
+p 
+ggsave(filename = '../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-2.png', height = 4, width = 7)
 ```
