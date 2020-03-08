@@ -1,28 +1,25 @@
 #PBS -S /bin/bash
 #PBS -l walltime=12:00:00
 #PBS -l nodes=1:ppn=1
-#PBS -l mem=4gb
+#PBS -l mem=16gb
 #PBS -e pack_logs/${PACKNAME}.err
 #PBS -o pack_logs/${PACKNAME}.out
 
 
-# GENELIST=qsub/mixfine/$i,OUTDIR=$outdir,NAME=$name,CONFIG=$config
-
-
 source ~/.bash_profile
 source ~/.bashrc
-cd /home/t.cri.yliang/scratch/GitHub/project-ase/test_scripts/gtex-v8-pipeline/  # /home/t.cri.yliang/labshare/mv_from_scratch/repo/project-ase/test_scripts/gtex-v8-pipeline/
-conda activate pleio  # Being lazy to use envir of another project ...
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8 
+conda activate mixqtl
 
 
 
-for subsetfile in `ls qsub/mixfine/subsampling-with-gene-qc/$SUBSETDIR/*`
+for subsetfile in `ls ../../misc_data/$SUBSETDIR/*`
 do
   for myconf in `echo $MYCONFIGS | tr ':' '\n'`
   do
     fname=`echo "$subsetfile" | sed -r "s/.+\/(.+)\..+/\1/"`
 
-    snakemake -s mixfine.snmk --configfile qsub/mixfine/subsampling-with-gene-qc/config.$myconf.yaml -p --nt all_pack_up --config outdir=$OUTDIR gene_list=$GENELIST indiv_subset_name=$fname indiv_subset=$subsetfile pack_name=$PACKNAME >> qsub/mixfine/subsampling-with-gene-qc/pack_logs/$PACKNAME--$myconf--$fname.log 2>&1
+    snakemake -s mixfine.snmk --configfile ../../qsub/gtex_v8/mixfine-subsample/$myconf -p --nt all_pack_up --config outdir=$OUTDIR/$GENELIST gene_list=../../qsub/gtex_v8/mixfine-subsample/gene_list/$GENELIST indiv_subset_name=$fname indiv_subset=$subsetfile pack_name=$PACKNAME >> ../../qsub/gtex_v8/mixfine-subsample/pack_logs/$PACKNAME--$myconf--$fname.log 2>&1
 
   done
 done
