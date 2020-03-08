@@ -109,11 +109,13 @@ if(is.null(df_partition)) {
       df$y_trc[train_ind], 
       df$lib_size[train_ind], 
       cov_offset = indiv_offset[train_ind], 
-      trc_cutoff = 100, 
-      asc_cutoff = 50, 
-      weight_cap = 10, 
-      asc_cap = 1000, 
-      nobs_asc_cutoff = 3
+      trc_cutoff = 0,  # 100, 
+      asc_cutoff = 0,  # 50, 
+      # weight_cap = 10, 
+      # asc_cap = 1000, 
+      nobs_asc_cutoff = 3,
+      intercept = T, 
+      standardize = T
     )
     Xtest = (geno1[test_ind, , drop = FALSE] + geno2[test_ind, , drop = FALSE]) / 2 
     ypred = Xtest %*% mod$beta[-1]

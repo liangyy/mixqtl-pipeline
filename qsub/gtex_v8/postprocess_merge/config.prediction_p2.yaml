@@ -1,0 +1,5 @@
+tissue: 'Whole_Blood'
+# name: indiv_partition-gtex_v8_whole_blood_partition_10-performance-mixpred, indiv_partition-gtex_v8_whole_blood_partition_10-performance-nepred
+gene_list: '../../misc_data/gene_list_whole_blood_for_subsampling_with_qc.txt'
+gene_file: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/mixpred-partition-p2/{{tissue}}/{{name}}.{gene}.txt.gz'
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-prediction'

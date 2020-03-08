@@ -8,13 +8,13 @@
 # ARGV6: name of job
 # ARGV7: output folder of log
 
-MYCONFIGS=config.mixfine.yaml:config.nefine.yaml  # $1
-TASKNAME=gene_list_whole_blood_for_subsampling_with_qc  # this is the subset of genes passing QC # gtex-v8-genes-passed-qc_gene_list  # $2  # gene list name
-SUBSETDIR=subsample_whole_blood  # relative path to subsampled individual IDs  # $3
-OUTDIR=/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/mixfine-subsample  # $4
-NGENE=30  # $4
-JOBNAME=mixfine-subsample  # $5
-OUTLOG=myrun-03-06-20  # $6
+MYCONFIGS=config.mixpred_p2.yaml:config.nepred_p2.yaml  # $1
+TASKNAME=gene_list_whole_blood_for_subsampling_with_qc  # gtex_v8_predictable_genes_en-passed-qc_gene_list  # this is the subset of genes passing QC # gtex-v8-genes-passed-qc_gene_list  # $2  # gene list name
+# SUBSETDIR=subsample_whole_blood  # relative path to subsampled individual IDs  # $3
+# OUTDIR=/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/mixpred-partition  # $4
+NGENE=300  # $4
+JOBNAME=mixpred-partition  # $5
+OUTLOG=myrun-03-06-20-p2  # $6
 
 if [ ! -d "logs" ]; then
   mkdir logs/
@@ -46,5 +46,5 @@ fi
 
 for i in `ls gene_list/$TASKNAME* | sed 's#gene_list/##g'`;
 do
-  echo qsub -v GENELIST=$i,MYCONFIGS=$MYCONFIGS,SUBSETDIR=$SUBSETDIR,JOBNAME=$JOBNAME,OUTLOG=$OUTLOG,OUTDIR=$OUTDIR -N $JOBNAME--$i run_by_genelist.qsub
+  qsub -v GENELIST=$i,MYCONFIGS=$MYCONFIGS,JOBNAME=$JOBNAME,OUTLOG=$OUTLOG,OUTDIR=$OUTDIR -N $JOBNAME--$i run_by_genelist.qsub
 done

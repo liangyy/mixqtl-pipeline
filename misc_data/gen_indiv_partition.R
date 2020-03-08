@@ -9,6 +9,9 @@ option_list <- list(
                 metavar="character"),
     make_option(c("-n", "--npartition"), type="numeric", default=100,
                 help="number of partition",
+                metavar="character"),
+    make_option(c("-s", "--subsample_indiv"), type="numeric", default=NULL,
+                help="fraction to subsample individuals",
                 metavar="character")
 )
 
@@ -23,6 +26,9 @@ set.seed(2020)
 
 covariates = fread(opt$input, header = T)
 covariate_names = str_replace(colnames(covariates), '\\.', '-')[-1]
+if(!is.null(opt$subsample_indiv)) {
+  covariate_names = covariate_names[sample(length(covariate_names), floor(length(covariate_names) * opt$subsample_indiv))]
+}
 nindiv = length(covariate_names)
 
 # output_prefix = 'indiv_subset_for_whole_blood'

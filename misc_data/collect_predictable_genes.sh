@@ -1,0 +1,2 @@
+zcat /gpfs/data/im-lab/nas40t2/abarbeira/projects/gtex_v8/models_v1/eqtl/elastic_net_models/en_Whole_Blood.txt.gz |cut -f 1 -d ' '|tail -n +2 | sort | uniq | awk '{split($1,a,"."); print a[1]}' > gtex_v8_predictable_genes_en.txt
+awk 'FNR==NR{a[$1]=$1;next}{if($1 in a) {print $1}}' gtex_v8_predictable_genes_en.txt gtex-v8-genes-passed-qc_gene_list.txt  > gtex_v8_predictable_genes_en-passed-qc_gene_list.txt
