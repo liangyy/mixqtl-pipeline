@@ -13,7 +13,7 @@ library(data.table)
 options(datatable.fread.datatable = FALSE)
 options(stringsAsFactors = FALSE)
 source('../code/rlib_analysis.R')
-datadir = '/Users/yanyul/Desktop/mixqtl-pipeline-results/gtex_v8-results/mixfine-subsample/gene_list_whole_blood_for_subsampling_with_qc0*/Whole_Blood/'
+datadir = '/Users/yanyul/Desktop/mixqtl-pipeline-results/gtex_v8-results/'
 cbPalette <- c('ascQTL' = "#999999", 'mixFine' = "#E69F00", 'trcQTL' = "#56B4E9", 'vanilla' = "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 source('https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R')
 th$panel.border = element_rect(colour = th$axis.line$colour)
@@ -32,180 +32,155 @@ parse_name = function(ee) {
 
 ```{r load-sure}
 method_df = data.frame(method = c('mixfine', 'nefine'), tag = c('mixFine', 'vanilla'))
-# fractions = 3 : 9 / 10
-# batch = 1 : 10
+fractions = 3 : 9 / 10
+batch = 1 : 10
 
-gene_list = read.table('~/Desktop/mixqtl-pipeline-results/misc_data/gene_list_whole_blood_for_subsampling_with_qc.txt', header = F)
+# load results from full data
+df_full = list()
+df_full_g = list()
+
+for(m in 1 : nrow(method_df)) {
+  method = method_df$method[m]
+  tag = method_df$tag[m]
+  d = readRDS(paste0(datadir, 'mixfine/Whole_Blood/pack/GTExV8_WholeBlood__result_pip-', method, '.rds'))
+  df_full[[length(df_full) + 1]] = d$pip %>% mutate(method = method, batch = NA, fraction = 1)
+  df_full_g[[length(df_full_g) + 1]] = data.frame(gene = d$gene, method = method, batch = NA, fraction = 1)
+}
+df_full = do.call(rbind, df_full)
+df_full_g = do.call(rbind, df_full_g)
+
 # load results from full data
 list_pip = list()
-list_cs = list()
-for(gene in gene_list$V1[1:10]) {
-  e = Sys.glob(paste0(datadir, 'indiv_subset-indiv_subset__fraction*', gene, '*'))
-  for(ee in e) {
-    tmp = tryCatch(
-      {
-        tmp = fread(paste0('zcat < ', ee), header = T)
-        oo = parse_name(ee)
-        tmp %>% mutate(batch = oo$batch, fraction = oo$fraction, gene = gene, method = oo$method)
-      }, error = function(e) {
-        NULL
-      }
-    )
-  }
-  if(oo$method == 'pip') {
-    list_pip[[length(list_pip) + 1]] = tmp
-  } else {
-    list_cs[[length(list_cs) + 1]] = tmp
-  }
-}
-
-# 
-# df_subsample_g_complete = df_subsample_g %>% group_by(method, gene) %>% summarize(n_success = n()) %>% ungroup() %>% filter(n_success == 10 * 7) %>% group_by(gene) %>% summarize(n_method = n()) %>% ungroup() %>% filter(n_method == 2)
-# df_full_g_complete = df_full_g %>% group_by(gene) %>% summarize(n_success = n()) %>% ungroup() %>% filter(n_success == 2)
-# gene_complete_all = df_subsample_g_complete %>% filter(gene %in% df_full_g_complete$gene)
-# 
-# # extract the genes with complete results (no failed runs)
-# df_subsample_complete = df_subsample %>% filter(gene %in% gene_complete_all$gene)
-# df_full_complete = df_full %>% filter(gene %in% gene_complete_all$gene)
-# df_both_complete = rbind(df_full_complete, df_subsample_complete)
-```
-
-# Plot -log(p) againist PIP
-
-```{r sure-plot}
-if(ifrun == TRUE) {
-n = 500000
-snps = unique(df$annotated_snpid)
-snps_selected = snps[sample(1 : length(snps), n)]
-df %>% filter(annotated_snpid %in% snps_selected) %>% ggplot() + geom_point(aes(x = variable_prob, y = -log(k562.wilcox.p.value))) + facet_grid(data ~ method)
-}
-```
-
-# Plot -log(p) for PIP > 0.5 vs PIP < 0.01
-
-```{r sure-plot2}
-if(ifrun == TRUE) {
-df_sub = df %>% filter(annotated_snpid %in% snps_selected) %>% filter(variable_prob > 0.5 | variable_prob < 0.01)
-df_sub$label = 'PIP>0.5'
-df_sub$label[df_sub$variable_prob < 0.01] = 'PIP<0.01'
-df_sub %>% ggplot() + geom_boxplot(aes(x = label, y = -log(k562.wilcox.p.value), color = method)) + facet_wrap(~data)
-df_sub %>% group_by(label, method, data) %>% summarize(median(-log(k562.wilcox.p.value)))
-}
-```
-
-# Generate input files for `torus`
-
-Summary statistics.
-
-```{r}
-if(ifrun == TRUE) {
-p2z_with_sign = function(ref, alt, p) {
-  qnorm(p / 2) * sign(ref - alt)
-}
-signed_z_h = p2z_with_sign(df$hepg2.ref.mean, df$hepg2.alt.mean, df$hepg2.wilcox.p.value)
-signed_z_k = p2z_with_sign(df$k562.ref.mean, df$k562.alt.mean, df$k562.wilcox.p.value)
-sum_stat = df %>% select(liftover_chr, liftover_pos, method, data, annotated_snpid, variable_prob) %>% mutate(hepg2.z = signed_z_h, k562.z = signed_z_k, hepg2.p = df$hepg2.wilcox.p.value, k562.p = df$k562.wilcox.p.value) 
-}
-```
-
-Load LD blocks.
-
-```{r}
-if(ifrun == TRUE) {
-library(SilverStandardPerformance)
-data("ld_block_pickrell_eur_b38")
-m = 1  # the two methods share the same set of SNPs
-df_this = sum_stat %>% filter(method == method_df$tag[m])
-tmp_ = df_this %>% select(liftover_chr, liftover_pos, annotated_snpid) %>% rename(chromosome = liftover_chr, position = liftover_pos)
-o = SilverStandardPerformance:::gwas_hit_to_gwas_loci_by_ld_block(tmp_, ld_block_pickrell_eur_b38)
-o = o[!duplicated(o$annotated_snpid), ]
-df_this = left_join(df_this, o %>% select(annotated_snpid, region_name), by = 'annotated_snpid')
-df_this$region_name[is.na(df_this$region_name)] = 'NA'
-}
-```
-
-Output summary statistics.
-
-```{r}
-if(ifrun == TRUE) {
-for(n in c('hepg2', 'k562')) {
-  out = data.frame(SNP = df_this$annotated_snpid, region = df_this$region_name, zscore = df_this[[paste0(n, '.z')]])
-  gz1 = gzfile(paste0('../output/torus_input.', n, '.sum_stat.gz'), "w")
-  write.table(out, gz1, quote = F, col.names = T, row.names = F, sep = '\t')
-  close(gz1)
-}
-}
-```
-
-Annotations.
-
-```{r}
-cutoffs = c(0.5, 0.8)
-if(ifrun == TRUE) {
+list_g = list()
 for(m in 1 : nrow(method_df)) {
-  tmp = sum_stat %>% filter(method == method_df$tag[m])
-  for(cc in cutoffs) {
-    annot = data.frame(SNP = tmp$annotated_snpid, pip_d = (tmp$variable_prob > cc) * 1)
-    gz1 = gzfile(paste0('../output/torus_input.', method_df$method[m], '.pip_cutoff_', cc, '.annot.gz'), "w")
-    write.table(annot, gz1, quote = F, col.names = T, row.names = F, sep = '\t')
-    close(gz1)
-  }
-}
-}
-```
-
-# Run torus
-
-```{r}
-if(ifrun == TRUE) {
-run_torus = function(gwas, annot, output) {
-  cmd = paste('/Users/yanyul/Documents/repo/github/torus/dev/torus', '-est', '-d', gwas, '-annot', annot, '--load_zval', '>', output)
-  message('Running: ', cmd)
-  system(cmd)
-}
-for(g in c('hepg2', 'k562')) {
-  gwas = paste0('../output/torus_input.', g, '.sum_stat.gz')
-  for(m in 1 : nrow(method_df)) {
-    method = method_df$method[m]
-    for(cc in cutoffs) {
-      annot = paste0('../output/torus_input.', method, '.pip_cutoff_', cc, '.annot.gz')
-      output = paste0('../output/torus_output.', method, '.pip_cutoff_', cc, '_x_', g, '.log')
-      if(!file.exists(output)) {
-        run_torus(gwas, annot, output)
+  method = method_df$method[m]
+  tag = method_df$tag[m]
+  for(frac in fractions) {
+    for(bat in batch) {
+      e = Sys.glob(paste0(datadir, 'mixfine-subsample/gene_list_whole_blood_for_subsampling_with_qc0*/Whole_Blood/pack/mypack-03-08-20__indiv_subset-indiv_subset__fraction', frac, '__batch', bat, '-result_pip-', method, '.rds'))
+      for(ee in e) {
+        d = readRDS(ee)
+      list_pip[[length(list_pip) + 1]] = d$pip %>% mutate(method = method, batch = bat, fraction = frac)
+      list_g[[length(list_g) + 1]] = data.frame(gene = d$gene, method = method, batch = bat, fraction = frac)
       }
     }
   }
 }
-}
+df_subsample = do.call(rbind, list_pip)
+df_subsample_g = do.call(rbind, list_g)
+
+# 
+df_subsample_g_complete = df_subsample_g %>% group_by(method, gene) %>% summarize(n_success = n()) %>% ungroup() %>% filter(n_success == 10 * 7) %>% group_by(gene) %>% summarize(n_method = n()) %>% ungroup() %>% filter(n_method == 2)
+df_full_g_complete = df_full_g %>% group_by(gene) %>% summarize(n_success = n()) %>% ungroup() %>% filter(n_success == 2)
+gene_complete_all = df_subsample_g_complete %>% filter(gene %in% df_full_g_complete$gene)
+
+# extract the genes with complete results (no failed runs)
+df_subsample_complete = df_subsample %>% filter(gene %in% gene_complete_all$gene)
+df_full_complete = df_full %>% filter(gene %in% gene_complete_all$gene)
+df_both_complete = rbind(df_full_complete, df_subsample_complete)
 ```
 
-# See results
+# Plot
+
+## Number of 95% credible set identified in total
 
 ```{r}
-parser = function(logfile) {
-  f = read.table(logfile, header = F, stringsAsFactors = FALSE)
-  colnames(f) = c('variable', 'logodds_ratio', 'ci95_low', 'ci95_high')
-  f
-}
-result = list()
-for(g in c('hepg2', 'k562')) {
-  gwas = paste0('../output/torus_input.', g, '.sum_stat.gz')
-  for(m in 1 : nrow(method_df)) {
-    method = method_df$method[m]
-    for(cc in cutoffs) {
-      output = paste0('../output/torus_output.', method, '.pip_cutoff_', cc, '_x_', g, '.log')
-      result[[length(result) + 1]] = parser(output) %>% mutate(method = method, celltype = g, pip_cutoff = cc)
-    }
-  }
-}
-result = do.call(rbind, result)
+ncs_total = df_subsample_complete %>% group_by(gene, method, fraction) %>% summarize(ncs = length(unique(cs))) %>% ungroup()
+g = ncs_total %>% dcast(fraction + gene ~ method, value.var = 'ncs', fill = 0)
+g %>% ggplot() + geom_point(aes(x = nefine, y = mixfine)) + facet_wrap(~fraction)
 ```
 
+
+## Concensus SNPs
+
 ```{r}
-result %>% filter(variable == 'pip.1') %>% 
-  ggplot() + 
-  geom_point(aes(x = factor(pip_cutoff), y = logodds_ratio, group = method, color = method), position = position_dodge(width = 0.3)) + 
-  geom_errorbar(aes(x = factor(pip_cutoff), ymax = ci95_high, ymin = ci95_low, group = method, color = method), position = position_dodge(width = 0.3), width = 0.1) + 
-  facet_wrap(~celltype) +
-  th
+# extract variant-gene pairs with PIP > 0.5 from full set in both mixfine and nefine
+# plot the fraction of them identified in sub sampled sets
+consensus_eqtl = df_full_complete %>% filter(variable_prob > 0.5) %>% group_by(variant_id, gene) %>% summarize(n_method = n()) %>% ungroup() %>% filter(n_method == 2)
+df_subsample_with_consensus = df_subsample_complete %>% mutate(is_consensus = paste(variant_id, gene) %in% paste(consensus_eqtl$variant_id, consensus_eqtl$gene))
+df_subsample_with_consensus_summary = df_subsample_with_consensus %>% group_by(method, fraction, batch) %>% summarize(fraction_of_detection = sum(is_consensus) / nrow(consensus_eqtl))
+df_subsample_with_consensus_summary_flat = df_subsample_with_consensus_summary %>% dcast(fraction + batch ~ method, value.var = 'fraction_of_detection')
+df_subsample_with_consensus_summary_flat %>% ggplot() + geom_point(aes(x = mixfine, y = nefine)) + geom_abline(slope = 1, intercept = 0)
+df_subsample_with_consensus_summary %>% ggplot() + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, color = method)) + scale_color_manual(values = cbPalette)
+
+# for saving a nice plot
+temp = df_subsample_with_consensus_summary
+temp$method[temp$method == 'mixfine'] = 'mixFine'
+temp$method[temp$method == 'nefine'] = 'vanilla'
+p = temp %>% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = .5, position = position_dodge(1)) + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = 1, width = .2, position = position_dodge(1)) + scale_fill_manual(values = cbPalette) + xlab('Subsampling fraction') + ylab('Power (detection rate)') + theme(legend.position = c(0.8, 0.2), legend.title = element_blank()) # + ggtitle('Consensus variants \n (PIP > 0.5 in both) \n being detected')
+p = p + th + theme(aspect.ratio = 1)
+p
+ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc.png', p, height = 4, width = 4)
+```
+
+## Concensus CSs
+
+```{r}
+# get variants in Consensus CS's (sharing the same variant)
+sub = df_full %>% filter(cs > 0) %>% group_by(gene, variant_id) %>% summarize(nmethod = length(unique(method))) %>% ungroup() %>% filter(nmethod > 1)
+# get Consensus top variant of Consensus CS
+sub2 = df_full %>% filter(paste(gene, variant_id) %in% paste(sub$gene, sub$variant_id))
+sub2 = sub2 %>% group_by(gene, method, cs) %>% summarize(top_var = variant_id[which.max(variable_prob)])
+sub2 = sub2 %>% group_by(gene, top_var) %>% summarize(n = n()) %>% ungroup() %>% filter(n == 2)
+# get cs size in subsample
+sub_cs_size_sub = df_subsample %>% group_by(gene, cs, method, fraction, batch) %>% summarize(cs_size = n())
+# get cs with top variant in subsample
+sub_cs = df_subsample %>% filter(paste(gene, variant_id) %in% paste(sub2$gene, sub2$top_var))
+# annotate extracted cs with cs size
+sub_cs = left_join(sub_cs, sub_cs_size_sub, by = c('gene', 'cs', 'batch', 'fraction', 'method'))
+# flat to compare mixfine vs nefine
+sub_flat = sub_cs %>% dcast(gene + variant_id + batch + fraction ~ method, value.var = 'cs_size')
+# plot: for cs's detected in both mixfine and nefine
+th2 = th
+th2$panel.border = element_rect(colour = th2$axis.line$colour)
+p = sub_flat %>% filter(!is.na(mixfine), !is.na(nefine)) %>% filter(fraction != 0.3) %>% ggplot(aes(y = mixfine, x = nefine)) + geom_abline(slope = 1, intercept = 0, color = 'lightgray') + geom_point(alpha = .5) + facet_wrap(~fraction, ncol = 2) + ylab('CS size in mixFine') + xlab('CS size in vanilla') + coord_equal(xlim = c(0, 300), y = c(0, 300)) # + ggtitle('Size of Consensus CS \n being detected in both')
+p = p + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) # + coord_cartesian(xlim = c(0, 300), y = c(0, 300))
+p = p + th2
+p
+ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-cs-size-gene-qc.png', p, height = 5, width = 4)
+
+# plot: counting how many cs's are detected
+sub_sum = sub_cs %>% group_by(method, fraction, batch) %>% summarize(ntimes_detected = n()) 
+sub_sum_flat = sub_sum %>% dcast(fraction + batch ~ method, value.var = 'ntimes_detected')
+p = sub_sum_flat %>% ggplot() + geom_abline(slope = 1, intercept = 0, color = 'lightgray') + geom_point(aes(y = mixfine / nrow(sub2), x = nefine / nrow(sub2))) + ylab('Detection rate in mixFine') + xlab('Detection rate in vanilla') + coord_equal() # + ggtitle('Consensus CS \n (CS with same top variant) \n being detected')
+p = p + th
+p
+ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-concensus-cs-gene-qc.png', p, height = 4, width = 4)
+```
+
+# Stratifying by gene expression level
+
+```{r}
+expression_level = read.table('~/Desktop/mixqtl-pipeline-results/misc_data/gtex-v8-genes-passed-qc-with-median-trc.txt', header = T, stringsAsFactors = F)
+cutoffs = quantile(expression_level$median_trc, probs = c(1/3, 2/3))
+# df_subsample_with_consensus$median_trc = expression_level$median_trc[match(df_subsample_with_consensus$gene, expression_level$gene)]
+df_subsample_with_consensus = df_subsample_complete %>% mutate(is_consensus = paste(variant_id, gene) %in% paste(consensus_eqtl$variant_id, consensus_eqtl$gene))
+df_subsample_with_consensus$expression_level = 'high'
+df_subsample_with_consensus$expression_level[df_subsample_with_consensus$gene %in% expression_level$gene[expression_level$median_trc < cutoffs[1]]] = 'low'
+df_subsample_with_consensus$expression_level[df_subsample_with_consensus$gene %in% expression_level$gene[expression_level$median_trc < cutoffs[2] & expression_level$median_trc >= cutoffs[1]]] = 'middle'
+
+
+# consensus_eqtl$median_trc = expression_level$median_trc[match(consensus_eqtl$gene, expression_level$gene)]
+consensus_eqtl$expression_level = 'high'
+consensus_eqtl$expression_level[consensus_eqtl$gene %in% expression_level$gene[expression_level$median_trc < cutoffs[1]]] = 'low'
+consensus_eqtl$expression_level[consensus_eqtl$gene %in% expression_level$gene[expression_level$median_trc < cutoffs[2] & expression_level$median_trc >= cutoffs[1]]] = 'middle'
+n_consensus_eqtl = consensus_eqtl %>% group_by(expression_level) %>% summarize(n = n()) %>% ungroup()
+
+df_subsample_with_consensus_summary = df_subsample_with_consensus %>% group_by(method, fraction, batch, expression_level) %>% summarize(num_of_detection = sum(is_consensus))
+df_subsample_with_consensus_summary = inner_join(df_subsample_with_consensus_summary, n_consensus_eqtl, by = 'expression_level')
+df_subsample_with_consensus_summary = df_subsample_with_consensus_summary %>% mutate(fraction_of_detection = num_of_detection / n)
+df_subsample_with_consensus_summary$expression_level = factor(df_subsample_with_consensus_summary$expression_level, levels = c('high', 'middle', 'low'))
+
+df_subsample_with_consensus_summary_flat = df_subsample_with_consensus_summary %>% dcast(fraction + batch + expression_level ~ method, value.var = 'fraction_of_detection')
+df_subsample_with_consensus_summary_flat %>% ggplot() + geom_point(aes(x = mixfine, y = nefine)) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~expression_level)
+df_subsample_with_consensus_summary %>% ggplot() + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, color = method)) + facet_wrap(~expression_level) # + scale_color_manual(values = cbPalette)
+
+# for saving a nice plot
+temp = df_subsample_with_consensus_summary
+temp$method[temp$method == 'mixfine'] = 'mixFine'
+temp$method[temp$method == 'nefine'] = 'vanilla'
+p = temp %>% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = .5, position = position_dodge(1)) + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = 1, width = .2, position = position_dodge(1)) + scale_fill_manual(values = cbPalette) + xlab('Subsampling fraction') + ylab('Power (detection rate)') + theme(legend.position = 'bottom', legend.title = element_blank()) + facet_wrap(~expression_level)  # + ggtitle('Consensus variants \n (PIP > 0.5 in both) \n being detected')
+p = p + th2 + theme(aspect.ratio = 1)
+p
+ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc-stratified.png', p, height = 6, width = 12)
 ```
