@@ -17,7 +17,7 @@ fi
 
 for genelist in `ls gene_list/$TASKNAME* | sed 's#gene_list/##g'`;
 do
-  echo qsub -v GENELIST=$genelist,PACKNAME=$packname,MYCONFIGS=$MYCONFIGS,OUTDIR=$outdir,SUBSETDIR=$SUBSETDIR -N $packname run_pack.qsub
+  qsub -v GENELIST=$genelist,PACKNAME=$packname,MYCONFIGS=$MYCONFIGS,OUTDIR=$outdir,SUBSETDIR=$SUBSETDIR -N $packname run_pack.qsub
 done
 
 

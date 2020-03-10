@@ -2,7 +2,9 @@
 
 geneid=$1
 
-if [[ -f perm-input.$geneid.1.rds ]]; then
+echo $geneid
+
+if [[ ! -f perm-input.$geneid.1.rds ]]; then
   Rscript ../../code/gtex_v8_split_into_batch.R --expression /scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/expression/merge-Whole_Blood.rds --genotype /scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/genotype/$geneid.txt.gz --output_prefix perm-input.$geneid. --nbatch 1 --gene $geneid
 fi
 

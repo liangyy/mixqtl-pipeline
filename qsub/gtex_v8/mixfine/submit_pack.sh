@@ -11,5 +11,5 @@ packname=GTExV8_WholeBlood  # $3
 
 # mkdir -p logs/
 
-qsub -v GENELIST=../../../misc_data/$genelist,PACKNAME=$packname,CONFIG=$config -N pack-$packname run_pack.qsub
+qsub -v GENELIST=../../misc_data/$genelist.txt,PACKNAME=$packname,CONFIG=$config -N pack-$packname run_pack.qsub
 
