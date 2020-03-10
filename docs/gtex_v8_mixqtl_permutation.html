@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Yanyu Liang" />
+
+
+<title>gtex-v8-pipeline: eQTL with matrix QTL implementation with permutated data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mixqtl-pipeline</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/liangyy/mixqtl-pipeline">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">gtex-v8-pipeline: eQTL with matrix QTL implementation with permutated data</h1>
+<h4 class="author">Yanyu Liang</h4>
+<h4 class="date">10 March, 2020</h4>
+
+</div>
+
+
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(data.table)
+options(datatable.fread.datatable = F)
+library(pander)
+theme_set(theme_bw(base_size=15))
+source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R&#39;)
+cbPalette &lt;- c(&#39;ascQTL&#39; = &quot;#999999&quot;, &#39;mixQTL&#39; = &quot;#E69F00&quot;, &#39;trcQTL&#39; = &quot;#56B4E9&quot;, &#39;eQTL&#39; = &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;, &#39;ascQTL-permute&#39; = &quot;#000000&quot;, &#39;trcQTL-permute&#39; = &quot;#000000&quot;, &#39;mixQTL-permute&#39; = &quot;#000000&quot;)</code></pre>
+<div id="about" class="section level1">
+<h1><span class="header-section-number">1</span> About</h1>
+<p>run on four genes (see script at <code>misc_scripts/mixqtl_permutation/run.sh</code>)</p>
+</div>
+<div id="load-permutation-result" class="section level1">
+<h1><span class="header-section-number">2</span> Load permutation result</h1>
+<pre class="r"><code>genes = c(&#39;ENSG00000000457&#39;, &#39;ENSG00000001461&#39;, &#39;ENSG00000002834&#39;, &#39;ENSG00000277734&#39;)
+df_asc = list()
+df_trc = list()
+df_meta = list()
+for(i in genes) {
+  d = readRDS(paste0(&#39;~/Desktop/mixqtl-pipeline-results/misc_scripts/mixqtl_permutation/perm-&#39;, i, &#39;.mixqtl_permute.rds&#39;))
+  df_asc[[i]] = data.frame(pval = d$pval.asc, bhat = d$bhat.asc, se = d$se.asc, variant = d$variant_id, gene = i)
+  df_trc[[i]] = data.frame(pval = d$pval.trc, bhat = d$bhat.trc, se = d$se.trc, variant = d$variant_id, gene = i)
+  df_meta[[i]] = data.frame(pval = d$pval.meta, bhat = d$bhat.meta, se = d$se.meta, variant = d$variant_id, gene = i)
+}
+df_asc = do.call(rbind, df_asc)
+df_trc = do.call(rbind, df_trc)
+df_meta = do.call(rbind, df_meta)</code></pre>
+</div>
+<div id="load-asctrcmixqtl-result" class="section level1">
+<h1><span class="header-section-number">3</span> Load asc/trc/mixQTL result</h1>
+<pre class="r"><code>df_asc2 = list()
+df_trc2 = list()
+df_meta2 = list()
+for(i in genes) {
+  d = fread(paste0(&#39;zcat &lt; ~/Desktop/mixqtl-pipeline-results/gtex_v8-results/mixqtl/Whole_Blood/result-mixqtl.&#39;, i, &#39;.txt.gz&#39;))
+  df_asc2[[i]] = data.frame(pval = d$pval.asc, bhat = d$bhat.asc, se = d$se.asc, variant = d$variant_id, gene = i)
+  df_trc2[[i]] = data.frame(pval = d$pval.trc, bhat = d$bhat.trc, se = d$se.trc, variant = d$variant_id, gene = i)
+  df_meta2[[i]] = data.frame(pval = d$pval.meta, bhat = d$bhat.meta, se = d$se.meta, variant = d$variant_id, gene = i)
+}</code></pre>
+<pre><code>## Taking input= as a system command (&#39;zcat &lt; ~/Desktop/mixqtl-pipeline-results/gtex_v8-results/mixqtl/Whole_Blood/result-mixqtl.ENSG00000000457.txt.gz&#39;) and a variable has been used in the expression passed to `input=`. Please use fread(cmd=...). There is a security concern if you are creating an app, and the app could have a malicious user, and the app is not running in a secure environment; e.g. the app is running as root. Please read item 5 in the NEWS file for v1.11.6 for more information and for the option to suppress this message.</code></pre>
+<pre><code>## Taking input= as a system command (&#39;zcat &lt; ~/Desktop/mixqtl-pipeline-results/gtex_v8-results/mixqtl/Whole_Blood/result-mixqtl.ENSG00000001461.txt.gz&#39;) and a variable has been used in the expression passed to `input=`. Please use fread(cmd=...). There is a security concern if you are creating an app, and the app could have a malicious user, and the app is not running in a secure environment; e.g. the app is running as root. Please read item 5 in the NEWS file for v1.11.6 for more information and for the option to suppress this message.</code></pre>
+<pre><code>## Taking input= as a system command (&#39;zcat &lt; ~/Desktop/mixqtl-pipeline-results/gtex_v8-results/mixqtl/Whole_Blood/result-mixqtl.ENSG00000002834.txt.gz&#39;) and a variable has been used in the expression passed to `input=`. Please use fread(cmd=...). There is a security concern if you are creating an app, and the app could have a malicious user, and the app is not running in a secure environment; e.g. the app is running as root. Please read item 5 in the NEWS file for v1.11.6 for more information and for the option to suppress this message.</code></pre>
+<pre><code>## Taking input= as a system command (&#39;zcat &lt; ~/Desktop/mixqtl-pipeline-results/gtex_v8-results/mixqtl/Whole_Blood/result-mixqtl.ENSG00000277734.txt.gz&#39;) and a variable has been used in the expression passed to `input=`. Please use fread(cmd=...). There is a security concern if you are creating an app, and the app could have a malicious user, and the app is not running in a secure environment; e.g. the app is running as root. Please read item 5 in the NEWS file for v1.11.6 for more information and for the option to suppress this message.</code></pre>
+<pre class="r"><code>df_asc2 = do.call(rbind, df_asc2)
+df_trc2 = do.call(rbind, df_trc2)
+df_meta2 = do.call(rbind, df_meta2)</code></pre>
+</div>
+<div id="load-gtex-v8-qtl-from-bigquery" class="section level1">
+<h1><span class="header-section-number">4</span> Load GTEx v8 QTL from bigquery</h1>
+<pre class="r"><code>library(bigrquery)
+set_service_token(&#39;~/Downloads/gtex-awg-im-6077f6f6b70b.json&#39;)</code></pre>
+<pre><code>## Warning: &#39;set_service_token&#39; is deprecated.
+## Use &#39;bq_auth(path = ...)&#39; instead.
+## See help(&quot;Deprecated&quot;) and help(&quot;bigrquery-deprecated&quot;).</code></pre>
+<pre class="r"><code>cond = paste0(paste0(&quot;gene_id like &#39;&quot;, genes, &quot;%&#39;&quot;), collapse = &#39; or &#39;)
+tbl = bq_project_query(x = &#39;gtex-awg-im&#39;, 
+                       query = paste0(&#39;select * from `gtex-awg-im.GTEx_v8_eQTL.Whole_Blood_allpairs` where &#39;, cond)
+)</code></pre>
+<pre><code>## Complete</code></pre>
+<pre><code>## Billed: 0 B</code></pre>
+<pre class="r"><code>df_gtex = bq_table_download(tbl)</code></pre>
+<pre><code>## Downloading 29,218 rows in 3 pages.</code></pre>
+<pre><code>## Downloading data [==================&gt;---------------------------------------] 33% ETA: 3s
+## Downloading data [======================================&gt;-------------------] 67% ETA: 1s
+## Downloading data [==========================================================] 100% ETA: 0s</code></pre>
+<pre><code>## 
+Parsing [========================------------------------------------------------] ETA:  0s
+Parsing [========================================================================] ETA:  0s
+                                                                                           </code></pre>
+<pre class="r"><code>df_eqtl = df_gtex %&gt;% select(pval_nominal, slope, slope_se, variant_id, gene_id) %&gt;% rename(pval = pval_nominal, bhat = slope, se = slope_se, variant = variant_id, gene = gene_id) %&gt;% mutate(gene = trim_dot(gene))
+eqtl = intersect(paste(df_eqtl$variant, df_eqtl$gene), paste(df_asc$variant, df_asc$gene))</code></pre>
+</div>
+<div id="extract-variantgene-pairs-appear-in-both" class="section level1">
+<h1><span class="header-section-number">5</span> Extract variant/gene pairs appear in both</h1>
+<pre class="r"><code>df_eqtl = df_eqtl %&gt;% filter(paste(variant, gene) %in% eqtl)
+df_asc = df_asc %&gt;% filter(paste(variant, gene) %in% eqtl)
+df_trc = df_trc %&gt;% filter(paste(variant, gene) %in% eqtl)
+df_meta = df_meta %&gt;% filter(paste(variant, gene) %in% eqtl)
+df_asc2 = df_asc2 %&gt;% filter(paste(variant, gene) %in% eqtl)
+df_trc2 = df_trc2 %&gt;% filter(paste(variant, gene) %in% eqtl)
+df_meta2 = df_meta2 %&gt;% filter(paste(variant, gene) %in% eqtl)</code></pre>
+</div>
+<div id="qq-plot-everything" class="section level1">
+<h1><span class="header-section-number">6</span> QQ-plot everything</h1>
+<pre class="r"><code>df_qq = data.frame(
+  pval = c(
+    df_eqtl$pval,
+    df_asc$pval,
+    df_trc$pval,
+    df_meta$pval,
+    df_asc2$pval,
+    df_trc2$pval,
+    df_meta2$pval
+  ),
+  method = c(
+    rep(&#39;eQTL&#39;, nrow(df_eqtl)),
+    rep(&#39;ascQTL-permute&#39;, nrow(df_asc)),
+    rep(&#39;trcQTL-permute&#39;, nrow(df_trc)),
+    rep(&#39;mixQTL-permute&#39;, nrow(df_meta)),
+    rep(&#39;ascQTL&#39;, nrow(df_asc)),
+    rep(&#39;trcQTL&#39;, nrow(df_trc)),
+    rep(&#39;mixQTL&#39;, nrow(df_meta))
+  )
+)
+df_qq$pval[is.na(df_qq$pval)] = runif(sum(is.na(df_qq$pval)))
+p = my_qqplot(df_qq$pval, df_qq$method)
+p</code></pre>
+<p><img src="gtex_v8_mixqtl_permutation_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+<div id="qq-plot-by-method" class="section level1">
+<h1><span class="header-section-number">7</span> QQ-plot by method</h1>
+<pre class="r"><code>for(m in c(&#39;ascQTL&#39;, &#39;trcQTL&#39;, &#39;mixQTL&#39;)) {
+  sub = df_qq %&gt;% filter(method %in% c(&#39;eQTL&#39;, m, paste0(m, &#39;-permute&#39;)))
+  p = my_qqplot(sub$pval, sub$method)
+  p = p + th + scale_color_manual(values = cbPalette)
+  p$layers &lt;- c(geom_abline(slope = 1, intercept = 0, color = &#39;lightgray&#39;), p$layers)
+  p = p + theme(legend.position = c(0.3, 0.8), legend.title = element_blank())
+  p = p + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+  p = p + theme(aspect.ratio = 1)
+  print(p + ggtitle(m))
+  ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-new-cutoffs-and-caps-permutation-&#39;, m, &#39;.png&#39;), p, width = 4, height = 4)
+}</code></pre>
+<p><img src="gtex_v8_mixqtl_permutation_files/figure-html/unnamed-chunk-13-1.png" width="672" /><img src="gtex_v8_mixqtl_permutation_files/figure-html/unnamed-chunk-13-2.png" width="672" /><img src="gtex_v8_mixqtl_permutation_files/figure-html/unnamed-chunk-13-3.png" width="672" /></p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
