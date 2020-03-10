@@ -385,7 +385,7 @@ source(&#39;../code/rlib_analysis.R&#39;)
 datadir = &#39;/Users/yanyul/Desktop/mixqtl-pipeline-results/postprocess-mixqtl&#39;
 cbPalette &lt;- c(&#39;ascQTL&#39; = &quot;#999999&quot;, &#39;mixQTL&#39; = &quot;#E69F00&quot;, &#39;trcQTL&#39; = &quot;#56B4E9&quot;, &#39;eQTL&#39; = &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
 source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R&#39;)
-th$panel.border = element_rect(colour = th$axis.line$colour)
+# th$panel.border = element_rect(colour = th$axis.line$colour)
 auto_cutoff = function(score, nbin = 100) {
   cutoffs = quantile(score, probs = 0:nbin/nbin)
   cutoffs
@@ -419,15 +419,23 @@ p$layers[[2]]$aes_params$size = 0.5
 p</code></pre>
 <p><img src="gtex_v8_mixqtl_eqtlgen_files/figure-html/qq-pos-1.png" width="672" /></p>
 </div>
+<div id="save-figure-for-paper" class="section level2">
+<h2><span class="header-section-number">1.3</span> Save figure for paper</h2>
+<pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive.png&#39;, p, height = 4, width = 4)
+collector = df
+for(m in c(&#39;ascQTL&#39;, &#39;trcQTL&#39;, &#39;mixQTL&#39;)) {
+  sub = df %&gt;% filter(method %in% c(m, &#39;eQTL&#39;))
+  p = my_qqplot(sub$pval, sub$method) 
+  p$layers &lt;- c(geom_abline(slope = 1, intercept = 0, color = &#39;lightgray&#39;), p$layers)
+  p = p + scale_color_manual(values = cbPalette)
+  p = p + theme(legend.position = c(0.7, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+  ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-&#39;, m, &#39;.png&#39;), p, height = 4, width = 4)
+}</code></pre>
+</div>
 <div id="chi2-plot-mixqtl-vs-eqtl" class="section level2">
-<h2><span class="header-section-number">1.3</span> <span class="math inline">\(\chi^2\)</span> plot: mixQTL vs eQTL</h2>
-<pre class="r"><code>dfplot = df %&gt;% mutate(chisq = qchisq(pval, df = 1, lower.tail = F)) %&gt;% select(-pval) %&gt;% filter(method %in% c(&#39;mixQTL&#39;, &#39;eQTL&#39;)) %&gt;% dcast(gene + variant ~ method, value.var = &#39;chisq&#39;)</code></pre>
-<pre><code>## Warning in dcast(., gene + variant ~ method, value.var = &quot;chisq&quot;): The dcast generic
-## in data.table has been passed a data.frame and will attempt to redirect to the
-## reshape2::dcast; please note that reshape2 is deprecated, and this redirection is now
-## deprecated as well. Please do this redirection yourself like reshape2::dcast(.). In the
-## next version, this warning will become an error.</code></pre>
-<pre class="r"><code>p = dfplot %&gt;% ggplot() + 
+<h2><span class="header-section-number">1.4</span> <span class="math inline">\(\chi^2\)</span> plot: mixQTL vs eQTL</h2>
+<pre class="r"><code>dfplot = df %&gt;% mutate(chisq = qchisq(pval, df = 1, lower.tail = F)) %&gt;% select(-pval) %&gt;% filter(method %in% c(&#39;mixQTL&#39;, &#39;eQTL&#39;)) %&gt;% dcast(gene + variant ~ method, value.var = &#39;chisq&#39;)
+p = dfplot %&gt;% ggplot() + 
   geom_point(aes(x = eQTL, y = mixQTL), alpha = 0.5) +
   geom_point(data = dfplot %&gt;% filter(gene %in% c(&#39;ENSG00000115607&#39;, &#39;ENSG00000145730&#39;)), aes(x = eQTL, y = mixQTL, color = gene)) + 
   th +
@@ -439,19 +447,6 @@ dfplot %&gt;% summarize(median_eqtl = median(eQTL), median_mixqtl = median(mixQT
 <pre><code>##   median_eqtl median_mixqtl    ratio
 ## 1    2.580397       3.56258 1.380632</code></pre>
 <pre class="r"><code>ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.png&#39;), p, height = 4, width = 4)</code></pre>
-</div>
-<div id="save-figure-for-paper" class="section level2">
-<h2><span class="header-section-number">1.4</span> Save figure for paper</h2>
-<pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive.png&#39;, p, height = 4, width = 4)
-collector = df
-for(m in c(&#39;ascQTL&#39;, &#39;trcQTL&#39;, &#39;mixQTL&#39;)) {
-  sub = df %&gt;% filter(method %in% c(m, &#39;eQTL&#39;))
-  p = my_qqplot(sub$pval, sub$method) 
-  p$layers &lt;- c(geom_abline(slope = 1, intercept = 0, color = &#39;lightgray&#39;), p$layers)
-  p = p + scale_color_manual(values = cbPalette)
-  p = p + theme(legend.position = c(0.7, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
-  ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-&#39;, m, &#39;.png&#39;), p, height = 4, width = 4)
-}</code></pre>
 </div>
 </div>
 <div id="negative-set-eqtlgen-pvalue-0.5" class="section level1">
@@ -477,7 +472,7 @@ df = df %&gt;% filter(paste(gene, variant) %in% paste(df_clean$gene, df_clean$va
 <pre class="r"><code>df$pval[is.na(df$pval)] = runif(sum(is.na(df$pval)))
 p = my_qqplot(df$pval, df$method) 
 p = p + geom_abline(intercept = 0, slope = 1)
-p = p + scale_color_manual(values = cbPalette) + theme(legend.position = c(0.7, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+p = p + scale_color_manual(values = cbPalette) + theme(legend.position = c(0.3, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
 p$layers[[2]]$aes_params$size = 0.5
 p</code></pre>
 <p><img src="gtex_v8_mixqtl_eqtlgen_files/figure-html/qq-neg-1.png" width="672" /></p>
@@ -491,7 +486,7 @@ for(m in c(&#39;ascQTL&#39;, &#39;trcQTL&#39;, &#39;mixQTL&#39;)) {
   p = my_qqplot(sub$pval, sub$method) 
   p$layers &lt;- c(geom_abline(slope = 1, intercept = 0, color = &#39;lightgray&#39;), p$layers)
   p = p + scale_color_manual(values = cbPalette)
-  p = p + theme(legend.position = c(0.7, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+  p = p + theme(legend.position = c(0.3, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
   ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-negative-&#39;, m, &#39;.png&#39;), p, height = 4, width = 4)
 }</code></pre>
 </div>

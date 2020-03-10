@@ -14,7 +14,7 @@ source('../code/rlib_analysis.R')
 datadir = '/Users/yanyul/Desktop/mixqtl-pipeline-results/postprocess-mixqtl'
 cbPalette <- c('ascQTL' = "#999999", 'mixQTL' = "#E69F00", 'trcQTL' = "#56B4E9", 'eQTL' = "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 source('https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R')
-th$panel.border = element_rect(colour = th$axis.line$colour)
+# th$panel.border = element_rect(colour = th$axis.line$colour)
 auto_cutoff = function(score, nbin = 100) {
   cutoffs = quantile(score, probs = 0:nbin/nbin)
   cutoffs
@@ -53,6 +53,21 @@ p$layers[[2]]$aes_params$size = 0.5
 p
 ```
 
+## Save figure for paper
+
+```{r save-pos}
+ggsave('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive.png', p, height = 4, width = 4)
+collector = df
+for(m in c('ascQTL', 'trcQTL', 'mixQTL')) {
+  sub = df %>% filter(method %in% c(m, 'eQTL'))
+  p = my_qqplot(sub$pval, sub$method) 
+  p$layers <- c(geom_abline(slope = 1, intercept = 0, color = 'lightgray'), p$layers)
+  p = p + scale_color_manual(values = cbPalette)
+  p = p + theme(legend.position = c(0.7, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+  ggsave(paste0('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-', m, '.png'), p, height = 4, width = 4)
+}
+```
+
 ## $\chi^2$ plot: mixQTL vs eQTL
 
 ```{r chisq}
@@ -69,20 +84,6 @@ dfplot %>% summarize(median_eqtl = median(eQTL), median_mixqtl = median(mixQTL))
 ggsave(paste0('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.png'), p, height = 4, width = 4)
 ```
 
-## Save figure for paper
-
-```{r save-pos}
-ggsave('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive.png', p, height = 4, width = 4)
-collector = df
-for(m in c('ascQTL', 'trcQTL', 'mixQTL')) {
-  sub = df %>% filter(method %in% c(m, 'eQTL'))
-  p = my_qqplot(sub$pval, sub$method) 
-  p$layers <- c(geom_abline(slope = 1, intercept = 0, color = 'lightgray'), p$layers)
-  p = p + scale_color_manual(values = cbPalette)
-  p = p + theme(legend.position = c(0.7, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
-  ggsave(paste0('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-', m, '.png'), p, height = 4, width = 4)
-}
-```
 
 # Negative set (eQTLGen pvalue > 0.5)
 
@@ -110,7 +111,7 @@ df = df %>% filter(paste(gene, variant) %in% paste(df_clean$gene, df_clean$varia
 df$pval[is.na(df$pval)] = runif(sum(is.na(df$pval)))
 p = my_qqplot(df$pval, df$method) 
 p = p + geom_abline(intercept = 0, slope = 1)
-p = p + scale_color_manual(values = cbPalette) + theme(legend.position = c(0.7, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+p = p + scale_color_manual(values = cbPalette) + theme(legend.position = c(0.3, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
 p$layers[[2]]$aes_params$size = 0.5
 p
 collector = rbind(collector %>% mutate(type = 'positive'), df %>% mutate(type = 'negative'))
@@ -125,7 +126,7 @@ for(m in c('ascQTL', 'trcQTL', 'mixQTL')) {
   p = my_qqplot(sub$pval, sub$method) 
   p$layers <- c(geom_abline(slope = 1, intercept = 0, color = 'lightgray'), p$layers)
   p = p + scale_color_manual(values = cbPalette)
-  p = p + theme(legend.position = c(0.7, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+  p = p + theme(legend.position = c(0.3, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
   ggsave(paste0('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-negative-', m, '.png'), p, height = 4, width = 4)
 }
 ```
