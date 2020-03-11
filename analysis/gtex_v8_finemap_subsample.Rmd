@@ -16,7 +16,8 @@ source('../code/rlib_analysis.R')
 datadir = '/Users/yanyul/Desktop/mixqtl-pipeline-results/gtex_v8-results/'
 cbPalette <- c('ascQTL' = "#999999", 'mixFine' = "#E69F00", 'trcQTL' = "#56B4E9", 'vanilla' = "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 source('https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R')
-th$panel.border = element_rect(colour = th$axis.line$colour)
+# th0 = th
+# th$panel.border = element_rect(colour = th$axis.line$colour)
 
 parse_name = function(ee) {
   ee = basename(ee)
