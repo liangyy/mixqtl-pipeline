@@ -1,0 +1,7 @@
+nbatch: 1
+tissue: 'Whole_Blood'
+gene: 'ENSG00000000457'
+method: 'mixqtl'
+covariate: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/peer/Whole_Blood/covariate-combined.txt'
+genotype: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/genotype/{gene}.txt.gz'
+expression: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/expression/merge-Whole_Blood.rds'

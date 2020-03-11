@@ -1,0 +1,12 @@
+---
+title: "Analysis gallary"
+---
+
+* mixQTL runs on simulated data [link](sim_mixqtl.html)
+* mixFine runs on simulated data [link](sim_mixfine.html)
+* mixPred runs on simulated data [link](sim_mixpred.html)
+* mixQTL on GTEx V8 (four genes permutation plot) [link](gtex_v8_mixqtl_permutation.html)
+* mixQTL on GTEx V8 (eQTLGen plots) [link](gtex_v8_mixqtl_eqtlgen.html)
+* mixFine on GTEx V8 (experimental validation plot) [link](gtex_v8_finemap_experimental.html)
+* mixFine on GTEx V8 (subsampling analysis) [link](gtex_v8_finemap_subsample.html)
+* mixPred on GTEx V8 (Prediction performance evaluated by cross-validation) [link](gtex_v8_prediction_cv.html)

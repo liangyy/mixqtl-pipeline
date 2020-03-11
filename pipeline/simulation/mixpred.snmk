@@ -1,0 +1,83 @@
+# Run mixPred on simulated data (simulation_multi.snmk)
+
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+
+snplist_cmd = ''
+if 'snplist' in config:
+    snplist_cmd = '--snplist ' + config['snplist']
+    
+rule all:
+    input:
+        '{outdir}/{name}/merge_{trainer}-ntest{ntest}-ratio{ratio}.from{fm}_to{tm}.rds'.format(
+            name = config['data']['name'],
+            ratio = config['split']['ratio'],
+            trainer = config['trainer'],
+            ntest = config['split']['ntest'],
+            fm = config['data']['M_from'],
+            tm = config['data']['M_to'],
+            outdir = config['outdir']
+        )
+
+rule all_split:
+    input:
+        [ '{outdir}/{name}/data-ntest{ntest}-ratio{ratio}.m{m}-replicate{i}.rds'.format(i = i, name = config['data']['name'], ratio = config['split']['ratio'], m = m, ntest = config['split']['ntest'], outdir = config['outdir']) for i in range(1, config['split']['ntest'] + 1) for m in range(config['data']['M_from'], config['data']['M_to'] + 1) ]
+
+rule split:
+    input:
+        config['data']['genotype'],
+        config['data']['readcount']
+    output:
+        [ '{{outdir}}/{{name}}/data-ntest{{ntest}}-ratio{{ratio}}.m{{m}}-replicate{i}.rds'.format(i = i) for i in range(1, config['split']['ntest'] + 1) ]
+    shell:
+        'Rscript ../../code/sim_prediction_split_data.R \
+            --geno {input[0]} \
+            --readcount {input[1]} \
+            --output_prefix {wildcards.outdir}/{wildcards.name}/data-ntest{wildcards.ntest}-ratio{wildcards.ratio}.m{wildcards.m}-replicate \
+            --ntest {wildcards.ntest} \
+            --ratio {wildcards.ratio}'
+
+rule train:
+    input:
+        '{outdir}/{name}/data-ntest{ntest}-ratio{ratio}.m{m}-replicate{i}.rds'
+    output:
+        '{outdir}/{name}/{trainer}--predictor-ntest{ntest}-ratio{ratio}.m{m}-replicate{i}.rds'
+    log:
+        '{outdir}/{name}/{trainer}--predictor-ntest{ntest}-ratio{ratio}.m{m}-replicate{i}.log'
+    shell:
+        'Rscript ../../code/sim_{wildcards.trainer}.R \
+            --data {input[0]} \
+            --output {output[0]} \
+            {snplist_cmd}'
+            # --timelog {log}'
+
+rule predict:
+    input:
+        '{outdir}/{name}/{trainer}--predictor-ntest{ntest}-ratio{ratio}.m{m}-replicate{i}.rds',
+        '{outdir}/{name}/data-ntest{ntest}-ratio{ratio}.m{m}-replicate{i}.rds'
+    output:
+        '{outdir}/{name}/{trainer}--ypred-ntest{ntest}-ratio{ratio}.m{m}-replicate{i}.rds'
+    shell:
+        'Rscript ../../code/sim_predict.R --predictor {input[0]} --test_data {input[1]} --output {output[0]}'
+
+rule merge_and_evaluate:
+    input:
+        lambda wildcards: [ '{outdir}/{name}/{trainer}--ypred-ntest{ntest}-ratio{ratio}.m{m}-replicate{i}.rds'.format(
+            i = i,
+            name = wildcards.name,
+            trainer = wildcards.trainer,
+            m = m,
+            ntest = wildcards.ntest,
+            ratio = wildcards.ratio,
+            outdir = wildcards.outdir
+        ) for i in range(1, int(wildcards.ntest) + 1) for m in range(int(wildcards.fm), int(wildcards.tm) + 1) ]
+    output:
+        '{outdir}/{name}/merge_{trainer}-ntest{ntest}-ratio{ratio}.from{fm}_to{tm}.rds'
+    shell:
+        'Rscript ../../code/sim_mixpred_merge.R \
+            --input_prefix {wildcards.outdir}/{wildcards.name}/{wildcards.trainer}--ypred-ntest{wildcards.ntest}-ratio{wildcards.ratio}.m \
+            --input_middle=-replicate \
+            --output {output[0]} \
+            --from {wildcards.fm} \
+            --to {wildcards.tm} \
+            --ntest {wildcards.ntest}'

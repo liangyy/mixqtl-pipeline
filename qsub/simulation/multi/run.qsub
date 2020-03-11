@@ -1,0 +1,14 @@
+#PBS -S /bin/bash
+#PBS -l walltime=24:00:00
+#PBS -l nodes=1:ppn=16
+#PBS -l mem=16gb
+#PBS -e logs/${NAME}.err
+#PBS -o logs/${NAME}.out
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /home/t.cri.yliang/scratch/GitHub/mixqtl-pipeline/pipeline/simulation
+conda activate mixqtl  
+
+snakemake -s simulation_multi.snmk --configfile ../../qsub/simulation/multi/configs/config_$NAME.yaml --unlock --config outdir=$OUTDIR
+snakemake -s simulation_multi.snmk --configfile ../../qsub/simulation/multi/configs/config_$NAME.yaml --cores 16 -p --nolock --config outdir=$OUTDIR > ../../qsub/simulation/multi/logs/$NAME.log 2>&1

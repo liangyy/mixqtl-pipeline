@@ -1,0 +1,50 @@
+# this module extract read count data from total/allele-specific read count matrix
+
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+
+rule all:
+    input:
+        '{outdir}/expression/merge-{tissue}.rds'.format(tissue = config['tissue'], outdir = config['outdir'])
+
+rule get_id:
+    input:
+        config['sample-id']
+    output:
+        '{outdir}/expression/sample-id-{tissue}.txt'
+    shell:
+        'Rscript ../../misc_scripts/gtex_v8_preprocess/get_sample_id.R --table {input[0]} --tissue "{config[extract-name]}" --output {output[0]}'
+
+rule extract_trc:
+    input:
+        config['trc-matrix'],
+        '{outdir}/expression/sample-id-{tissue}.txt'
+    output:
+        '{outdir}/expression/trc-{tissue}.txt.gz'
+    shell:
+        'bash ../../misc_scripts/gtex_v8_preprocess/extract_trc.sh {input[0]} {input[1]} {output[0]}'
+
+rule extract_ase:
+    input:
+        config['ase-matrix'],
+        '{outdir}/expression/sample-id-{tissue}.txt'
+    output:
+        '{outdir}/expression/ase-{tissue}.txt.gz'
+    shell:
+        'bash ../../misc_scripts/gtex_v8_preprocess/extract_ase.sh {input[0]} {input[1]} {output[0]}'
+
+rule merge_trc_ase:
+    input:
+        trc = '{outdir}/expression/trc-{tissue}.txt.gz',
+        ase = '{outdir}/expression/ase-{tissue}.txt.gz',
+        ne = config['normalize-expression-matrix'],
+        lib = config['library-size']
+    output:
+        '{outdir}/expression/merge-{tissue}.rds'
+    shell:
+        'Rscript ../../misc_scripts/gtex_v8_preprocess/merge_trc_ase_ne.R \
+            --trc {input.trc} \
+            --ase {input.ase} \
+            --ne {input.ne} \
+            --library_size {input.lib} \
+            --output {output[0]}'

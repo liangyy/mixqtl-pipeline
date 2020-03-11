@@ -1,0 +1,19 @@
+#PBS -S /bin/bash
+#PBS -l walltime=24:00:00
+#PBS -l nodes=1:ppn=1
+#PBS -l mem=8gb
+#PBS -e run_finemap.err
+#PBS -o run_finemap.out
+
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8
+conda activate mixqtl
+
+namelist=('result_pip-mixfine' 'result_cs-mixfine' 'result_pip-nefine' 'result_cs-nefine')
+
+for i in "${namelist[@]}"
+do
+  snakemake -s postprocess_merge.snmk --configfile ../../qsub/gtex_v8/postprocess_merge/config.finemap.yaml -p --config name=$i > ../../qsub/gtex_v8/postprocess_merge/run_finemap-$i.log 2>&1
+done

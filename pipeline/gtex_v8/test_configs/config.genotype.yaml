@@ -1,0 +1,6 @@
+gene-annotation: '../../misc_data/annotations_gencode_v26.tsv'
+genotype:
+  path: '/gpfs/data/gtex-group/v8/59348/gtex/exchange/GTEx_phs000424/exchange/analysis_releases/GTEx_Analysis_2017-06-05_v8/genotypes/WGS/variant_calls/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.SHAPEIT2_phased.MAF01.vcf.gz'
+  header: 3388
+window-size: 1000000
+genelist: 'test_configs/test_gene_list.txt'

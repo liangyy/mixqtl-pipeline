@@ -1,0 +1,6 @@
+nfactor: 60
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/peer'
+tissue: 'Whole_Blood'
+covariate: '/gpfs/data/gtex-group/v8/59349/gtex/exchange/GTEx_phs000424/exchange/analysis_releases/GTEx_Analysis_2017-06-05_v8/eqtl/GTEx_Analysis_v8_eQTL_covariates/Whole_Blood.v8.covariates.txt'
+expr_mat: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/expression/merge-Whole_Blood.rds'
+path_to_peertool: '/gpfs/data/im-lab/nas40t2/yanyul/softwares/peer/bin/peertool'

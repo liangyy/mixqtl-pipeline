@@ -1,0 +1,53 @@
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+    
+def readfile(myfile):
+    o = []
+    with open(myfile, 'r') as f:
+        for i in f:
+            i = i.strip()
+            o.append(i)
+    return o
+
+def clean_braket(str):
+    import re
+    str = re.sub('}}', '}', str)
+    str = re.sub('{{', '{', str)
+    return str
+
+def get_presuffix(path):
+    e = path.split('{gene}')
+    prefix = clean_braket(e[0])
+    suffix = clean_braket(e[1])
+    return (prefix, suffix)
+
+
+gene_list = readfile(config['gene_list'])
+(gene_prefix, gene_suffix) = get_presuffix(config['gene_file'])
+
+rule all:
+    input:
+        '{outdir}/{tissue}-x-{name}.txt.gz'.format(outdir = config['outdir'], tissue = config['tissue'], name = config['name'])
+
+rule merge:
+    input:
+        gene_list = config['gene_list'],
+        gene_file = [ config['gene_file'].format(gene = g) for g in gene_list ]
+    params:
+        prefix = gene_prefix,
+        suffix = gene_suffix
+    log:
+        '{outdir}/{tissue}-x-{name}.log'
+    output:
+        '{outdir}/{tissue}-x-{name}.txt.gz'
+    shell:
+        '''
+        bash ../../misc_scripts/gtex_v8_postprocess/merge.sh {input.gene_list} {params.prefix} {params.suffix} {output[0]} 2> {log}
+        if [ -s "{log}" ]
+        then
+          echo "Something wrong. Check log at {log}"; exit 1
+        else
+          exit 0
+        fi
+        '''
+

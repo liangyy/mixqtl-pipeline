@@ -1,0 +1,11 @@
+data:
+  genotype: '/scratch/t.cri.yliang/mixqtl-pipeline-results/simulation-multi/genotype__SelectedGenes.size_100.{m}.rds'
+  readcount: '/scratch/t.cri.yliang/mixqtl-pipeline-results/simulation-multi/readcount__samplesize100_x_theta5e-6--SelectedGenes.size_100.{m}.rds'
+  M_from: 1
+  M_to: 2
+  name: 'test'
+trainer: 'trcpred'  # 'mixpred'
+split:
+  ntest: 2 
+  ratio: 0.2
+

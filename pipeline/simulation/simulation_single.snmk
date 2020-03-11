@@ -1,0 +1,39 @@
+# This module is a simple wrapper to simulate data
+# The script simulate one gene (position/MAF of heterozygous sites) and fix the gene while simulating transcripts for each variant/beta
+# Steps:
+#   1. Simulate gene
+#   2. Fix the gene, simulate genotype
+#   3. Fix the gene and variant, simulate transcripts for each beta
+
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+
+rule all:
+    input:
+        [ '{outdir}/{name}__readcount.{m}.rds'.format(m = i + 1, name = config['parameter_file']['name'], outdir = config['outdir']) for i in range(config['M']) ]
+
+rule prepare_gene_param:
+    input:
+        config['parameter_file']['path']
+    output:
+        '{outdir}/{name}__gene.rds'
+    shell:
+        'Rscript ../../code/sim_prepare_gene_param.R --param {input[0]} --output {output[0]}'
+
+rule simulate_genotype:
+    input:
+        config['parameter_file']['path']
+    output:
+        [ '{{outdir}}/{{name}}__genotype.{m}.rds'.format(m = i + 1) for i in range(config['M']) ]
+    shell:
+        'Rscript ../../code/sim_simulate_genotype.R --param {input[0]} --nreplicate {config[M]} --output_prefix {wildcards.outdir}/{wildcards.name}__genotype.'
+
+rule simulate:
+    input:
+        config['parameter_file']['path'],
+        '{outdir}/{name}__gene.rds',
+        '{outdir}/{name}__genotype.{m}.rds'
+    output:
+        '{outdir}/{name}__readcount.{m}.rds'
+    shell:
+        'Rscript ../../code/sim_simulate_read_count.R --param {input[0]} --gene {input[1]} --genotype {input[2]} --output {output[0]} --type single'

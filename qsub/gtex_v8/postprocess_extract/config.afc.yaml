@@ -1,0 +1,12 @@
+target_name: 'cleaned-Whole_Blood.v8.egenes'
+from_name: 'Whole_Blood-x-result-mixqtl'
+
+target_list:
+  path: '/gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/misc_data/{target_name}.txt.gz'
+  varcol: 13
+  genecol: 1
+from_list:
+  path: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-mixqtl/{from_name}.txt.gz'
+  varcol: 16 
+  genecol: 17
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-mixqtl'

@@ -1,0 +1,57 @@
+# this module simulation read count under weak multiplicative effect across multiple causal variants
+# Inputs:
+#   1. phased genotype VCF for a list of candidate genes  
+#   2. parameter file of the simulation
+# Steps:
+#   1. Read-in and format genotype
+#   2. Generate gene configuration (for this part, it does not rely on genotype input)
+#   3. Simulate read count
+
+
+
+def read_in_genes(genelist, gene_col):
+    genes = []
+    with open(genelist, 'r') as f:
+        for i in f:
+            i = i.strip().split('\t')
+            genes.append(i[gene_col - 1])
+    return genes
+    
+genes = read_in_genes(config['gene-list']['path'], config['gene-list']['col'])    
+
+
+if 'outdir' not in config:
+    config['outdir'] = 'output'
+
+rule all:
+    input:
+        [ '{outdir}/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'.format(m = i + 1, simulation_name = config['parameter_file']['name'], genotype_name = config['gene-list']['name'], nsample = config['Nsample'], outdir = config['outdir']) for i in range(config['M']) ]
+
+
+    
+rule format_genotype:
+    input:
+        lambda wildcards: config['genotype']['path'].format(gene = genes[int(wildcards.m) - 1]),
+        config['genotype']['indiv-list']
+    output:
+        '{outdir}/genotype__{genotype_name}.size_{nsample}.{m}.rds'
+    shell:
+        'Rscript ../../code/sim_format_genotype.R --input {input[0]} --output {output[0]} --indiv {input[1]} --nsample {config[Nsample]}'
+
+rule prepare_gene_param:
+    input:
+        config['parameter_file']['path']
+    output:
+        '{outdir}/{simulation_name}__gene.rds'
+    shell:
+        'Rscript ../../code/sim_prepare_gene_param.R --param {input[0]} --output {output[0]}'
+
+rule simulate:
+    input:
+        config['parameter_file']['path'],
+        '{outdir}/{simulation_name}__gene.rds',
+        '{outdir}/genotype__{genotype_name}.size_{nsample}.{m}.rds'
+    output:
+        '{outdir}/readcount__{simulation_name}--{genotype_name}.size_{nsample}.{m}.rds'
+    shell:
+        'Rscript ../../code/sim_simulate_read_count.R --param {input[0]} --gene {input[1]} --genotype {input[2]} --output {output[0]} --type multi'

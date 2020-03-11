@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Results on mixPred runs on GTEx V8 (performance comparison based on 10-fold and 2-fold CV)</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mixqtl-pipeline</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/liangyy/mixqtl-pipeline">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Results on mixPred runs on GTEx V8 (performance comparison based on 10-fold and 2-fold CV)</h1>
+
+</div>
+
+
+<pre class="r"><code>rm(list = ls())
+library(ggplot2)
+theme_set(theme_bw(base_size = 15))
+library(dplyr)
+library(reshape2)
+library(data.table)
+options(datatable.fread.datatable = FALSE)
+options(stringsAsFactors = FALSE)
+source(&#39;../code/rlib_analysis.R&#39;)
+datadir = &#39;/Users/yanyul/Desktop/mixqtl-pipeline-results/postprocess-prediction&#39;
+cbPalette &lt;- c(&#39;ascQTL&#39; = &quot;#999999&quot;, &#39;mixPred&#39; = &quot;#E69F00&quot;, &#39;trcQTL&#39; = &quot;#56B4E9&quot;, &#39;vanilla&#39; = &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
+source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R&#39;)
+th$panel.border = element_rect(colour = th$axis.line$colour)
+ifrun = FALSE</code></pre>
+<div id="analysis-plan" class="section level1">
+<h1><span class="header-section-number">1</span> Analysis plan</h1>
+<p>Regress out covariates as usual on the full data. And split the data into 10-part or 2-part partitions. Run <code>mixPred</code> and <code>nePred</code> on each of the leave-one-part out data. And evaluate the performance on the held out one part of the data.</p>
+</div>
+<div id="load-results" class="section level1">
+<h1><span class="header-section-number">2</span> Load results</h1>
+<pre class="r"><code>method_df = data.frame(method = c(&#39;mixpred&#39;, &#39;nepred&#39;), tag = c(&#39;mixPred&#39;, &#39;vanilla&#39;))
+full_sample_size = 670
+partitions = c(10, 2)
+out = list()
+for(part in partitions) {
+  for(i in 1 : nrow(method_df)) {
+    tmp_ = read.table(paste0(datadir, &#39;/&#39;, &#39;Whole_Blood-x-indiv_partition-gtex_v8_whole_blood_partition_&#39;, part, &#39;-performance-&#39;, method_df$method[i], &#39;.txt.gz&#39;), header = T, )
+    out[[length(out) + 1]] = tmp_ %&gt;% mutate(method = method_df$tag[i], split = part, sample_size = full_sample_size * (part - 1) / part)
+  }
+}
+df = do.call(rbind, out)</code></pre>
+<!-- # QC -->
+<!-- ```{r} -->
+<!-- passed_genes = df %>% filter(method == 'vanilla') %>% group_by(gene, sample_size, partition) %>% summarize(min_cor = min(pearson_correlation)) %>% filter(min_cor > -100) %>% pull(gene) -->
+<!-- ``` -->
+</div>
+<div id="plot-pearson-correlation-comparison" class="section level1">
+<h1><span class="header-section-number">3</span> Plot Pearson correlation comparison</h1>
+<p>Median correlation across partitions.</p>
+<pre class="r"><code>p = df %&gt;% group_by(gene, method, sample_size) %&gt;% summarize(pearson = median(pearson_correlation)) %&gt;% select(gene, pearson, method, sample_size) %&gt;% dcast(gene + sample_size ~ method, value.var = &#39;pearson&#39;) %&gt;% ggplot(aes(x = vanilla, y = mixPred)) + geom_point(alpha = .3) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~sample_size, labeller = label_both) + th + coord_equal()</code></pre>
+<pre><code>## Warning in dcast(., gene + sample_size ~ method, value.var = &quot;pearson&quot;): The dcast generic in data.table
+## has been passed a grouped_df and will attempt to redirect to the reshape2::dcast; please note that
+## reshape2 is deprecated, and this redirection is now deprecated as well. Please do this redirection
+## yourself like reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
+<pre class="r"><code>p </code></pre>
+<p><img src="gtex_v8_prediction_cv_files/figure-html/plot_pearson_scatter-1.png" width="672" /></p>
+<pre class="r"><code>ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson.png&#39;, height = 4, width = 7)</code></pre>
+<p>All pairwise comparison.</p>
+<pre class="r"><code>df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% dcast(gene + partition + sample_size ~ method , value.var = &#39;pearson_correlation&#39;) %&gt;% ggplot(aes(x = vanilla, y = mixPred)) + geom_point(alpha = .2) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~sample_size, labeller = label_both) + th + coord_equal()</code></pre>
+<pre><code>## Warning in dcast(., gene + partition + sample_size ~ method, value.var = &quot;pearson_correlation&quot;):
+## The dcast generic in data.table has been passed a data.frame and will attempt to redirect to the
+## reshape2::dcast; please note that reshape2 is deprecated, and this redirection is now deprecated as
+## well. Please do this redirection yourself like reshape2::dcast(.). In the next version, this warning
+## will become an error.</code></pre>
+<p><img src="gtex_v8_prediction_cv_files/figure-html/plot_pearson_box-1.png" width="672" /></p>
+<p>As violin plot.</p>
+<pre class="r"><code>p = df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% ggplot(aes(x = method, y = pearson_correlation, fill = method)) + geom_violin() + geom_boxplot(width = .4) + facet_wrap(~sample_size, labeller = label_both) + th + scale_fill_manual(values = cbPalette) + theme(legend.position = &#39;bottom&#39;)
+p </code></pre>
+<p><img src="gtex_v8_prediction_cv_files/figure-html/plot_pearson_box2-1.png" width="672" /></p>
+<pre class="r"><code>ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin.png&#39;, height = 4, width = 7)</code></pre>
+<p>Sample size comparison: 670 * 0.9 vs 670 * 0.5</p>
+<pre class="r"><code># two_cols = as.character(unique(df$sample_size))
+p = df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% mutate(sample_size = paste(&#39;sample size =&#39;, sample_size)) %&gt;% group_by(gene, sample_size, method) %&gt;% summarize(pearson = median(pearson_correlation)) %&gt;% dcast(gene + method ~ sample_size, value.var = &#39;pearson&#39;) %&gt;% ggplot(aes(x = `sample size = 335`, y = `sample size = 603`)) + geom_point(alpha = .2) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~method) + th</code></pre>
+<pre><code>## Warning in dcast(., gene + method ~ sample_size, value.var = &quot;pearson&quot;): The dcast generic in data.table
+## has been passed a grouped_df and will attempt to redirect to the reshape2::dcast; please note that
+## reshape2 is deprecated, and this redirection is now deprecated as well. Please do this redirection
+## yourself like reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
+<pre class="r"><code>p </code></pre>
+<p><img src="gtex_v8_prediction_cv_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-2.png&#39;, height = 4, width = 7)</code></pre>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

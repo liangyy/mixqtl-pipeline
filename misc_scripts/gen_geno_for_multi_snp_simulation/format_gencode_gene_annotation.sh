@@ -1,0 +1,1 @@
+zcat gencode.v32lift37.basic.annotation.gff3.gz |tail -n +8|awk -F"\t" -v OFS="\t" '{split($9,a,";"); split(a[1],b,"=");split(a[3],c,"=");if( $3=="gene"){print $1,$2,$3,$4, $5,$7,b[2],c[2]}}' | gzip > formatted-gene-model.gencode.v32lift37.basic.annotation.txt.gz

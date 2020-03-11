@@ -1,0 +1,24 @@
+#PBS -S /bin/bash
+#PBS -l walltime=48:00:00
+#PBS -l nodes=1:ppn=16
+#PBS -l mem=4gb
+#PBS -e ${OUTLOG}/${JOBNAME}--${GENELIST}.err
+#PBS -o ${OUTLOG}/${JOBNAME}--${GENELIST}.out
+
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8 
+conda activate mixqtl
+
+
+for subsetfile in `ls ../../misc_data/$SUBSETDIR/*`
+do
+  for myconf in `echo $MYCONFIGS | tr ':' '\n'`
+  do
+    fname=`echo "$subsetfile" | sed -r "s/.+\/(.+)\..+/\1/"`
+
+    snakemake -s mixfine.snmk --configfile ../../qsub/gtex_v8/mixfine-subsample/$myconf --cores 16 -p --nolock --nt --config outdir=$OUTDIR/$GENELIST gene_list=../../qsub/gtex_v8/mixfine-subsample/gene_list/$GENELIST indiv_subset_name=$fname indiv_subset=$subsetfile >> ../../qsub/gtex_v8/mixfine-subsample/$OUTLOG/$JOBNAME--$GENELIST--$myconf.log 2>&1
+
+  done
+done

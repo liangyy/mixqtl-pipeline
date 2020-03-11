@@ -1,0 +1,14 @@
+.snakemake
+.Rproj.user
+.Rhistory
+.DS_Store
+*.rds
+*.err
+*.log
+*.out
+*.txt
+*.tsv
+gene_list/
+*.txt.gz
+*.gz
+

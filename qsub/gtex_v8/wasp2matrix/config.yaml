@@ -1,0 +1,5 @@
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess'
+wasp: '/gpfs/data/im-lab/nas40t2/yanyul/ASE/GTEx_Analysis_v8_ASE_WASP_counts_by_subject/{indiv}.v8.wasp_corrected.ase_table.tsv.gz'
+gene-list: '../../misc_data/gene_list_phaser_all.txt'  
+sample-list: '../../misc_data/sample_list_phaser_all.txt'
+indiv-list: '../../misc_data/indiv_list_phaser_all.txt'

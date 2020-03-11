@@ -1,0 +1,21 @@
+#PBS -S /bin/bash
+#PBS -l walltime=12:00:00
+#PBS -l nodes=1:ppn=1
+#PBS -l mem=8gb
+#PBS -e logs/pack--${PACKNAME}.err
+#PBS -o logs/pack--${PACKNAME}.out
+
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8 
+conda activate mixqtl
+
+
+for myconf in `echo $CONFIG | tr ':' '\n'`
+do
+    thisconfig=../../qsub/gtex_v8/mixfine/config.$myconf.yaml
+
+    snakemake -s mixfine.snmk --configfile $thisconfig --nolock -p --nt all_pack_up --config gene_list=$GENELIST pack_name=$PACKNAME >> ../../qsub/gtex_v8/mixfine/logs/pack--$PACKNAME-$myconf.log 2>&1
+
+done
