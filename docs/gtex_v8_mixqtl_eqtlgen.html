@@ -390,6 +390,10 @@ auto_cutoff = function(score, nbin = 100) {
   cutoffs = quantile(score, probs = 0:nbin/nbin)
   cutoffs
   # c(min(score)-1, as.numeric(cutoffs), max(score) + 1)
+}
+calc_pval_from_slope = function(slope, slope_se) {
+  z = slope / slope_se
+  exp(pnorm(abs(z), lower.tail = FALSE, log.p = TRUE)) * 2
 }</code></pre>
 <div id="positive-set-eqtlgen-significant" class="section level1">
 <h1><span class="header-section-number">1</span> Positive set (eQTLGen significant)</h1>
@@ -399,6 +403,10 @@ auto_cutoff = function(score, nbin = 100) {
 df = data.frame()
 for(f in names(fnames)) {
   sub = read.table(paste0(datadir, &#39;/&#39;, fnames[[f]][1]), header = T)
+  if(f == &#39;eQTL&#39;) {
+    pval__ = calc_pval_from_slope(sub$slope, sub$slope_se)
+    sub[ ,fnames[[f]][4]] = pval__
+  }
   sub = sub[, fnames[[f]][2:4]]
   colnames(sub) = c(&#39;gene&#39;, &#39;variant&#39;, &#39;pval&#39;)
   sub$method = f
@@ -443,9 +451,11 @@ p = dfplot %&gt;% ggplot() +
   ylab(expression(paste(chi^2, &#39;(mixQTL)&#39;))) +
   theme(legend.position = &#39;bottom&#39;, legend.text = element_text(size = 8)) + 
   coord_equal()
-dfplot %&gt;% summarize(median_eqtl = median(eQTL), median_mixqtl = median(mixQTL)) %&gt;% mutate(ratio = median_mixqtl / median_eqtl)</code></pre>
+p</code></pre>
+<p><img src="gtex_v8_mixqtl_eqtlgen_files/figure-html/chisq-1.png" width="672" /></p>
+<pre class="r"><code>dfplot %&gt;% summarize(median_eqtl = median(eQTL), median_mixqtl = median(mixQTL)) %&gt;% mutate(ratio = median_mixqtl / median_eqtl)</code></pre>
 <pre><code>##   median_eqtl median_mixqtl    ratio
-## 1    2.580397       3.56258 1.380632</code></pre>
+## 1     2.58812       3.56258 1.376512</code></pre>
 <pre class="r"><code>ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.png&#39;), p, height = 4, width = 4)</code></pre>
 </div>
 </div>
@@ -457,6 +467,10 @@ dfplot %&gt;% summarize(median_eqtl = median(eQTL), median_mixqtl = median(mixQT
 df = data.frame()
 for(f in names(fnames)) {
   sub = read.table(paste0(datadir, &#39;/&#39;, fnames[[f]][1]), header = T)
+  if(f == &#39;eQTL&#39;) {
+    pval__ = calc_pval_from_slope(sub$slope, sub$slope_se)
+    sub[ ,fnames[[f]][4]] = pval__
+  }
   sub = sub[, fnames[[f]][2:4]]
   colnames(sub) = c(&#39;gene&#39;, &#39;variant&#39;, &#39;pval&#39;)
   sub$method = f
@@ -533,10 +547,10 @@ ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-pr.png&#
 th2$panel.border = element_rect(colour = th2$axis.line$colour)
 expression_level = read.table(&#39;/Users/yanyul/Desktop/mixqtl-pipeline-results/misc_data/gtex-v8-genes-passed-qc-with-median-trc.txt&#39;, header = T)
 quantile(expression_level$median_trc, probs = 0:10/10)</code></pre>
-<pre><code>##         0%        10%        20%        30%        40%        50%        60%        70% 
-##     181.00     506.30     738.00    1018.00    1357.10    1808.50    2447.40    3456.35 
-##        80%        90%       100% 
-##    5149.10    9985.05 5893511.00</code></pre>
+<pre><code>##         0%        10%        20%        30%        40%        50%        60%        70%        80% 
+##     181.00     506.30     738.00    1018.00    1357.10    1808.50    2447.40    3456.35    5149.10 
+##        90%       100% 
+##    9985.05 5893511.00</code></pre>
 <div id="roc-by-expression-level" class="section level2">
 <h2><span class="header-section-number">4.1</span> ROC by expression level</h2>
 <pre class="r"><code>thresholds = quantile(expression_level$median_trc, probs = c(1/3, 2/3))

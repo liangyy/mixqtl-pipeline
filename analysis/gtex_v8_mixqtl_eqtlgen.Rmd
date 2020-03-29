@@ -20,6 +20,10 @@ auto_cutoff = function(score, nbin = 100) {
   cutoffs
   # c(min(score)-1, as.numeric(cutoffs), max(score) + 1)
 }
+calc_pval_from_slope = function(slope, slope_se) {
+  z = slope / slope_se
+  exp(pnorm(abs(z), lower.tail = FALSE, log.p = TRUE)) * 2
+}
 ```
 
 # Positive set (eQTLGen significant)
@@ -31,6 +35,10 @@ fnames = list(mixQTL = c('Whole_Blood-x-result-mixqtl-IN-eqtlgen_pos.subsample10
 df = data.frame()
 for(f in names(fnames)) {
   sub = read.table(paste0(datadir, '/', fnames[[f]][1]), header = T)
+  if(f == 'eQTL') {
+    pval__ = calc_pval_from_slope(sub$slope, sub$slope_se)
+    sub[ ,fnames[[f]][4]] = pval__
+  }
   sub = sub[, fnames[[f]][2:4]]
   colnames(sub) = c('gene', 'variant', 'pval')
   sub$method = f
@@ -80,6 +88,7 @@ p = dfplot %>% ggplot() +
   ylab(expression(paste(chi^2, '(mixQTL)'))) +
   theme(legend.position = 'bottom', legend.text = element_text(size = 8)) + 
   coord_equal()
+p
 dfplot %>% summarize(median_eqtl = median(eQTL), median_mixqtl = median(mixQTL)) %>% mutate(ratio = median_mixqtl / median_eqtl)
 ggsave(paste0('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.png'), p, height = 4, width = 4)
 ```
@@ -94,6 +103,10 @@ fnames = list(mixQTL = c('Whole_Blood-x-result-mixqtl-IN-eqtlgen_neg.subsample10
 df = data.frame()
 for(f in names(fnames)) {
   sub = read.table(paste0(datadir, '/', fnames[[f]][1]), header = T)
+  if(f == 'eQTL') {
+    pval__ = calc_pval_from_slope(sub$slope, sub$slope_se)
+    sub[ ,fnames[[f]][4]] = pval__
+  }
   sub = sub[, fnames[[f]][2:4]]
   colnames(sub) = c('gene', 'variant', 'pval')
   sub$method = f
