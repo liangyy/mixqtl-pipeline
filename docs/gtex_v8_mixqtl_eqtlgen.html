@@ -377,9 +377,10 @@ div.tocify {
 <pre class="r"><code>rm(list = ls())
 library(SilverStandardPerformance)  # for ROC/PR plotting
 library(ggplot2)
-theme_set(theme_bw(base_size = 12))
+theme_set(theme_bw(base_size = 15))
 library(dplyr)
 library(reshape2)
+library(pander)
 options(stringsAsFactors = FALSE)
 source(&#39;../code/rlib_analysis.R&#39;)
 datadir = &#39;/Users/yanyul/Desktop/mixqtl-pipeline-results/postprocess-mixqtl&#39;
@@ -415,14 +416,45 @@ for(f in names(fnames)) {
 }
 df_clean = df %&gt;% group_by(gene, variant) %&gt;% summarize(nobs = n()) %&gt;% filter(nobs == 4) %&gt;% ungroup()
 df = df %&gt;% filter(paste(gene, variant) %in% paste(df_clean$gene, df_clean$variant))
-# df$pval[df$method == &#39;metaQTL&#39;] = df$pval[df$method == &#39;metaQTL&#39;]</code></pre>
+# df$pval[df$method == &#39;metaQTL&#39;] = df$pval[df$method == &#39;metaQTL&#39;]
+df %&gt;% group_by(method) %&gt;% summarize(nobs = n()) %&gt;% pander</code></pre>
+<table style="width:25%;">
+<colgroup>
+<col width="12%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">method</th>
+<th align="center">nobs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">ascQTL</td>
+<td align="center">96660</td>
+</tr>
+<tr class="even">
+<td align="center">eQTL</td>
+<td align="center">96660</td>
+</tr>
+<tr class="odd">
+<td align="center">mixQTL</td>
+<td align="center">96660</td>
+</tr>
+<tr class="even">
+<td align="center">trcQTL</td>
+<td align="center">96660</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="qq-plot" class="section level2">
 <h2><span class="header-section-number">1.2</span> QQ-plot</h2>
 <pre class="r"><code>df$pval[is.na(df$pval)] = runif(sum(is.na(df$pval)))
 p = my_qqplot(df$pval, df$method) 
 p = p + geom_abline(intercept = 0, slope = 1)
-p = p + scale_color_manual(values = cbPalette) + theme(legend.position = c(0.7, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+p = p + scale_color_manual(values = cbPalette) + theme(legend.position = c(0.7, 0.5), legend.title = element_blank(), legend.text = element_text(size = 12)) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
 p$layers[[2]]$aes_params$size = 0.5
 p</code></pre>
 <p><img src="gtex_v8_mixqtl_eqtlgen_files/figure-html/qq-pos-1.png" width="672" /></p>
@@ -436,7 +468,7 @@ for(m in c(&#39;ascQTL&#39;, &#39;trcQTL&#39;, &#39;mixQTL&#39;)) {
   p = my_qqplot(sub$pval, sub$method) 
   p$layers &lt;- c(geom_abline(slope = 1, intercept = 0, color = &#39;lightgray&#39;), p$layers)
   p = p + scale_color_manual(values = cbPalette)
-  p = p + theme(legend.position = c(0.7, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+  p = p + theme(legend.position = c(0.7, 0.5), legend.title = element_blank(), legend.text = element_text(size = 12)) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
   ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-&#39;, m, &#39;.png&#39;), p, height = 4, width = 4)
 }</code></pre>
 </div>
@@ -445,17 +477,55 @@ for(m in c(&#39;ascQTL&#39;, &#39;trcQTL&#39;, &#39;mixQTL&#39;)) {
 <pre class="r"><code>dfplot = df %&gt;% mutate(chisq = qchisq(pval, df = 1, lower.tail = F)) %&gt;% select(-pval) %&gt;% filter(method %in% c(&#39;mixQTL&#39;, &#39;eQTL&#39;)) %&gt;% dcast(gene + variant ~ method, value.var = &#39;chisq&#39;)
 p = dfplot %&gt;% ggplot() + 
   geom_point(aes(x = eQTL, y = mixQTL), alpha = 0.5) +
-  geom_point(data = dfplot %&gt;% filter(gene %in% c(&#39;ENSG00000115607&#39;, &#39;ENSG00000145730&#39;)), aes(x = eQTL, y = mixQTL, color = gene)) + 
+  geom_point(data = dfplot %&gt;% filter(gene %in% c(&#39;ENSG00000115607&#39;, &#39;ENSG00000213462&#39;)), aes(x = eQTL, y = mixQTL, color = gene)) + 
   th +
   xlab(expression(paste(chi^2, &#39;(eQTL)&#39;)))+
   ylab(expression(paste(chi^2, &#39;(mixQTL)&#39;))) +
-  theme(legend.position = &#39;bottom&#39;, legend.text = element_text(size = 8)) + 
-  coord_equal()
+  theme(legend.position = c(0.75, 0.15), legend.text = element_text(size = 10), legend.title = element_blank()) + 
+  coord_equal() +
+  geom_abline(slope = 1, intercept = 0, color = &#39;lightgreen&#39;, linetype = 2, size = 1)
 p</code></pre>
 <p><img src="gtex_v8_mixqtl_eqtlgen_files/figure-html/chisq-1.png" width="672" /></p>
-<pre class="r"><code>dfplot %&gt;% summarize(median_eqtl = median(eQTL), median_mixqtl = median(mixQTL)) %&gt;% mutate(ratio = median_mixqtl / median_eqtl)</code></pre>
-<pre><code>##   median_eqtl median_mixqtl    ratio
-## 1     2.58812       3.56258 1.376512</code></pre>
+<pre class="r"><code>dfplot %&gt;% summarize(median_eqtl = median(eQTL), median_mixqtl = median(mixQTL)) %&gt;% mutate(ratio = median_mixqtl / median_eqtl) %&gt;% pander(&#39;ratio of median&#39;)</code></pre>
+<table style="width:53%;">
+<caption>ratio of median</caption>
+<colgroup>
+<col width="19%" />
+<col width="22%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">median_eqtl</th>
+<th align="center">median_mixqtl</th>
+<th align="center">ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">2.588</td>
+<td align="center">3.563</td>
+<td align="center">1.377</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>dfplot %&gt;% mutate(ratio = mixQTL / eQTL) %&gt;% summarize(median_ratio = median(ratio, na.rm = T)) %&gt;% pander(&#39;median of ratio&#39;)</code></pre>
+<table style="width:21%;">
+<caption>median of ratio</caption>
+<colgroup>
+<col width="20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">median_ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1.289</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.png&#39;), p, height = 4, width = 4)</code></pre>
 </div>
 </div>
@@ -479,14 +549,45 @@ for(f in names(fnames)) {
 }
 df_clean = df %&gt;% group_by(gene, variant) %&gt;% summarize(nobs = n()) %&gt;% filter(nobs == 4) %&gt;% ungroup()
 df = df %&gt;% filter(paste(gene, variant) %in% paste(df_clean$gene, df_clean$variant))
-# df$pval[df$method == &#39;metaQTL&#39;] = df$pval[df$method == &#39;metaQTL&#39;]</code></pre>
+# df$pval[df$method == &#39;metaQTL&#39;] = df$pval[df$method == &#39;metaQTL&#39;]
+df %&gt;% group_by(method) %&gt;% summarize(nobs = n()) %&gt;% pander</code></pre>
+<table style="width:25%;">
+<colgroup>
+<col width="12%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">method</th>
+<th align="center">nobs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">ascQTL</td>
+<td align="center">78691</td>
+</tr>
+<tr class="even">
+<td align="center">eQTL</td>
+<td align="center">78691</td>
+</tr>
+<tr class="odd">
+<td align="center">mixQTL</td>
+<td align="center">78691</td>
+</tr>
+<tr class="even">
+<td align="center">trcQTL</td>
+<td align="center">78691</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="qq-plot-1" class="section level2">
 <h2><span class="header-section-number">2.2</span> QQ-plot</h2>
 <pre class="r"><code>df$pval[is.na(df$pval)] = runif(sum(is.na(df$pval)))
 p = my_qqplot(df$pval, df$method) 
 p = p + geom_abline(intercept = 0, slope = 1)
-p = p + scale_color_manual(values = cbPalette) + theme(legend.position = c(0.3, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+p = p + scale_color_manual(values = cbPalette) + theme(legend.position = c(0.3, 0.5), legend.title = element_blank(), legend.text = element_text(size = 12)) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
 p$layers[[2]]$aes_params$size = 0.5
 p</code></pre>
 <p><img src="gtex_v8_mixqtl_eqtlgen_files/figure-html/qq-neg-1.png" width="672" /></p>
@@ -500,7 +601,7 @@ for(m in c(&#39;ascQTL&#39;, &#39;trcQTL&#39;, &#39;mixQTL&#39;)) {
   p = my_qqplot(sub$pval, sub$method) 
   p$layers &lt;- c(geom_abline(slope = 1, intercept = 0, color = &#39;lightgray&#39;), p$layers)
   p = p + scale_color_manual(values = cbPalette)
-  p = p + theme(legend.position = c(0.3, 0.5), legend.title = element_blank()) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
+  p = p + theme(legend.position = c(0.3, 0.5), legend.title = element_blank(), legend.text = element_text(size = 12)) + th + theme(aspect.ratio = 1) + ylab(expression(-log[10](p[observed]))) + xlab(expression(-log[10](p[expected])))
   ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-negative-&#39;, m, &#39;.png&#39;), p, height = 4, width = 4)
 }</code></pre>
 </div>
@@ -520,7 +621,7 @@ cur_eqtl = gen_roc_curve(true_genes = true_eqtls, gene = eqtl$eqtl, score = -log
 e2 = rbind(cur_mix %&gt;% mutate(method = &#39;mixQTL&#39;), cur_eqtl %&gt;% mutate(method = &#39;eQTL&#39;))
 p = e2 %&gt;% ggplot() + geom_abline(intercept = 0, slope = 1, color = &#39;lightgray&#39;) + geom_path(aes(x = fpr, y = tpr, color = method), size = 2, alpha = .8) + coord_equal()
 p = p + th 
-p = p + xlab(&#39;False positive rate&#39;) + ylab(&#39;True positive rate&#39;) + theme(legend.position = c(0.8, 0.2), legend.title = element_blank()) + scale_color_manual(values = cbPalette) 
+p = p + xlab(&#39;False positive rate&#39;) + ylab(&#39;True positive rate&#39;) + theme(legend.position = c(0.8, 0.2), legend.title = element_blank(), legend.text = element_text(size = 12)) + scale_color_manual(values = cbPalette) 
 p</code></pre>
 <p><img src="gtex_v8_mixqtl_eqtlgen_files/figure-html/roc-1.png" width="672" /></p>
 </div>
@@ -531,7 +632,7 @@ cur_eqtl = gen_fdr_power_curve(true_genes = true_eqtls, gene = eqtl$eqtl, score 
 e = rbind(cur_mix %&gt;% mutate(method = &#39;mixQTL&#39;) %&gt;% filter(recall != 0) , cur_eqtl %&gt;% mutate(method = &#39;eQTL&#39;) %&gt;% filter(recall != 0))
 p2 = e %&gt;% ggplot() + geom_path(aes(x = recall, y = precision, color = method), size = 2, alpha = .8) + theme(aspect.ratio = 1)
 p2 = p2 + th 
-p2 = p2 + xlab(&#39;Recall&#39;) + ylab(&#39;Precision&#39;) + theme(legend.position = c(0.2, 0.2), legend.title = element_blank()) + scale_color_manual(values = cbPalette) 
+p2 = p2 + xlab(&#39;Recall&#39;) + ylab(&#39;Precision&#39;) + theme(legend.position = c(0.2, 0.2), legend.title = element_blank(), legend.text = element_text(size = 12)) + scale_color_manual(values = cbPalette) 
 p2</code></pre>
 <p><img src="gtex_v8_mixqtl_eqtlgen_files/figure-html/pr-1.png" width="672" /></p>
 </div>
@@ -574,7 +675,7 @@ roc_c = do.call(rbind, roc_c)
 roc_c$expression_level = factor(roc_c$expression_level, levels = c(&#39;high&#39;, &#39;middle&#39;, &#39;low&#39;))
 p = roc_c %&gt;% ggplot() + geom_abline(intercept = 0, slope = 1, color = &#39;lightgray&#39;) + geom_path(aes(x = fpr, y = tpr, color = method), size = 2, alpha = .8) + facet_wrap(~expression_level) + coord_equal() # + geom_point(aes(x = fpr, y = tpr))
 p = p + th2 
-p = p + xlab(&#39;False positive rate&#39;) + ylab(&#39;True positive rate&#39;) + scale_color_manual(values = cbPalette) + theme(legend.position = &#39;bottom&#39;, legend.title = element_blank())
+p = p + xlab(&#39;False positive rate&#39;) + ylab(&#39;True positive rate&#39;) + scale_color_manual(values = cbPalette) + theme(legend.position = c(0.57, 0.2), legend.title = element_blank(), legend.text = element_text(size = 12))
 p</code></pre>
 <p><img src="gtex_v8_mixqtl_eqtlgen_files/figure-html/roc-by-expr-1.png" width="672" /></p>
 </div>
@@ -596,14 +697,14 @@ pr_c = do.call(rbind, pr_c)
 pr_c$expression_level = factor(pr_c$expression_level, levels = c(&#39;high&#39;, &#39;middle&#39;, &#39;low&#39;))
 p2 = pr_c %&gt;% ggplot()  + geom_path(aes(x = recall, y = precision, color = method), size = 2, alpha = .8) + theme(aspect.ratio = 1) + facet_wrap(~expression_level)
 p2 = p2 + th2 
-p2 = p2 + xlab(&#39;Recall&#39;) + ylab(&#39;Precision&#39;) + theme(legend.position = &#39;bottom&#39;, legend.title = element_blank()) + scale_color_manual(values = cbPalette) 
+p2 = p2 + xlab(&#39;Recall&#39;) + ylab(&#39;Precision&#39;) + theme(legend.position = c(0.45, 0.2), legend.title = element_blank(), legend.text = element_text(size = 12)) + scale_color_manual(values = cbPalette) 
 p2</code></pre>
 <p><img src="gtex_v8_mixqtl_eqtlgen_files/figure-html/pr-by-expr-1.png" width="672" /></p>
 </div>
 <div id="save-rocpr-curves-by-expression-level" class="section level2">
 <h2><span class="header-section-number">4.3</span> Save ROC/PR curves by expression level</h2>
-<pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-roc-stratified.png&#39;, p, width = 10, height = 5)
-ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-pr-stratified.png&#39;, p2, width = 10, height = 5)</code></pre>
+<pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-roc-stratified.png&#39;, p, width = 10, height = 4)
+ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-pr-stratified.png&#39;, p2, width = 10, height = 4)</code></pre>
 </div>
 </div>
 
