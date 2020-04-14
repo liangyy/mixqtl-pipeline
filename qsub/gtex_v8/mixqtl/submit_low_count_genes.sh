@@ -28,6 +28,6 @@ do
       echo $i
     fi
   fi
-  qsub -v BATCH=$i -N $1--$i qsub_generic.qsub
+  qsub -v BATCH=$i -N $1--$i qsub_generic_low_count_genes.qsub
   
 done

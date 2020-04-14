@@ -1,0 +1,20 @@
+#PBS -S /bin/bash
+#PBS -l walltime=24:00:00
+#PBS -l nodes=1:ppn=1
+#PBS -l mem=8gb
+#PBS -e logs/${BATCH}.err
+#PBS -o logs/${BATCH}.out
+
+
+source ~/.bash_profile
+source ~/.bashrc
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8
+conda activate mixqtl
+
+
+for i in `cat ../../qsub/gtex_v8/mixqtl/gene_list/$BATCH`;
+do
+  
+  snakemake -s mixqtl.snmk --configfile ../../qsub/gtex_v8/mixqtl/config_low_count_genes.yaml -p --nolock --config method=mixqtl gene=$i > ../../qsub/gtex_v8/mixqtl/logs/${BATCH}.log 2>&1
+  
+done
