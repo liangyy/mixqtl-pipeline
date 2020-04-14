@@ -1,16 +1,24 @@
+library(data.table)
+options(datatable.fread.datatable = F)
 df_mix = read.table('~/Desktop/mixqtl-pipeline-results/postprocess-mixqtl/Whole_Blood-x-result-mixqtl-IN-cleaned-Whole_Blood.v8.egenes.txt.gz', header = T)
-df_afc = read.delim2('~/Downloads/GTEx_Analysis_v8_eQTL/Whole_Blood.v8.egenes.txt.gz', header = T)
-df_afc$log2_aFC = as.numeric(df_afc$log2_aFC)
-df_afc$pval_nominal = as.numeric(df_afc$pval_nominal)
-df_afc$log2_aFC_lower = as.numeric(df_afc$log2_aFC_lower)
-df_afc$log2_aFC_upper = as.numeric(df_afc$log2_aFC_upper)
-df_afc$slope = as.numeric(df_afc$slope)
+df_afc = fread('zcat < ~/Downloads/GTEx_Analysis_v8_eQTL/Whole_Blood.v8.egenes.txt.gz', header = T)
+df_afc_impute = fread('~/Downloads/Whole_Blood_imputed.aFC.txt', header = T)
+# df_afc$log2_aFC = as.numeric(df_afc$log2_aFC)
+# df_afc$pval_nominal = as.numeric(df_afc$pval_nominal)
+# df_afc$log2_aFC_lower = as.numeric(df_afc$log2_aFC_lower)
+# df_afc$log2_aFC_upper = as.numeric(df_afc$log2_aFC_upper)
+# df_afc$slope = as.numeric(df_afc$slope)
+afc_merge = inner_join(df_afc, df_afc_impute, by = c('gene_id' = 'pid', 'variant_id' = 'sid'))
+plot(afc_merge$log2_aFC.x, afc_merge$log2_aFC.y)
 head(df_afc)
 library(dplyr)
 library(ggplot2)
 library(patchwork)
 source('../code/rlib_analysis.R')
 merge = inner_join(df_mix %>% select(bhat.trc, bhat.asc, bhat.meta, se.meta, pval.meta, gene, variant_id), df_afc %>% mutate(gene = trim_dot(gene_id)), by = c('gene', 'variant_id'))
+merge = inner_join(merge, df_afc_impute %>% select(pid, sid, log2_aFC, log2_aFC_lower, log2_aFC_upper) %>% mutate(gene = trim_dot(pid)), by = c('gene', 'variant_id' = 'sid'), suffix = c('', '_imputed'))
+plot(merge$log2_aFC, merge$log2_aFC_imputed)
+
 
 high_quality = function(m, l, u) {
   (u -  l) < 1 & l != -6.643856 & u != 6.643856
@@ -58,6 +66,17 @@ plot(-log(merge$pval.meta), -log(merge$pval_nominal))
 merge %>% mutate(high_quality = high_quality(log2_aFC, log2_aFC_lower, log2_aFC_upper)) %>% ggplot() + 
   geom_point(aes(x = log2_aFC, y = bhat.trc / log(2)), alpha = .2) + 
   geom_abline(slope = 1, intercept = 0, color = 'red') + facet_wrap(~high_quality, labeller = label_both) 
+
+p1 = merge %>% mutate(high_quality = high_quality(log2_aFC, log2_aFC_lower, log2_aFC_upper)) %>% ggplot() + 
+  geom_point(aes(x = log2_aFC_imputed, y = bhat.trc / log(2)), alpha = .2) + 
+  geom_abline(slope = 1, intercept = 0, color = 'red') # + facet_wrap(~high_quality, labeller = label_both) 
+p2 = merge %>% mutate(high_quality = high_quality(log2_aFC, log2_aFC_lower, log2_aFC_upper)) %>% ggplot() + 
+  geom_point(aes(x = log2_aFC, y = bhat.trc / log(2)), alpha = .2) + 
+  geom_abline(slope = 1, intercept = 0, color = 'red')
+p3 = merge %>% mutate(high_quality = high_quality(log2_aFC, log2_aFC_lower, log2_aFC_upper)) %>% ggplot() + 
+  geom_point(aes(x = log2_aFC, y = log2_aFC_imputed), alpha = .2) + 
+  geom_abline(slope = 1, intercept = 0, color = 'red')
+p1 + p2 + p3
 
 # gene_annot = read.table('https://bitbucket.org/yanyul/rotation-at-imlab/raw/7c966369cf9ac1f2563409b09625a2b3cf2d592e/data/annotations_gencode_v26.tsv', header = T)
 # merge = merge %>% left_join(gene_annot, by = c('gene' = 'gene_id'))
