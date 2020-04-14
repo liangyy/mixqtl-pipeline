@@ -1,0 +1,12 @@
+target_name: 'gtexv8_pos.pos-with-low_count_genes'
+from_name: 'Whole_Blood-x-result-mixqtl'
+
+target_list:
+  path: '/gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/misc_data/{target_name}.txt.gz'
+  varcol: 15
+  genecol: 8
+from_list:
+  path: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-mixqtl/{from_name}.txt.gz'
+  varcol: 16 
+  genecol: 17
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-mixqtl'
