@@ -1,0 +1,5 @@
+tissue: 'Whole_Blood'
+name: 'result-mixqtl_low_count'
+gene_list: '../../misc_data/gtex-v8-genes-low-expr_gene_list.txt'
+gene_file: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/mixqtl-low_count_genes/{{tissue}}/{{name}}.{gene}.txt.gz'
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-mixqtl'
