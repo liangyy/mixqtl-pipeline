@@ -1,5 +1,5 @@
 target_name: 'gtexv8_pos.pos-with-low_count_genes'
-from_name: 'Whole_Blood-x-result-mixqtl'
+from_name: 'Whole_Blood-x-result-mixqtl_low_count'
 
 target_list:
   path: '/gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/misc_data/{target_name}.txt.gz'

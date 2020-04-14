@@ -1,0 +1,5 @@
+# qsub -v TYPE=pos run_generic.qsub
+# qsub -v TYPE=neg run_generic.qsub
+# qsub -v TYPE=gtex_pos run_generic.qsub
+# qsub -v TYPE=gtex_neg run_generic.qsub
+qsub -v TYPE=low_count_genes run_generic.qsub
