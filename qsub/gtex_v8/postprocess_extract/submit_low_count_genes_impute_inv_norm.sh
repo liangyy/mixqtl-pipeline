@@ -3,7 +3,7 @@
 # qsub -v TYPE=gtex_pos run_generic.qsub
 # qsub -v TYPE=gtex_neg run_generic.qsub
 # qsub -v TYPE=low_count_genes run_generic.qsub
-qsub -v TYPE=pos_low_count run_generic.qsub
-qsub -v TYPE=neg_low_count run_generic.qsub
+qsub -v TYPE=pos_low_count_impute_inv_norm run_generic.qsub
+qsub -v TYPE=neg_low_count_impute_inv_norm run_generic.qsub
 # qsub -v TYPE=gtex_pos_low_count run_generic.qsub
 # qsub -v TYPE=gtex_neg_low_count run_generic.qsub

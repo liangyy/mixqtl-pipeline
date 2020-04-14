@@ -1,0 +1,12 @@
+target_name: 'eqtlgen_pos_low_count.subsample100000-with-gene-low-expr'
+from_name: 'Whole_Blood.allpairs'
+
+target_list:
+  path: '/gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/misc_data/{target_name}.txt.gz'
+  varcol: 15
+  genecol: 8
+from_list:
+  path: '/gpfs/data/gtex-group/v8/59349/gtex/exchange/GTEx_phs000424/exchange/analysis_releases/GTEx_Analysis_2017-06-05_v8/eqtl/GTEx_Analysis_v8_eQTL_all_associations/{from_name}.txt.gz'
+  varcol: 2
+  genecol: 1
+outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/postprocess-mixqtl'

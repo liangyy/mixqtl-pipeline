@@ -16,5 +16,5 @@ opt <- parse_args(opt_parser)
 
 set.seed(1)
 
-idx = sample(1 : opt$number_total, size = opt$number_sub, replace = F)
+idx = sample(1 : min(opt$number_sub, opt$number_total), size = opt$number_sub, replace = F)
 write.table(idx, opt$output, row = F, col = F, quo = F, sep = '\t')

@@ -51,6 +51,20 @@ if(nvar == 0) {
 }
 
 
+# imputation and inverse normalization happen here
+impute_inv_norm_and_back_to_count = function(trc, lib) {
+  # impute 
+  trc[trc == 0] = 1
+  # inv norm
+  eff_lib = lib / mean(lib)
+  x = log(trc / lib)
+  x_norm = qnorm(rank(x) / (length(x) + 1))
+  trc_converted = exp(x_norm) * eff_lib
+  return(trc_converted)
+}
+data_collector$trc_g = impute_inv_norm_and_back_to_count(data_collector$trc_g, data_collector$nlib)
+# END
+
 if(!is.null(opt$cov)) {
   covariates = fread(opt$cov, header = T)
   covariate_names = str_replace(colnames(covariates), '\\.', '-')

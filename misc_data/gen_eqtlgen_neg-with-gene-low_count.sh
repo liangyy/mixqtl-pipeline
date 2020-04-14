@@ -18,5 +18,5 @@ nrow=`zcat $prefix.pval_gt_0.5-with-gene-low-expr.txt.gz | wc -l`
 
 Rscript subsample_idx.R --number_total $nrow --number_sub $size --output $prefix.idx.subsample$size-with-gene-low-expr.txt
 
-awk 'FNR==NR{a[$1]=1;next}{ if(FNR in a) print $0}' $prefix.idx.subsample$size-with-gene-expr_gene_list.txt <(zcat $prefix.pval_gt_0.5-with-gene-low-expr.txt.gz) | gzip > $prefix.subsample$size-with-gene-low-expr.txt.gz
+awk 'FNR==NR{a[$1]=1;next}{ if(FNR in a) print $0}' $prefix.idx.subsample$size-with-gene-low-expr.txt <(zcat $prefix.pval_gt_0.5-with-gene-low-expr.txt.gz) | gzip > $prefix.subsample$size-with-gene-low-expr.txt.gz
 

@@ -51,6 +51,10 @@ if(nvar == 0) {
 }
 
 
+# impute happens here
+data_collector$trc_g[data_collector$trc_g == 0] = 1
+# END
+
 if(!is.null(opt$cov)) {
   covariates = fread(opt$cov, header = T)
   covariate_names = str_replace(colnames(covariates), '\\.', '-')
