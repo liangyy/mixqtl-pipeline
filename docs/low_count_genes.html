@@ -11,7 +11,7 @@
 
 
 
-<title>Analysis gallary</title>
+<title>Gene with low counts (comparing eQTL analysis with trcQTL)</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -369,26 +369,131 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Analysis gallary</h1>
+<h1 class="title toc-ignore">Gene with low counts (comparing eQTL analysis with trcQTL)</h1>
 
 </div>
 
 
-<ul>
-<li>mixQTL runs on simulated data <a href="sim_mixqtl.html">link</a></li>
-<li>mixFine runs on simulated data <a href="sim_mixfine.html">link</a></li>
-<li>mixPred runs on simulated data <a href="sim_mixpred.html">link</a></li>
-<li>mixQTL on GTEx V8 (four genes permutation plot) <a href="gtex_v8_mixqtl_permutation.html">link</a></li>
-<li>mixQTL on GTEx V8 (eQTLGen plots) <a href="gtex_v8_mixqtl_eqtlgen.html">link</a></li>
-<li>mixFine on GTEx V8 (experimental validation plot) <a href="gtex_v8_finemap_experimental.html">link</a></li>
-<li>mixFine on GTEx V8 (subsampling analysis) <a href="gtex_v8_finemap_subsample.html">link</a></li>
-<li>mixPred on GTEx V8 (Prediction performance evaluated by cross-validation) <a href="gtex_v8_prediction_cv.html">link</a></li>
-</ul>
-<p>Analysis on the side:</p>
-<ul>
-<li>Compare aFC estimate from GTEx v8 to proposed estimates <a href="aFC_vs_mixQTL.html">link</a></li>
-<li>Compare eQTL to trcQTL on low-count genes <a href="low_count_genes.html">link</a></li>
-</ul>
+<pre class="r"><code>rm(list = ls())
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(SilverStandardPerformance)
+library(patchwork)
+options(datatable.fread.datatable = FALSE)
+source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/3ca651cfa53ffccb8422f432561138a46e93710f/my_ggplot_theme.R&#39;)
+source(&#39;https://gist.githubusercontent.com/liangyy/e580a36154586148cca7fd4cd973f502/raw/bad4364b1700662c7086fcdea191e42f530d0e2e/zval2pval.R&#39;)
+source(&#39;../code/rlib_analysis.R&#39;)
+cbPalette &lt;- c(&#39;ascQTL&#39; = &quot;#999999&quot;, &#39;mixQTL&#39; = &quot;#E69F00&quot;, &#39;trcQTL&#39; = &quot;#56B4E9&quot;, &#39;eQTL&#39; = &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
+datadir = &#39;/Users/yanyul/Desktop/mixqtl-pipeline-results/postprocess-mixqtl&#39;</code></pre>
+<div id="about" class="section level1">
+<h1><span class="header-section-number">1</span> About</h1>
+<p>Here we meant to look at the power of eQTL and trcQTL on genes with low total count. To do so, we limit to the extreme cases where the gene has <span class="math inline">\(\le\)</span> 50 reads in all 670 samples. (See processing script <a href="https://github.com/liangyy/mixqtl-pipeline/blob/dev/misc_data/gen_gene_low_count.R">here</a>).</p>
+<p>In total, we end up with 912 genes. To compare the power, we rely on eQTLGen as silver standard. We randomly selected 100,000 variant/gene pairs from the pairs with p-value &gt; 0.5 in eQTLGen (as negative instances). And similary, we selected 100,000 variant/gene pairs from the pairs with FDR &lt; 0.05 in eQTLGen (as positive instances). The processing scripts are <a href="https://github.com/liangyy/mixqtl-pipeline/blob/dev/misc_data/gen_eqtlgen_neg-with-gene-low_count.sh">here (negative ones)</a> and <a href="https://github.com/liangyy/mixqtl-pipeline/blob/dev/misc_data/gen_eqtlgen_pos-with-gene-low_count.sh">here (positive ones)</a>.</p>
+<p>Some of the variant/gene pairs were not included in the GTEx cis-eQTL analysis (due to different definition on cis-window?). So, the final number of variant/gene pairs that go into analysis is less than 100,000.</p>
+<p>To make a full comparison, we impute the zeros in the data with ones in the trcQTL calculation. And <code>trc_cutoff = 1</code> is used in <code>mixqtl</code> call which essentially corresponds to use all data. The script used is <a href="https://github.com/liangyy/mixqtl-pipeline/blob/dev/code/gtex_v8_mixqtl_low_count_impute.R">here</a>.</p>
+</div>
+<div id="load-data" class="section level1">
+<h1><span class="header-section-number">2</span> Load data</h1>
+<pre class="r"><code>ll = data.frame(
+  prefix = c(&#39;Whole_Blood.allpairs&#39;, &#39;Whole_Blood-x-result-mixqtl_low_count_impute&#39;),
+  method = c(&#39;eQTL&#39;, &#39;trcQTL&#39;),
+  bcol = c(8, 4),  # c(8, 13)
+  scol = c(9, 5),  # c(9, 14) 
+  vcol = c(2, 16),
+  gcol = c(1, 17)
+)
+out = list()
+for(p in 1 : nrow(ll)) {
+  pre = ll$prefix[p]
+  b = ll$bcol[p]
+  s = ll$scol[p]
+  g = ll$gcol[p]
+  v = ll$vcol[p]
+  tag = ll$method[p]
+  for(i in c(&#39;pos&#39;, &#39;neg&#39;)) {
+    tmp_ = fread(cmd = paste0(&#39;zcat &lt; &#39;, datadir, &#39;/&#39;, pre, &#39;-IN-eqtlgen_&#39;, i, &#39;_low_count.subsample100000-with-gene-low-expr.txt.gz&#39;), header = TRUE)[, c(b, s, g, v)] %&gt;% mutate(method = tag, type = i) 
+    colnames(tmp_)[1:4] = c(&#39;bhat&#39;, &#39;se&#39;, &#39;gene&#39;, &#39;variant&#39;)
+    tmp_$gene = trim_dot(tmp_$gene)
+    out[[length(out) + 1]] = tmp_
+  }
+}
+out = do.call(rbind, out)
+pairs_with_two_obs = out %&gt;% group_by(gene, variant) %&gt;% summarize(n = n()) %&gt;% filter(n == 2) %&gt;% select(gene, variant)
+out = out %&gt;% filter(paste(gene, variant) %in% paste(pairs_with_two_obs$gene, pairs_with_two_obs$variant))
+out = out %&gt;% mutate(stat = bhat / se)
+out %&gt;% group_by(method, type) %&gt;% summarize(median(stat^2))</code></pre>
+<pre><code>## # A tibble: 4 x 3
+## # Groups:   method [2]
+##   method type  `median(stat^2)`
+##   &lt;fct&gt;  &lt;chr&gt;            &lt;dbl&gt;
+## 1 eQTL   neg              0.457
+## 2 eQTL   pos              3.23 
+## 3 trcQTL neg              0.481
+## 4 trcQTL pos              3.30</code></pre>
+</div>
+<div id="plot-rocpr-curves" class="section level1">
+<h1><span class="header-section-number">3</span> Plot ROC/PR curves</h1>
+<pre class="r"><code>curve = list()
+curve2 = list()
+for(m in unique(out$method)) {
+  df = out %&gt;% filter(method == m)
+  trues = df %&gt;% filter(type == &#39;pos&#39;) %&gt;% mutate(pair = paste(gene, variant)) %&gt;% pull(pair)
+  alls = df %&gt;% mutate(pair = paste(gene, variant)) %&gt;% pull(pair)
+  scores = df %&gt;% mutate(score = stat ^ 2) %&gt;% pull(score)
+  o = gen_roc_curve(
+    trues,
+    alls, 
+    scores,
+    cutoff = quantile(scores, probs = 0:100 / 100)
+  ) %&gt;% mutate(method = m)
+  o2 = gen_fdr_power_curve(
+    trues,
+    alls, 
+    scores,
+    cutoff = quantile(scores, probs = 0:100 / 100)
+  ) %&gt;% mutate(method = m)
+  curve[[length(curve) + 1]] = o
+  curve2[[length(curve2) + 1]] = o2
+   # %&gt;% ggplot() + geom_path(aes(x = fpr, y = tpr))
+}
+p1 = do.call(rbind, curve) %&gt;% ggplot() + 
+  geom_path(aes(x = fpr, y = tpr, color = method), size = 2, alpha = 0.5) + 
+  scale_color_manual(values = cbPalette) + 
+  geom_abline(intercept = 0, slope = 1, color = &#39;lightgray&#39;) +
+  th + xlab(&#39;False positive rate&#39;) + ylab(&#39;True positive rate&#39;) + 
+  theme(legend.position = c(0.8, 0.2), legend.title = element_blank(), legend.text = element_text(size = 18)) +
+  coord_equal()
+p2 = do.call(rbind, curve2) %&gt;% filter(precision != 0 &amp; recall != 0) %&gt;% ggplot() + 
+  geom_path(aes(x = recall, y = precision, color = method), size = 2, alpha = 0.5) + 
+  scale_color_manual(values = cbPalette) + theme(aspect.ratio = 1) +
+  xlab(&#39;Recall&#39;) + ylab(&#39;Precision&#39;) + 
+  theme(legend.position = c(0.3, 0.2), legend.title = element_blank(), legend.text = element_text(size = 18)) +
+  th
+p1</code></pre>
+<p><img src="low_count_genes_files/figure-html/roc-pr-1.png" width="384" /></p>
+<pre class="r"><code>p2</code></pre>
+<p><img src="low_count_genes_files/figure-html/roc-pr-2.png" width="384" /></p>
+<pre class="r"><code>ggsave(&#39;../output/low_count_genes_ROC.png&#39;, p1, width = 4, height = 4)
+ggsave(&#39;../output/low_count_genes_PR.png&#39;, p2, width = 4, height = 4)</code></pre>
+<!-- ```{r qq} -->
+<!-- out_neg = out %>% filter(type == 'neg') %>% mutate(pval = zval2pval(stat)) -->
+<!-- my_qqplot(out_neg$pval, out_neg$method)  -->
+<!-- ``` -->
+</div>
+<div id="compare-test-statistic" class="section level1">
+<h1><span class="header-section-number">4</span> Compare test statistic</h1>
+<pre class="r"><code>recode = function(x) {
+  x = as.character(x)
+  o = rep(&#39;negative&#39;, length(x))
+  o[x == &#39;pos&#39;] = &#39;positive&#39;
+  return(o)
+}
+p = out %&gt;% reshape2::dcast(gene + variant + type ~ method, value.var = &#39;stat&#39;) %&gt;% mutate(type = recode(type)) %&gt;% ggplot() + geom_point(aes(x = eQTL, y = trcQTL), alpha = 0.2) + facet_wrap(~type) + th2 + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + xlab(&#39;eQTL test statistic&#39;) + ylab(&#39;trcQTL test statistic&#39;) + coord_equal()
+p</code></pre>
+<p><img src="low_count_genes_files/figure-html/test-stat-1.png" width="480" /></p>
+<pre class="r"><code>ggsave(&#39;../output/low_count_genes_test_stat.png&#39;, p, height = 4, width = 8)</code></pre>
+</div>
 
 
 

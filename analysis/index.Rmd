@@ -10,3 +10,8 @@ title: "Analysis gallary"
 * mixFine on GTEx V8 (experimental validation plot) [link](gtex_v8_finemap_experimental.html)
 * mixFine on GTEx V8 (subsampling analysis) [link](gtex_v8_finemap_subsample.html)
 * mixPred on GTEx V8 (Prediction performance evaluated by cross-validation) [link](gtex_v8_prediction_cv.html)
+
+Analysis on the side:
+
+* Compare aFC estimate from GTEx v8 to proposed estimates [link](aFC_vs_mixQTL.html)
+* Compare eQTL to trcQTL on low-count genes [link](low_count_genes.html) 
