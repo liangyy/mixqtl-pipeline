@@ -4,7 +4,7 @@ genelist=gtex-v8-genes-low-expr_gene_list.txt
 
 if [ ! -f $prefix.pos-with-low_count_genes.txt.gz ];then
   zcat $gtexv8signif | head -n 1 > $prefix.pos-with-low_count_genes.txt
-  awk 'FNR==NR{a[$1]=1;next}{split($2,b,"."); if(b[1] in a) print $0"\t"b[1]}' $genelist <(zcat $gtexv8signif) >> $prefix.pos-with-low_count_genes.txt
+  awk 'FNR==NR{a[$1]=1;next}{split($2,b,"."); if(b[1] in a) {print $0"\t"b[1]}}' $genelist <(zcat $gtexv8signif) >> $prefix.pos-with-low_count_genes.txt
   gzip $prefix.pos-with-low_count_genes.txt
 fi
 

@@ -10,6 +10,7 @@ df = data.frame(n_low_trc = trc, gene = rownames(dl$df_trc))
 
 df = df %>% mutate(pass_trc_low = n_low_trc >= trc_nobs_cutoff)
 
-write.table(df %>% filter(pass_trc_low) %>% select(gene), 'gtex-v8-genes-low-expr_gene_list.txt', row = F, col = F, quo = F, sep = '\t')
+write.table(df %>% filter(pass_trc_low) %>% filter(gene != 'ENSG00000223571') %>% select(gene), 'gtex-v8-genes-low-expr_gene_list.txt', row = F, col = F, quo = F, sep = '\t')
+# ENSG00000223571 does not have any SNP
 
 
