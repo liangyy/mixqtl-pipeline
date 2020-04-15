@@ -11,6 +11,10 @@ parser.add_argument('--genotype-out-prefix', help='''
 parser.add_argument('--outdir', help='''
     directory of output (if not exists, it will be created)
 ''')
+parser.add_argument('--chrs', type=str, default=None, help='''
+    specify chromsomes (default: run on all 1..22 + X).
+    separate by ','
+''')
 args = parser.parse_args()
 
 import logging, time, sys
@@ -37,21 +41,31 @@ genotype_out_prefix = args.genotype_out_prefix
 
 # process by chromosome
 gt_dict = {'0':np.int8(0), '1':np.int8(1), '.':np.int8(-1)}
-chromosomes = [ str(i) in range(1, 23) ]
-chromosomes.append('X')
+if args.chrs is None:
+    chromosomes = [ str(i) for i in range(1, 23) ]
+    chromosomes.append('X')
+else:
+    chromosomes = args.chrs.split(',')
 for chr in chromosomes:
     logging.info(f'Processing chr{chr}')
+    out1 = f'{outdir}/{genotype_out_prefix}.chr{chr}.hap1.parquet'
+    out2 = f'{outdir}/{genotype_out_prefix}.chr{chr}.hap2.parquet'
+    if os.path.exists(out1) and os.path.exists(out2):
+        logging.info(f'--> parquet outputs exist for chr{chr}. Skip!')
+        continue
     vcf = f'{outdir}/{genotype_out_prefix}.chr{chr}'
     # get header
-    cmd = f'zcat {genotype_input} | head -n 3388 > {vcf}'
+    cmd = f'zcat {genotype_input} 2>/dev/null | head -n 3388 > {vcf}'
     os.system(cmd)
     # extract the chromosome
     cmd = f'tabix {genotype_input} chr{chr} >> {vcf}'
     os.system(cmd)
+    # cmd = f'gzip {vcf}'
+    # os.system(cmd)
     logging.info(f'--> VCF extraction finished: {vcf}')
     
     # go into the extracted file
-    with open(vcf, 'rt') as f:
+    with open(f'{vcf}', 'rt') as f:
         variant_ids = []
         hap1 = []
         hap2 = []
@@ -78,20 +92,23 @@ for chr in chromosomes:
 
             if np.mod(k,1000)==0:
                 print('\rVariants parsed: {}'.format(k), end='')
+    # delete the intermediate VCF file
+    os.remove(f'{vcf}')
+    print(' - END')
     logging.info(f'Finished scanning chr{chr}')
     hap1_df = pd.DataFrame(
         np.array(hap1), 
         index=variant_ids, 
         columns=sample_ids
     )
-    hap1_df.to_parquet(f'{outdir}/{genotype_out_prefix}.chr{chr}.hap1.parquet')
+    hap1_df.to_parquet(out1)
 
     hap2_df = pd.DataFrame(
         np.array(hap2), 
         index=variant_ids, 
         columns=sample_ids
     )
-    hap2_df.to_parquet(f'{outdir}/{genotype_out_prefix}.chr{chr}.hap2.parquet')
+    hap2_df.to_parquet(out2)
             
     
     
