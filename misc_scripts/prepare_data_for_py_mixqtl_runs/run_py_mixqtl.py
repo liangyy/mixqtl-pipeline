@@ -73,7 +73,8 @@ def load_yaml(f):
     return data_loaded
 
 def count_qc(gene_list, trc, asc1, asc2, pos_df):
-    isin = np.isin(phenotype_pos_df.index.to_list(), gene_list)[0]
+    gene_list_no_dot = [ i.split('.')[0] for i in gene_list ]
+    isin = np.isin(phenotype_pos_df.index.to_list(), gene_list_no_dot)[0]
     trc = filter_by_all(
         trc,
         [isin]
