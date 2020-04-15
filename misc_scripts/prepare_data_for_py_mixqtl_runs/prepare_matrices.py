@@ -62,7 +62,7 @@ df_trc = df_trc[a1_ase.columns]
 logging.info('Processing library size')
 libsize_input = args.libsize
 cmd = f'cat {libsize_input} | cut -f1,45 > {outdir}/{intermediate_out}'
-os.system(out)
+os.system(cmd)
 df_lib = pd.read_csv(f'{outdir}/{intermediate_out}', header = 0, sep = '\t')
 df_lib = df_lib.set_index('SAMPID')
 df_lib = df_lib.loc[df_trc.columns.to_list()]
@@ -71,6 +71,7 @@ df_lib = df_lib.loc[df_trc.columns.to_list()]
 logging.info('Processing covariates')
 covariate_matrix = args.covariate_matrix
 cmd = f'cat {covariate_matrix} | gzip > {outdir}/{covar_out}'
+os.system(cmd)
 
 # Saving results
 logging.info('Saving results')
