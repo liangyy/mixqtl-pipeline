@@ -14,6 +14,10 @@ parser.add_argument('--libsize', help='''
 parser.add_argument('--covariate-matrix', help='''
     covariate matrix
 ''')
+parser.add_argument('--gene-annotation', help='''
+    gene annotation so that we can 
+    annotate with the genomic position. 
+''')
 parser.add_argument('--outdir', help='''
     directory of output (if not exists, it will be created)
 ''')
@@ -57,7 +61,24 @@ df_trc = pd.read_csv(args.trc_matrix, header = 0, compression = 'gzip', sep = '\
 df_trc = df_trc.set_index('Name')
 df_trc = df_trc.drop(df_trc.columns[df_trc.shape[1] - 1], axis = 1).drop('Description', axis = 1)
 df_trc = df_trc[a1_ase.columns]
-
+df_annot = pd.read_csv(args.gene_annotation, header = 0, sep = '\t')
+# add the gene id without dot 
+df_trc['gene_trimmed'] = df_trc['Name'].apply(lambda x: x.split('.')[0])
+# add tss
+df_annot.loc[:, 'tss'] = df_annot.apply(lambda x: x.start if x.strand == '+' else x.end, axis = 1).to_list()
+df_trc = df_trc.set_index('gene_trimmed').join(df_annot_selected.loc[:, ['gene_id', 'tss', 'chromosome']].set_index('gene_id'))
+# get the columns needed for bed file
+df_trc = df_trc.rename(columns = {'chromosome': '#chr'})
+df_trc['gene_id'] = df_trc.index.to_list()
+l = df_trc.columns.to_list()
+l.remove('tss')
+l.remove('gene_id')
+l.remove('Name')
+l.remove('#chr')
+df_trc['start'] = df_trc['tss'] - 1
+df_trc['end'] = df_trc['tss']
+df_trc = df_trc.loc[:, ['#chr', 'start', 'end', 'gene_id'] + l ]
+    
 # Library size
 logging.info('Processing library size')
 libsize_input = args.libsize
