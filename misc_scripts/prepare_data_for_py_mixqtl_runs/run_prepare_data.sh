@@ -7,10 +7,10 @@ TRCmat=trc-Whole_Blood.txt.gz
 LIBvec=GTEx_Analysis_2017-06-05_v8_Annotations_SampleAttributesDS.txt
 COVARmat=covariate-combined.txt
 GENOTYPEvcf=GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.SHAPEIT2_phased.MAF01.vcf.gz
-GENEannot=annotations_gencode_v26.tsv
+GENEannot=annotations_gencode_v26_fixed_some_from_gtex_v8_egene.tsv
 
 # prepare matrices
-echo python prepare_matrices.py \
+python prepare_matrices.py \
   --ase-matrix $PipeDATAdir/$ASEmat \
   --trc-matrix $PipeDATAdir/$TRCmat \
   --libsize $GTExDATAdir/$LIBvec \
@@ -20,7 +20,7 @@ echo python prepare_matrices.py \
   
 # prepare genotypes
 outprefix=GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.SHAPEIT2_phased.MAF01
-python prepare_genotypes.py \
+echo python prepare_genotypes.py \
   --genotype-input $GTExDATAdir/$GENOTYPEvcf \
   --genotype-out-prefix $outprefix \
   --outdir $GTExDATAdir/processed/genotype_in_parquet 

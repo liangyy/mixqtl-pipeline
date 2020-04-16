@@ -72,9 +72,9 @@ def load_yaml(f):
         data_loaded = yaml.safe_load(stream)
     return data_loaded
 
-def count_qc(gene_list, trc, asc1, asc2, pos_df):
+def filter_by_gene_list(gene_list, trc, asc1, asc2, pos_df):
     gene_list_no_dot = [ i.split('.')[0] for i in gene_list ]
-    isin = np.isin(phenotype_pos_df.index.to_list(), gene_list_no_dot)[0]
+    isin = np.isin(phenotype_pos_df.index.to_list(), gene_list_no_dot)
     trc = filter_by_all(
         trc,
         [isin]
@@ -133,6 +133,9 @@ covar_file = args.covariate_matrix
 # output
 output_prefix = args.out_prefix
 outdir = args.out_dir
+if not (os.path.exists(outdir) and os.path.isdir(outdir)):
+    os.mkdir(outdir)
+
 
 # load parameters for mixqtl
 param_mixqtl = load_yaml(args.param_yaml)

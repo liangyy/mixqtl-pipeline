@@ -11,4 +11,4 @@
 gene_list/
 *.txt.gz
 *.gz
-
+.ipynb_checkpoints/

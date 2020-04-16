@@ -1,2 +1,2 @@
-trc_cutoff: 1
-asc_cutoff: 5
+count_threshold: 1
+ase_threshold: 15  # 50 # 15  # 5

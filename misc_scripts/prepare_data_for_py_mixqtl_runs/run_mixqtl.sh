@@ -8,7 +8,7 @@ HAPsuffix=.hap{}.parquet
 LIBSIZEpattern=gtex_v8_library_size.txt.gz:SAMPID:SMMPPD
 ASCpattern=allele_specific_count.hap{}.txt.gz:GENE_ID
 COVARfile=covariates.txt.gz
-TRCfile=total_count.txt.gz
+TRCfile=total_count.bed.gz
 
 ## other files
 genelist=/vol/bmd/yanyul/UKB/GTExV8/Whole_Blood.v8.egenes.txt.gz:gene_id
@@ -22,20 +22,31 @@ OUTDIR=/vol/bmd/yanyul/UKB/GTExV8/mixqtl
 OUTPREFIX=Whole_Blood_GTEx_eGene
 
 # run
-THISchr=16
-echo ython run_py_mixqtl.py \
-  --hap-file $HAPdir/$HAPprefix$THISchr$HAPsuffix \
-  --libsize $DATAdir/$LIBSIZEpattern \
-  --covariate-matrix $DATAdir/$COVARfile \
-  --asc-matrix $DATAdir/$ASCpattern \
-  --trc-matrix $DATAdir/$TRCfile \
-  --param-yaml $paramyaml \
-  --out-dir $OUTDIR \
-  --out-prefix $OUTPREFIX \
-  --tensorqtl $CODEtensorqtl \
-  --chr chr$THISchr \
-  --impute-trc 
-
+chromosomes=`seq 1 22`
+chromosomes+=(X)
+if [[ -f run_mixqtl.log ]] 
+then
+  rm run_mixqtl.log
+fi
+# chromosomes=(1)  # for test
+for THISchr in ${chromosomes[@]}
+do
+  echo on chromosome $THISchr >> run_mixqtl.log 2>&1
+  python run_py_mixqtl.py \
+    --hap-file $HAPdir/$HAPprefix$THISchr$HAPsuffix \
+    --libsize $DATAdir/$LIBSIZEpattern \
+    --covariate-matrix $DATAdir/$COVARfile \
+    --asc-matrix $DATAdir/$ASCpattern \
+    --trc-matrix $DATAdir/$TRCfile \
+    --param-yaml $paramyaml \
+    --out-dir $OUTDIR \
+    --out-prefix $OUTPREFIX \
+    --tensorqtl $CODEtensorqtl \
+    --chr chr$THISchr \
+    --impute-trc \
+    --gene-list $genelist \
+    >> run_mixqtl.log 2>&1
+done
 
 
 

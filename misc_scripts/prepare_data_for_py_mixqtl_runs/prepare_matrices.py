@@ -41,7 +41,7 @@ import gzip, os
 outdir = args.outdir
 if not (os.path.exists(outdir) and os.path.isdir(outdir)):
     os.mkdir(outdir)
-trc_out = 'total_count.txt.gz'
+trc_out = 'total_count.bed.gz'
 asc1_out = 'allele_specific_count.hap1.txt.gz'
 asc2_out = 'allele_specific_count.hap2.txt.gz'
 intermediate_out = 'tempo-gtex_v8_library_size.txt'
@@ -61,12 +61,13 @@ df_trc = pd.read_csv(args.trc_matrix, header = 0, compression = 'gzip', sep = '\
 df_trc = df_trc.set_index('Name')
 df_trc = df_trc.drop(df_trc.columns[df_trc.shape[1] - 1], axis = 1).drop('Description', axis = 1)
 df_trc = df_trc[a1_ase.columns]
+df_trc = df_trc.reset_index()
 df_annot = pd.read_csv(args.gene_annotation, header = 0, sep = '\t')
 # add the gene id without dot 
 df_trc['gene_trimmed'] = df_trc['Name'].apply(lambda x: x.split('.')[0])
 # add tss
 df_annot.loc[:, 'tss'] = df_annot.apply(lambda x: x.start if x.strand == '+' else x.end, axis = 1).to_list()
-df_trc = df_trc.set_index('gene_trimmed').join(df_annot_selected.loc[:, ['gene_id', 'tss', 'chromosome']].set_index('gene_id'))
+df_trc = df_trc.set_index('gene_trimmed').join(df_annot.loc[:, ['gene_id', 'tss', 'chromosome']].set_index('gene_id'))
 # get the columns needed for bed file
 df_trc = df_trc.rename(columns = {'chromosome': '#chr'})
 df_trc['gene_id'] = df_trc.index.to_list()
@@ -86,7 +87,7 @@ cmd = f'cat {libsize_input} | cut -f1,45 > {outdir}/{intermediate_out}'
 os.system(cmd)
 df_lib = pd.read_csv(f'{outdir}/{intermediate_out}', header = 0, sep = '\t')
 df_lib = df_lib.set_index('SAMPID')
-df_lib = df_lib.loc[df_trc.columns.to_list()]
+df_lib = df_lib.loc[df_trc.columns.to_list()[4:]]
 
 # Covariates
 logging.info('Processing covariates')
@@ -101,7 +102,7 @@ a2_ase.columns = a2_ase.columns.map(lambda x: '-'.join(x.split('-')[:2]))
 a1_ase.to_csv(f'{outdir}/{asc1_out}', sep = '\t', compression = 'gzip')
 a2_ase.to_csv(f'{outdir}/{asc2_out}', sep = '\t', compression = 'gzip')
 df_trc.columns = df_trc.columns.map(lambda x: '-'.join(x.split('-')[:2]))
-df_trc.to_csv(f'{outdir}/{trc_out}', sep = '\t', compression = 'gzip')
+df_trc.to_csv(f'{outdir}/{trc_out}', index = None, sep = '\t', compression = 'gzip')
 df_lib.index = df_lib.index.map(lambda x: '-'.join(x.split('-')[:2]))
 df_lib.to_csv(f'{outdir}/{libsize_out}', sep = '\t', compression = 'gzip')
 
