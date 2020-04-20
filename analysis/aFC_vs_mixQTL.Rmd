@@ -114,8 +114,9 @@ relabel = function(x) {
   m = unlist(lapply(strsplit(x, '\\.'), function(v) {
     v[2]
   }))
+  m[m == 'meta'] = 'mix'
   f = paste0(m, 'QTL')
-  f = factor(f, levels = c('ascQTL', 'trcQTL', 'metaQTL'))
+  f = factor(f, levels = c('ascQTL', 'trcQTL', 'mixQTL'))
   return(f)
 }
 

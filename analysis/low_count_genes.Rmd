@@ -7,6 +7,7 @@ rm(list = ls())
 library(dplyr)
 library(data.table)
 library(ggplot2)
+theme_set(theme_bw(base_size = 15)) 
 library(SilverStandardPerformance)
 library(patchwork)
 options(datatable.fread.datatable = FALSE)
@@ -62,7 +63,7 @@ out = do.call(rbind, out)
 pairs_with_two_obs = out %>% group_by(gene, variant) %>% summarize(n = n()) %>% filter(n == 2) %>% select(gene, variant)
 out = out %>% filter(paste(gene, variant) %in% paste(pairs_with_two_obs$gene, pairs_with_two_obs$variant))
 out = out %>% mutate(stat = bhat / se)
-out %>% group_by(method, type) %>% summarize(median(stat^2))
+out %>% group_by(method, type) %>% summarize(median(stat^2), nobs = n())
 ```
 
 # Plot ROC/PR curves

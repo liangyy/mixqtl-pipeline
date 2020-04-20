@@ -378,6 +378,7 @@ div.tocify {
 library(dplyr)
 library(data.table)
 library(ggplot2)
+theme_set(theme_bw(base_size = 15)) 
 library(SilverStandardPerformance)
 library(patchwork)
 options(datatable.fread.datatable = FALSE)
@@ -422,15 +423,15 @@ out = do.call(rbind, out)
 pairs_with_two_obs = out %&gt;% group_by(gene, variant) %&gt;% summarize(n = n()) %&gt;% filter(n == 2) %&gt;% select(gene, variant)
 out = out %&gt;% filter(paste(gene, variant) %in% paste(pairs_with_two_obs$gene, pairs_with_two_obs$variant))
 out = out %&gt;% mutate(stat = bhat / se)
-out %&gt;% group_by(method, type) %&gt;% summarize(median(stat^2))</code></pre>
-<pre><code>## # A tibble: 4 x 3
+out %&gt;% group_by(method, type) %&gt;% summarize(median(stat^2), nobs = n())</code></pre>
+<pre><code>## # A tibble: 4 x 4
 ## # Groups:   method [2]
-##   method type  `median(stat^2)`
-##   &lt;fct&gt;  &lt;chr&gt;            &lt;dbl&gt;
-## 1 eQTL   neg              0.457
-## 2 eQTL   pos              3.23 
-## 3 trcQTL neg              0.481
-## 4 trcQTL pos              3.30</code></pre>
+##   method type  `median(stat^2)`  nobs
+##   &lt;fct&gt;  &lt;chr&gt;            &lt;dbl&gt; &lt;int&gt;
+## 1 eQTL   neg              0.457 88242
+## 2 eQTL   pos              3.23  85129
+## 3 trcQTL neg              0.481 88242
+## 4 trcQTL pos              3.30  85129</code></pre>
 </div>
 <div id="plot-rocpr-curves" class="section level1">
 <h1><span class="header-section-number">3</span> Plot ROC/PR curves</h1>
