@@ -14,7 +14,7 @@ options(datatable.fread.datatable = FALSE)
 options(stringsAsFactors = FALSE)
 source('../code/rlib_analysis.R')
 datadir = '/Users/yanyul/Desktop/mixqtl-pipeline-results/gtex_v8-results/'
-cbPalette <- c('ascQTL' = "#999999", 'mixFine' = "#E69F00", 'trcQTL' = "#56B4E9", 'vanilla' = "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+cbPalette <- c('ascQTL' = "#999999", 'mixFine' = "#E69F00", 'trcQTL' = "#56B4E9", 'vanilla' = "#009E73", 'standard approach' = "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 source('https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R')
 # th0 = th
 # th$panel.border = element_rect(colour = th$axis.line$colour)
@@ -32,7 +32,7 @@ parse_name = function(ee) {
 # Load result
 
 ```{r load-sure}
-method_df = data.frame(method = c('mixfine', 'nefine'), tag = c('mixFine', 'vanilla'))
+method_df = data.frame(method = c('mixfine', 'nefine'), tag = c('mixFine', 'standard approach'))
 fractions = 3 : 9 / 10
 batch = 1 : 10
 
@@ -107,7 +107,7 @@ df_subsample_with_consensus_summary %>% ggplot() + geom_boxplot(aes(x = as.facto
 # for saving a nice plot
 temp = df_subsample_with_consensus_summary
 temp$method[temp$method == 'mixfine'] = 'mixFine'
-temp$method[temp$method == 'nefine'] = 'vanilla'
+temp$method[temp$method == 'nefine'] = 'standard approach'
 p = temp %>% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = .5, position = position_dodge(1)) + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = 1, width = .2, position = position_dodge(1)) + scale_fill_manual(values = cbPalette) + xlab('Subsampling fraction') + ylab('Power (detection rate)') + theme(legend.position = c(0.8, 0.2), legend.title = element_blank()) # + ggtitle('Consensus variants \n (PIP > 0.5 in both) \n being detected')
 p = p + th + theme(aspect.ratio = 1)
 p
@@ -134,7 +134,7 @@ sub_flat = sub_cs %>% dcast(gene + variant_id + batch + fraction ~ method, value
 # plot: for cs's detected in both mixfine and nefine
 th2 = th
 th2$panel.border = element_rect(colour = th2$axis.line$colour)
-p = sub_flat %>% filter(!is.na(mixfine), !is.na(nefine)) %>% filter(fraction != 0.3) %>% ggplot(aes(y = mixfine, x = nefine)) + geom_abline(slope = 1, intercept = 0, color = 'lightgray') + geom_point(alpha = .5) + facet_wrap(~fraction, ncol = 2) + ylab('CS size in mixFine') + xlab('CS size in vanilla') + coord_equal(xlim = c(0, 300), y = c(0, 300)) # + ggtitle('Size of Consensus CS \n being detected in both')
+p = sub_flat %>% filter(!is.na(mixfine), !is.na(nefine)) %>% filter(fraction != 0.3) %>% ggplot(aes(y = mixfine, x = nefine)) + geom_abline(slope = 1, intercept = 0, color = 'lightgray') + geom_point(alpha = .5) + facet_wrap(~fraction, ncol = 2) + ylab('CS size in mixFine') + xlab('CS size in standard approach') + coord_equal(xlim = c(0, 300), y = c(0, 300)) # + ggtitle('Size of Consensus CS \n being detected in both')
 p = p + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) # + coord_cartesian(xlim = c(0, 300), y = c(0, 300))
 p = p + th2
 p
@@ -143,10 +143,12 @@ ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-cs-size-gene-qc.png', p, hei
 # plot: counting how many cs's are detected
 sub_sum = sub_cs %>% group_by(method, fraction, batch) %>% summarize(ntimes_detected = n()) 
 sub_sum_flat = sub_sum %>% dcast(fraction + batch ~ method, value.var = 'ntimes_detected')
-p = sub_sum_flat %>% ggplot() + geom_abline(slope = 1, intercept = 0, color = 'lightgray') + geom_point(aes(y = mixfine / nrow(sub2), x = nefine / nrow(sub2))) + ylab('Detection rate in mixFine') + xlab('Detection rate in vanilla') + coord_equal() # + ggtitle('Consensus CS \n (CS with same top variant) \n being detected')
+p = sub_sum_flat %>% ggplot() + geom_abline(slope = 1, intercept = 0, color = 'lightgray') + geom_point(aes(y = mixfine / nrow(sub2), x = nefine / nrow(sub2))) + ylab('Detection rate in mixFine') + xlab('Detection rate in standard approach') + coord_equal() # + ggtitle('Consensus CS \n (CS with same top variant) \n being detected')
 p = p + th
 p
 ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-concensus-cs-gene-qc.png', p, height = 4, width = 4)
+
+sub_flat %>% filter(!is.na(mixfine), !is.na(nefine)) %>% summarize(mean_mixfine = mean(mixfine, na.rm = T), mean_nefine = mean(nefine, na.rm = T))
 ```
 
 # Stratifying by gene expression level
@@ -179,9 +181,9 @@ df_subsample_with_consensus_summary %>% ggplot() + geom_boxplot(aes(x = as.facto
 # for saving a nice plot
 temp = df_subsample_with_consensus_summary
 temp$method[temp$method == 'mixfine'] = 'mixFine'
-temp$method[temp$method == 'nefine'] = 'vanilla'
+temp$method[temp$method == 'nefine'] = 'standard approach'
 p = temp %>% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = .5, position = position_dodge(1)) + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = 1, width = .2, position = position_dodge(1)) + scale_fill_manual(values = cbPalette) + xlab('Subsampling fraction') + ylab('Power (detection rate)') + theme(legend.position = 'bottom', legend.title = element_blank()) + facet_wrap(~expression_level)  # + ggtitle('Consensus variants \n (PIP > 0.5 in both) \n being detected')
 p = p + th2 + theme(aspect.ratio = 1)
 p
-ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc-stratified.png', p, height = 6, width = 12)
+ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc-stratified.png', p, height = 4, width = 8)
 ```

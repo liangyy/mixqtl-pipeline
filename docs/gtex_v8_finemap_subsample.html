@@ -380,21 +380,12 @@ theme_set(theme_bw(base_size = 12))
 library(dplyr)
 library(reshape2)
 library(stringr)
-library(data.table)</code></pre>
-<pre><code>## data.table 1.12.8 using 4 threads (see ?getDTthreads).  Latest news: r-datatable.com</code></pre>
-<pre><code>## 
-## Attaching package: &#39;data.table&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:reshape2&#39;:
-## 
-##     dcast, melt</code></pre>
-<pre><code>## The following objects are masked from &#39;package:dplyr&#39;:
-## 
-##     between, first, last</code></pre>
-<pre class="r"><code>options(datatable.fread.datatable = FALSE)
+library(data.table)
+options(datatable.fread.datatable = FALSE)
 options(stringsAsFactors = FALSE)
 source(&#39;../code/rlib_analysis.R&#39;)
 datadir = &#39;/Users/yanyul/Desktop/mixqtl-pipeline-results/gtex_v8-results/&#39;
-cbPalette &lt;- c(&#39;ascQTL&#39; = &quot;#999999&quot;, &#39;mixFine&#39; = &quot;#E69F00&quot;, &#39;trcQTL&#39; = &quot;#56B4E9&quot;, &#39;vanilla&#39; = &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
+cbPalette &lt;- c(&#39;ascQTL&#39; = &quot;#999999&quot;, &#39;mixFine&#39; = &quot;#E69F00&quot;, &#39;trcQTL&#39; = &quot;#56B4E9&quot;, &#39;vanilla&#39; = &quot;#009E73&quot;, &#39;standard approach&#39; = &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
 source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R&#39;)
 # th0 = th
 # th$panel.border = element_rect(colour = th$axis.line$colour)
@@ -409,7 +400,7 @@ parse_name = function(ee) {
 }</code></pre>
 <div id="load-result" class="section level1">
 <h1><span class="header-section-number">1</span> Load result</h1>
-<pre class="r"><code>method_df = data.frame(method = c(&#39;mixfine&#39;, &#39;nefine&#39;), tag = c(&#39;mixFine&#39;, &#39;vanilla&#39;))
+<pre class="r"><code>method_df = data.frame(method = c(&#39;mixfine&#39;, &#39;nefine&#39;), tag = c(&#39;mixFine&#39;, &#39;standard approach&#39;))
 fractions = 3 : 9 / 10
 batch = 1 : 10
 
@@ -463,13 +454,12 @@ df_both_complete = rbind(df_full_complete, df_subsample_complete)</code></pre>
 <h2><span class="header-section-number">2.1</span> Number of 95% credible set identified in total</h2>
 <pre class="r"><code>ncs_total = df_subsample_complete %&gt;% group_by(gene, method, fraction) %&gt;% summarize(ncs = length(unique(cs))) %&gt;% ungroup()
 g = ncs_total %&gt;% dcast(fraction + gene ~ method, value.var = &#39;ncs&#39;, fill = 0)</code></pre>
-<pre><code>## Warning in dcast(., fraction + gene ~ method, value.var = &quot;ncs&quot;, fill = 0): The dcast generic
-## in data.table has been passed a tbl_df and will attempt to redirect to the reshape2::dcast;
-## please note that reshape2 is deprecated, and this redirection is now deprecated as well.
-## Please do this redirection yourself like reshape2::dcast(.). In the next version, this
-## warning will become an error.</code></pre>
+<pre><code>## Warning in dcast(., fraction + gene ~ method, value.var = &quot;ncs&quot;, fill = 0): The dcast generic in data.table has been
+## passed a tbl_df and will attempt to redirect to the reshape2::dcast; please note that reshape2 is deprecated, and
+## this redirection is now deprecated as well. Please do this redirection yourself like reshape2::dcast(.). In the next
+## version, this warning will become an error.</code></pre>
 <pre class="r"><code>g %&gt;% ggplot() + geom_point(aes(x = nefine, y = mixfine)) + facet_wrap(~fraction)</code></pre>
-<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 </div>
 <div id="concensus-snps" class="section level2">
 <h2><span class="header-section-number">2.2</span> Concensus SNPs</h2>
@@ -479,23 +469,22 @@ consensus_eqtl = df_full_complete %&gt;% filter(variable_prob &gt; 0.5) %&gt;% g
 df_subsample_with_consensus = df_subsample_complete %&gt;% mutate(is_consensus = paste(variant_id, gene) %in% paste(consensus_eqtl$variant_id, consensus_eqtl$gene))
 df_subsample_with_consensus_summary = df_subsample_with_consensus %&gt;% group_by(method, fraction, batch) %&gt;% summarize(fraction_of_detection = sum(is_consensus) / nrow(consensus_eqtl))
 df_subsample_with_consensus_summary_flat = df_subsample_with_consensus_summary %&gt;% dcast(fraction + batch ~ method, value.var = &#39;fraction_of_detection&#39;)</code></pre>
-<pre><code>## Warning in dcast(., fraction + batch ~ method, value.var = &quot;fraction_of_detection&quot;): The
-## dcast generic in data.table has been passed a grouped_df and will attempt to redirect to
-## the reshape2::dcast; please note that reshape2 is deprecated, and this redirection is now
-## deprecated as well. Please do this redirection yourself like reshape2::dcast(.). In the next
-## version, this warning will become an error.</code></pre>
+<pre><code>## Warning in dcast(., fraction + batch ~ method, value.var = &quot;fraction_of_detection&quot;): The dcast generic in
+## data.table has been passed a grouped_df and will attempt to redirect to the reshape2::dcast; please note that
+## reshape2 is deprecated, and this redirection is now deprecated as well. Please do this redirection yourself like
+## reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
 <pre class="r"><code>df_subsample_with_consensus_summary_flat %&gt;% ggplot() + geom_point(aes(x = mixfine, y = nefine)) + geom_abline(slope = 1, intercept = 0)</code></pre>
-<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <pre class="r"><code>df_subsample_with_consensus_summary %&gt;% ggplot() + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, color = method)) + scale_color_manual(values = cbPalette)</code></pre>
-<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
 <pre class="r"><code># for saving a nice plot
 temp = df_subsample_with_consensus_summary
 temp$method[temp$method == &#39;mixfine&#39;] = &#39;mixFine&#39;
-temp$method[temp$method == &#39;nefine&#39;] = &#39;vanilla&#39;
+temp$method[temp$method == &#39;nefine&#39;] = &#39;standard approach&#39;
 p = temp %&gt;% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = .5, position = position_dodge(1)) + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = 1, width = .2, position = position_dodge(1)) + scale_fill_manual(values = cbPalette) + xlab(&#39;Subsampling fraction&#39;) + ylab(&#39;Power (detection rate)&#39;) + theme(legend.position = c(0.8, 0.2), legend.title = element_blank()) # + ggtitle(&#39;Consensus variants \n (PIP &gt; 0.5 in both) \n being detected&#39;)
 p = p + th + theme(aspect.ratio = 1)
 p</code></pre>
-<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-2-3.png" width="672" /></p>
+<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-3-3.png" width="672" /></p>
 <pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc.png&#39;, p, height = 4, width = 4)</code></pre>
 </div>
 <div id="concensus-css" class="section level2">
@@ -514,34 +503,36 @@ sub_cs = df_subsample %&gt;% filter(paste(gene, variant_id) %in% paste(sub2$gene
 sub_cs = left_join(sub_cs, sub_cs_size_sub, by = c(&#39;gene&#39;, &#39;cs&#39;, &#39;batch&#39;, &#39;fraction&#39;, &#39;method&#39;))
 # flat to compare mixfine vs nefine
 sub_flat = sub_cs %&gt;% dcast(gene + variant_id + batch + fraction ~ method, value.var = &#39;cs_size&#39;)</code></pre>
-<pre><code>## Warning in dcast(., gene + variant_id + batch + fraction ~ method, value.var = &quot;cs_size&quot;):
-## The dcast generic in data.table has been passed a data.frame and will attempt to redirect
-## to the reshape2::dcast; please note that reshape2 is deprecated, and this redirection is now
-## deprecated as well. Please do this redirection yourself like reshape2::dcast(.). In the next
-## version, this warning will become an error.</code></pre>
+<pre><code>## Warning in dcast(., gene + variant_id + batch + fraction ~ method, value.var = &quot;cs_size&quot;): The dcast generic in
+## data.table has been passed a data.frame and will attempt to redirect to the reshape2::dcast; please note that
+## reshape2 is deprecated, and this redirection is now deprecated as well. Please do this redirection yourself like
+## reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
 <pre class="r"><code># plot: for cs&#39;s detected in both mixfine and nefine
 th2 = th
 th2$panel.border = element_rect(colour = th2$axis.line$colour)
-p = sub_flat %&gt;% filter(!is.na(mixfine), !is.na(nefine)) %&gt;% filter(fraction != 0.3) %&gt;% ggplot(aes(y = mixfine, x = nefine)) + geom_abline(slope = 1, intercept = 0, color = &#39;lightgray&#39;) + geom_point(alpha = .5) + facet_wrap(~fraction, ncol = 2) + ylab(&#39;CS size in mixFine&#39;) + xlab(&#39;CS size in vanilla&#39;) + coord_equal(xlim = c(0, 300), y = c(0, 300)) # + ggtitle(&#39;Size of Consensus CS \n being detected in both&#39;)
+p = sub_flat %&gt;% filter(!is.na(mixfine), !is.na(nefine)) %&gt;% filter(fraction != 0.3) %&gt;% ggplot(aes(y = mixfine, x = nefine)) + geom_abline(slope = 1, intercept = 0, color = &#39;lightgray&#39;) + geom_point(alpha = .5) + facet_wrap(~fraction, ncol = 2) + ylab(&#39;CS size in mixFine&#39;) + xlab(&#39;CS size in standard approach&#39;) + coord_equal(xlim = c(0, 300), y = c(0, 300)) # + ggtitle(&#39;Size of Consensus CS \n being detected in both&#39;)
 p = p + theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) # + coord_cartesian(xlim = c(0, 300), y = c(0, 300))
 p = p + th2
 p</code></pre>
-<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-finemapping-cs-size-gene-qc.png&#39;, p, height = 5, width = 4)
 
 # plot: counting how many cs&#39;s are detected
 sub_sum = sub_cs %&gt;% group_by(method, fraction, batch) %&gt;% summarize(ntimes_detected = n()) 
 sub_sum_flat = sub_sum %&gt;% dcast(fraction + batch ~ method, value.var = &#39;ntimes_detected&#39;)</code></pre>
-<pre><code>## Warning in dcast(., fraction + batch ~ method, value.var = &quot;ntimes_detected&quot;): The dcast
-## generic in data.table has been passed a grouped_df and will attempt to redirect to the
-## reshape2::dcast; please note that reshape2 is deprecated, and this redirection is now
-## deprecated as well. Please do this redirection yourself like reshape2::dcast(.). In the next
-## version, this warning will become an error.</code></pre>
-<pre class="r"><code>p = sub_sum_flat %&gt;% ggplot() + geom_abline(slope = 1, intercept = 0, color = &#39;lightgray&#39;) + geom_point(aes(y = mixfine / nrow(sub2), x = nefine / nrow(sub2))) + ylab(&#39;Detection rate in mixFine&#39;) + xlab(&#39;Detection rate in vanilla&#39;) + coord_equal() # + ggtitle(&#39;Consensus CS \n (CS with same top variant) \n being detected&#39;)
+<pre><code>## Warning in dcast(., fraction + batch ~ method, value.var = &quot;ntimes_detected&quot;): The dcast generic in data.table has
+## been passed a grouped_df and will attempt to redirect to the reshape2::dcast; please note that reshape2 is deprecated,
+## and this redirection is now deprecated as well. Please do this redirection yourself like reshape2::dcast(.). In the
+## next version, this warning will become an error.</code></pre>
+<pre class="r"><code>p = sub_sum_flat %&gt;% ggplot() + geom_abline(slope = 1, intercept = 0, color = &#39;lightgray&#39;) + geom_point(aes(y = mixfine / nrow(sub2), x = nefine / nrow(sub2))) + ylab(&#39;Detection rate in mixFine&#39;) + xlab(&#39;Detection rate in standard approach&#39;) + coord_equal() # + ggtitle(&#39;Consensus CS \n (CS with same top variant) \n being detected&#39;)
 p = p + th
 p</code></pre>
-<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
-<pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-finemapping-concensus-cs-gene-qc.png&#39;, p, height = 4, width = 4)</code></pre>
+<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-finemapping-concensus-cs-gene-qc.png&#39;, p, height = 4, width = 4)
+
+sub_flat %&gt;% filter(!is.na(mixfine), !is.na(nefine)) %&gt;% summarize(mean_mixfine = mean(mixfine, na.rm = T), mean_nefine = mean(nefine, na.rm = T))</code></pre>
+<pre><code>##   mean_mixfine mean_nefine
+## 1     9.631491     13.6946</code></pre>
 </div>
 </div>
 <div id="stratifying-by-gene-expression-level" class="section level1">
@@ -567,24 +558,23 @@ df_subsample_with_consensus_summary = df_subsample_with_consensus_summary %&gt;%
 df_subsample_with_consensus_summary$expression_level = factor(df_subsample_with_consensus_summary$expression_level, levels = c(&#39;high&#39;, &#39;middle&#39;, &#39;low&#39;))
 
 df_subsample_with_consensus_summary_flat = df_subsample_with_consensus_summary %&gt;% dcast(fraction + batch + expression_level ~ method, value.var = &#39;fraction_of_detection&#39;)</code></pre>
-<pre><code>## Warning in dcast(., fraction + batch + expression_level ~ method, value.var =
-## &quot;fraction_of_detection&quot;): The dcast generic in data.table has been passed a grouped_df and
-## will attempt to redirect to the reshape2::dcast; please note that reshape2 is deprecated,
-## and this redirection is now deprecated as well. Please do this redirection yourself like
+<pre><code>## Warning in dcast(., fraction + batch + expression_level ~ method, value.var = &quot;fraction_of_detection&quot;): The dcast
+## generic in data.table has been passed a grouped_df and will attempt to redirect to the reshape2::dcast; please note
+## that reshape2 is deprecated, and this redirection is now deprecated as well. Please do this redirection yourself like
 ## reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
 <pre class="r"><code>df_subsample_with_consensus_summary_flat %&gt;% ggplot() + geom_point(aes(x = mixfine, y = nefine)) + geom_abline(slope = 1, intercept = 0) + facet_wrap(~expression_level)</code></pre>
-<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <pre class="r"><code>df_subsample_with_consensus_summary %&gt;% ggplot() + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, color = method)) + facet_wrap(~expression_level) # + scale_color_manual(values = cbPalette)</code></pre>
-<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
 <pre class="r"><code># for saving a nice plot
 temp = df_subsample_with_consensus_summary
 temp$method[temp$method == &#39;mixfine&#39;] = &#39;mixFine&#39;
-temp$method[temp$method == &#39;nefine&#39;] = &#39;vanilla&#39;
+temp$method[temp$method == &#39;nefine&#39;] = &#39;standard approach&#39;
 p = temp %&gt;% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = .5, position = position_dodge(1)) + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = 1, width = .2, position = position_dodge(1)) + scale_fill_manual(values = cbPalette) + xlab(&#39;Subsampling fraction&#39;) + ylab(&#39;Power (detection rate)&#39;) + theme(legend.position = &#39;bottom&#39;, legend.title = element_blank()) + facet_wrap(~expression_level)  # + ggtitle(&#39;Consensus variants \n (PIP &gt; 0.5 in both) \n being detected&#39;)
 p = p + th2 + theme(aspect.ratio = 1)
 p</code></pre>
-<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-4-3.png" width="672" /></p>
-<pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc-stratified.png&#39;, p, height = 6, width = 12)</code></pre>
+<p><img src="gtex_v8_finemap_subsample_files/figure-html/unnamed-chunk-5-3.png" width="672" /></p>
+<pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc-stratified.png&#39;, p, height = 4, width = 8)</code></pre>
 </div>
 
 
