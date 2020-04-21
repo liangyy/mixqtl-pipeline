@@ -106,8 +106,8 @@ We stratify aFC estimate into two categories:
 * low quality: otherwise
 
 ```{r ascqtl_str, fig.height=5, fig.width=5}
-high_quality = function(m, l, u, fold = 500) {
-  (u -  l) < 1 & l >= -log(fold) & u <= log(fold)
+high_quality = function(m, l, u, fold = log2(50)) {
+  (u -  l) < 1 & l >= -fold & u <= fold
 }
 relabel = function(x) {
   x = as.character(x)
