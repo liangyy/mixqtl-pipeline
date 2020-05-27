@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository reproduces the results for paper [link](https://github.com/liangyy/paper-mixqtl/blob/master/new_draft/main.pdf)
+This repository reproduces the results for paper [link](https://www.biorxiv.org/content/10.1101/2020.04.22.050666v1)
 
 It contains pipelines for
 
@@ -15,10 +15,10 @@ It contains pipelines for
 It reproduces mixQTL results using `mixqtl` R package. To install, do
 
 ```
-devtools::install_github('liangyy/mixqtl@reproduce')
+devtools::install_github('liangyy/mixqtl')
 ```
 
-The pipeline is built using `snakemake`. The full conda environment is coming in the future. 
+The pipeline is built using `snakemake`. 
 
 ## Directory structure
 
@@ -27,6 +27,3 @@ The pipeline is built using `snakemake`. The full conda environment is coming in
 * `qsub/`: actual jobs running `pipeline`. It specifies all dependent files and parameters to reproduce the runs
 * `analysis/`: analysis and summary report of the runs
 
-# TODO
-
-* Pack up `misc_data` in the end.
