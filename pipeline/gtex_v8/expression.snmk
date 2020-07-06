@@ -3,6 +3,9 @@
 if 'outdir' not in config:
     config['outdir'] = 'output'
 
+if 'extract_name' in config:
+    config['extract-name'] = config['extract_name']
+
 rule all:
     input:
         '{outdir}/expression/merge-{tissue}.rds'.format(tissue = config['tissue'], outdir = config['outdir'])
