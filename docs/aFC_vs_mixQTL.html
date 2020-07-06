@@ -469,8 +469,8 @@ plist[[1]] + plist[[2]] + plist[[3]]</code></pre>
 <li>high quality: 95% confidence interval is smaller than 1 and the boundary of the 95% confidence interval does not hit the extreme (+/-log(500))</li>
 <li>low quality: otherwise</li>
 </ul>
-<pre class="r"><code>high_quality = function(m, l, u, fold = 500) {
-  (u -  l) &lt; 1 &amp; l &gt;= -log(fold) &amp; u &lt;= log(fold)
+<pre class="r"><code>high_quality = function(m, l, u, fold = log2(50)) {
+  (u -  l) &lt; 1 &amp; l &gt;= -fold &amp; u &lt;= fold
 }
 relabel = function(x) {
   x = as.character(x)
