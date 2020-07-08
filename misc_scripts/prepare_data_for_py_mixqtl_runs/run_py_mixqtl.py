@@ -51,6 +51,9 @@ parser.add_argument('--tensorqtl', help='''
 parser.add_argument('--chr', type=str, help='''
     specify chromosome
 ''')
+parser.add_argument('--nthread', type=int, default=1, help='''
+    number of threads
+''')
 parser.add_argument('--impute-trc', action='store_true', help='''
     add it if want to impute zero trc as one.
 ''')
@@ -104,6 +107,9 @@ import numpy as np
 import scipy.stats as stats
 import torch
 import os
+
+## setup number of threads for torch
+torch.set_num_threads(args.nthread)
 
 ## floating around dependency
 sys.path.insert(0, args.tensorqtl)
