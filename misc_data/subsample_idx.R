@@ -9,12 +9,15 @@ option_list <- list(
                 metavar="character"),
     make_option(c("-o", "--output"), type="character", default=NULL,
                 help="output",
+                metavar="character"),
+    make_option(c("-s", "--seed"), type="numeric", default=1,
+                help="random seed",
                 metavar="character")
 )
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
 
-set.seed(1)
+set.seed(opt$seed)
 
 idx = sample(1 : min(opt$number_sub, opt$number_total), size = opt$number_sub, replace = F)
 write.table(idx, opt$output, row = F, col = F, quo = F, sep = '\t')
