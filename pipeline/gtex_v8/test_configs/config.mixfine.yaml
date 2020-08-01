@@ -1,7 +1,7 @@
 tissue: 'Whole_Blood'
 method: 'mixfine'
 gene: 'ENSG00000000457'
-covariate: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/peer/Whole_Blood/covariate-combined.txt' 
-expression: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/expression/merge-Whole_Blood.rds'
-genotype: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/genotype/{gene}.txt.gz'
+covariate: '/gpfs/data/im-lab/nas40t2/yanyul/GTExV8-mixqtl/mixqtl-pipeline-results/gtex_v8-preprocess/peer/Whole_Blood/covariate-combined.txt' 
+expression: '/gpfs/data/im-lab/nas40t2/yanyul/GTExV8-mixqtl/mixqtl-pipeline-results/gtex_v8-preprocess/expression/merge-Whole_Blood.rds'
+genotype: '/gpfs/data/im-lab/nas40t2/yanyul/GTExV8-mixqtl/mixqtl-pipeline-results/gtex_v8-preprocess/genotype/{gene}.txt.gz'
  
