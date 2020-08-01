@@ -376,16 +376,18 @@ div.tocify {
 
 <pre class="r"><code>rm(list = ls())
 library(ggplot2)
-theme_set(theme_bw(base_size = 15))
+theme_set(theme_bw(base_size = 13))
 library(dplyr)
 library(reshape2)
 library(data.table)
+library(pander)
 options(datatable.fread.datatable = FALSE)
 options(stringsAsFactors = FALSE)
+panderOptions(&#39;table.split.table&#39;, Inf)
 source(&#39;../code/rlib_analysis.R&#39;)
 datadir = &#39;/Users/yanyul/Desktop/mixqtl-pipeline-results/postprocess-prediction&#39;
-cbPalette &lt;- c(&#39;ascQTL&#39; = &quot;#999999&quot;, &#39;mixPred&#39; = &quot;#E69F00&quot;, &#39;trcQTL&#39; = &quot;#56B4E9&quot;, &#39;vanilla&#39; = &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
-source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R&#39;)
+cbPalette &lt;- c(&#39;ascQTL&#39; = &quot;#999999&quot;, &#39;mixPred&#39; = &quot;#E69F00&quot;, &#39;trcQTL&#39; = &quot;#56B4E9&quot;, &#39;standard&#39; = &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
+source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/3ca651cfa53ffccb8422f432561138a46e93710f/my_ggplot_theme.R&#39;)
 th$panel.border = element_rect(colour = th$axis.line$colour)
 ifrun = FALSE</code></pre>
 <div id="analysis-plan" class="section level1">
@@ -394,56 +396,165 @@ ifrun = FALSE</code></pre>
 </div>
 <div id="load-results" class="section level1">
 <h1><span class="header-section-number">2</span> Load results</h1>
-<pre class="r"><code>method_df = data.frame(method = c(&#39;mixpred&#39;, &#39;nepred&#39;), tag = c(&#39;mixPred&#39;, &#39;vanilla&#39;))
+<pre class="r"><code>method_df = data.frame(method = c(&#39;mixpred&#39;, &#39;nepred&#39;), tag = c(&#39;mixPred&#39;, &#39;standard&#39;))
 full_sample_size = 670
-partitions = c(10, 2)
+partitions = c(2:8, 10)
 out = list()
 for(part in partitions) {
   for(i in 1 : nrow(method_df)) {
     tmp_ = read.table(paste0(datadir, &#39;/&#39;, &#39;Whole_Blood-x-indiv_partition-gtex_v8_whole_blood_partition_&#39;, part, &#39;-performance-&#39;, method_df$method[i], &#39;.txt.gz&#39;), header = T, )
-    out[[length(out) + 1]] = tmp_ %&gt;% mutate(method = method_df$tag[i], split = part, sample_size = full_sample_size * (part - 1) / part)
+    out[[length(out) + 1]] = tmp_ %&gt;% mutate(method = method_df$tag[i], split = part, sample_size = ceiling(full_sample_size / part))
   }
 }
 df = do.call(rbind, out)</code></pre>
 <!-- # QC -->
 <!-- ```{r} -->
-<!-- passed_genes = df %>% filter(method == 'vanilla') %>% group_by(gene, sample_size, partition) %>% summarize(min_cor = min(pearson_correlation)) %>% filter(min_cor > -100) %>% pull(gene) -->
+<!-- passed_genes = df %>% filter(method == 'standard') %>% group_by(gene, sample_size, partition) %>% summarize(min_cor = min(pearson_correlation)) %>% filter(min_cor > -100) %>% pull(gene) -->
 <!-- ``` -->
 </div>
 <div id="plot-pearson-correlation-comparison" class="section level1">
 <h1><span class="header-section-number">3</span> Plot Pearson correlation comparison</h1>
 <p>Median correlation across partitions.</p>
-<pre class="r"><code>p = df %&gt;% group_by(gene, method, sample_size) %&gt;% summarize(pearson = median(pearson_correlation)) %&gt;% select(gene, pearson, method, sample_size) %&gt;% dcast(gene + sample_size ~ method, value.var = &#39;pearson&#39;) %&gt;% ggplot(aes(x = vanilla, y = mixPred)) + geom_point(alpha = .3) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~sample_size, labeller = label_both) + th + coord_equal()</code></pre>
-<pre><code>## Warning in dcast(., gene + sample_size ~ method, value.var = &quot;pearson&quot;): The dcast generic in data.table
-## has been passed a grouped_df and will attempt to redirect to the reshape2::dcast; please note that
-## reshape2 is deprecated, and this redirection is now deprecated as well. Please do this redirection
-## yourself like reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
+<pre class="r"><code>p = df %&gt;% group_by(gene, method, sample_size) %&gt;% summarize(pearson = median(pearson_correlation)) %&gt;% select(gene, pearson, method, sample_size) %&gt;% dcast(gene + sample_size ~ method, value.var = &#39;pearson&#39;) %&gt;% ggplot(aes(x = standard, y = mixPred)) + geom_point(alpha = .3) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~sample_size, labeller = label_both, ncol=4) + th2 + coord_equal()</code></pre>
+<pre><code>## Warning in dcast(., gene + sample_size ~ method, value.var = &quot;pearson&quot;): The dcast generic in
+## data.table has been passed a grouped_df and will attempt to redirect to the reshape2::dcast;
+## please note that reshape2 is deprecated, and this redirection is now deprecated as well.
+## Please do this redirection yourself like reshape2::dcast(.). In the next version, this
+## warning will become an error.</code></pre>
 <pre class="r"><code>p </code></pre>
-<p><img src="gtex_v8_prediction_cv_files/figure-html/plot_pearson_scatter-1.png" width="672" /></p>
-<pre class="r"><code>ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson.png&#39;, height = 4, width = 7)</code></pre>
+<p><img src="gtex_v8_prediction_cv_files/figure-html/plot_pearson_scatter-1.png" width="768" /></p>
+<pre class="r"><code>ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson.png&#39;, height = 6, width = 8)</code></pre>
 <p>All pairwise comparison.</p>
-<pre class="r"><code>df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% dcast(gene + partition + sample_size ~ method , value.var = &#39;pearson_correlation&#39;) %&gt;% ggplot(aes(x = vanilla, y = mixPred)) + geom_point(alpha = .2) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~sample_size, labeller = label_both) + th + coord_equal()</code></pre>
-<pre><code>## Warning in dcast(., gene + partition + sample_size ~ method, value.var = &quot;pearson_correlation&quot;):
-## The dcast generic in data.table has been passed a data.frame and will attempt to redirect to the
-## reshape2::dcast; please note that reshape2 is deprecated, and this redirection is now deprecated as
-## well. Please do this redirection yourself like reshape2::dcast(.). In the next version, this warning
-## will become an error.</code></pre>
-<p><img src="gtex_v8_prediction_cv_files/figure-html/plot_pearson_box-1.png" width="672" /></p>
+<pre class="r"><code>df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% dcast(gene + partition + sample_size ~ method , value.var = &#39;pearson_correlation&#39;) %&gt;% ggplot(aes(x = standard, y = mixPred)) + geom_point(alpha = .2) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~sample_size, labeller = label_both, ncol=4) + th2 + coord_equal()</code></pre>
+<pre><code>## Warning in dcast(., gene + partition + sample_size ~ method, value.var =
+## &quot;pearson_correlation&quot;): The dcast generic in data.table has been passed a data.frame and
+## will attempt to redirect to the reshape2::dcast; please note that reshape2 is deprecated,
+## and this redirection is now deprecated as well. Please do this redirection yourself like
+## reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
+<p><img src="gtex_v8_prediction_cv_files/figure-html/plot_pearson_box-1.png" width="768" /></p>
 <p>As violin plot.</p>
-<pre class="r"><code>p = df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% ggplot(aes(x = method, y = pearson_correlation, fill = method)) + geom_violin() + geom_boxplot(width = .4) + facet_wrap(~sample_size, labeller = label_both) + th + scale_fill_manual(values = cbPalette) + theme(legend.position = &#39;bottom&#39;)
+<pre class="r"><code>p = df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% ggplot(aes(x = method, y = pearson_correlation, fill = method)) + geom_violin() + geom_boxplot(width = .2) + facet_wrap(~sample_size, labeller = label_both) + th2 + scale_fill_manual(values = cbPalette) + theme(legend.position = &#39;bottom&#39;)
 p </code></pre>
-<p><img src="gtex_v8_prediction_cv_files/figure-html/plot_pearson_box2-1.png" width="672" /></p>
-<pre class="r"><code>ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin.png&#39;, height = 4, width = 7)</code></pre>
-<p>Sample size comparison: 670 * 0.9 vs 670 * 0.5</p>
-<pre class="r"><code># two_cols = as.character(unique(df$sample_size))
-p = df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% mutate(sample_size = paste(&#39;sample size =&#39;, sample_size)) %&gt;% group_by(gene, sample_size, method) %&gt;% summarize(pearson = median(pearson_correlation)) %&gt;% dcast(gene + method ~ sample_size, value.var = &#39;pearson&#39;) %&gt;% ggplot(aes(x = `sample size = 335`, y = `sample size = 603`)) + geom_point(alpha = .2) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~method) + th</code></pre>
-<pre><code>## Warning in dcast(., gene + method ~ sample_size, value.var = &quot;pearson&quot;): The dcast generic in data.table
-## has been passed a grouped_df and will attempt to redirect to the reshape2::dcast; please note that
-## reshape2 is deprecated, and this redirection is now deprecated as well. Please do this redirection
-## yourself like reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
-<pre class="r"><code>p </code></pre>
-<p><img src="gtex_v8_prediction_cv_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
-<pre class="r"><code>ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-2.png&#39;, height = 4, width = 7)</code></pre>
+<p><img src="gtex_v8_prediction_cv_files/figure-html/plot_pearson_box2-1.png" width="768" /></p>
+<pre class="r"><code># ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin.png&#39;, height = 4, width = 7)</code></pre>
+<pre class="r"><code>p = df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% ggplot(aes(x = factor(sample_size), y = pearson_correlation, fill = method)) + geom_violin(position = position_dodge(width=0.8), alpha = 0.5) + geom_boxplot(width = .2, position = position_dodge(width=0.8), alpha = 0.5) + th + scale_fill_manual(values = cbPalette) + theme(legend.position = &#39;bottom&#39;) +
+  ylab(&#39;Pearson\&#39;s correlation&#39;) + xlab(&#39;Sample size&#39;)
+ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin.png&#39;, height = 3, width = 6)</code></pre>
+<p>Paired t-test</p>
+<pre class="r"><code>perform_t_test = function(method, gene, score) {
+  df = data.frame(method, gene, score)
+  df1 = df %&gt;% filter(method == &#39;mixPred&#39;) 
+  df2 = df %&gt;% filter(method == &#39;standard&#39;) 
+  dd = inner_join(df1, df2, by = &#39;gene&#39;)
+  res = t.test(dd$score.x, dd$score.y, paired = T)
+  return(data.frame(pairwise_diff = res$estimate, diff_ci95_low = res$conf.int[1], diff_ci95_high = res$conf.int[2], pval = res$p.value, median_mixpred = median(dd$score.x), median_standard = median(dd$score.y)))
+}</code></pre>
+<pre class="r"><code>tmp = df %&gt;% group_by(gene, method, sample_size) %&gt;% summarize(pearson = median(pearson_correlation)) %&gt;% select(gene, pearson, method, sample_size) %&gt;% ungroup() %&gt;% group_by(sample_size) %&gt;% do(perform_t_test(.$method, .$gene, .$pearson))
+tmp %&gt;% pander</code></pre>
+<table>
+<colgroup>
+<col width="12%" />
+<col width="14%" />
+<col width="14%" />
+<col width="15%" />
+<col width="10%" />
+<col width="15%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">sample_size</th>
+<th align="center">pairwise_diff</th>
+<th align="center">diff_ci95_low</th>
+<th align="center">diff_ci95_high</th>
+<th align="center">pval</th>
+<th align="center">median_mixpred</th>
+<th align="center">median_standard</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">67</td>
+<td align="center">0.02802</td>
+<td align="center">0.02364</td>
+<td align="center">0.0324</td>
+<td align="center">1.244e-33</td>
+<td align="center">0.1198</td>
+<td align="center">0.06873</td>
+</tr>
+<tr class="even">
+<td align="center">84</td>
+<td align="center">0.03091</td>
+<td align="center">0.02664</td>
+<td align="center">0.03519</td>
+<td align="center">9.285e-42</td>
+<td align="center">0.1651</td>
+<td align="center">0.09827</td>
+</tr>
+<tr class="odd">
+<td align="center">96</td>
+<td align="center">0.02967</td>
+<td align="center">0.02511</td>
+<td align="center">0.03424</td>
+<td align="center">1.273e-34</td>
+<td align="center">0.1854</td>
+<td align="center">0.1187</td>
+</tr>
+<tr class="even">
+<td align="center">112</td>
+<td align="center">0.02918</td>
+<td align="center">0.02477</td>
+<td align="center">0.0336</td>
+<td align="center">1.184e-35</td>
+<td align="center">0.2094</td>
+<td align="center">0.1542</td>
+</tr>
+<tr class="odd">
+<td align="center">134</td>
+<td align="center">0.02418</td>
+<td align="center">0.01966</td>
+<td align="center">0.02871</td>
+<td align="center">1.712e-24</td>
+<td align="center">0.236</td>
+<td align="center">0.1977</td>
+</tr>
+<tr class="even">
+<td align="center">168</td>
+<td align="center">0.02363</td>
+<td align="center">0.01954</td>
+<td align="center">0.02773</td>
+<td align="center">4.424e-28</td>
+<td align="center">0.2571</td>
+<td align="center">0.2225</td>
+</tr>
+<tr class="odd">
+<td align="center">224</td>
+<td align="center">0.01795</td>
+<td align="center">0.01384</td>
+<td align="center">0.02206</td>
+<td align="center">4.01e-17</td>
+<td align="center">0.2786</td>
+<td align="center">0.2499</td>
+</tr>
+<tr class="even">
+<td align="center">335</td>
+<td align="center">0.01353</td>
+<td align="center">0.009754</td>
+<td align="center">0.0173</td>
+<td align="center">3.735e-12</td>
+<td align="center">0.2997</td>
+<td align="center">0.2838</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>tmp %&gt;% write.csv(&#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-pairwise-ttest.csv&#39;, quote = F)</code></pre>
+<!-- Sample size comparison -->
+<!-- ```{r} -->
+<!-- # two_cols = as.character(unique(df$sample_size)) -->
+<!-- p = df %>% select(gene, pearson_correlation, method, partition, sample_size) %>% mutate(sample_size = paste('sample size =', sample_size)) %>% group_by(gene, sample_size, method) %>% summarize(pearson = median(pearson_correlation)) %>% dcast(gene + method ~ sample_size, value.var = 'pearson') %>% ggplot(aes(x = `sample size = 335`, y = `sample size = 603`)) + geom_point(alpha = .2) + geom_density2d(color = 'gray') + geom_abline(slope = 1, intercept = 0, color = 'gray') + facet_wrap(~method) + th -->
+<!-- p  -->
+<!-- ggsave(filename = '../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-2.png', height = 4, width = 7) -->
+<!-- ``` -->
 </div>
 
 
