@@ -13,7 +13,7 @@ library(data.table)
 options(datatable.fread.datatable = FALSE)
 options(stringsAsFactors = FALSE)
 source('../code/rlib_analysis.R')
-datadir = '/Users/yanyul/Desktop/mixqtl-pipeline-results/gtex_v8-results/'
+datadir = '/Users/yanyul/Desktop/mixqtl-pipeline-results/'  # gtex_v8-results/
 cbPalette <- c('ascQTL' = "#999999", 'mixFine' = "#E69F00", 'trcQTL' = "#56B4E9", 'vanilla' = "#009E73", 'standard approach' = "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 source('https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R')
 # th0 = th
@@ -27,6 +27,8 @@ parse_name = function(ee) {
   mm = str_remove(str_extract(ee, paste0('result_', cc, '-[a-z]+')), paste0('result_', cc, '-'))
   return(list(batch = b, fraction = f, type = cc, method = mm))
 }
+
+expression_level = read.table('~/Desktop/mixqtl-pipeline-results/misc_data/gtex-v8-genes-passed-qc-with-median-trc.txt', header = T, stringsAsFactors = F)
 ```
 
 # Load result
@@ -58,7 +60,7 @@ for(m in 1 : nrow(method_df)) {
   tag = method_df$tag[m]
   for(frac in fractions) {
     for(bat in batch) {
-      e = Sys.glob(paste0(datadir, 'mixfine-subsample/gene_list_whole_blood_for_subsampling_with_qc0*/Whole_Blood/pack/mypack-03-08-20__indiv_subset-indiv_subset__fraction', frac, '__batch', bat, '-result_pip-', method, '.rds'))
+      e = Sys.glob(paste0(datadir, 'mixfine-subsample/gene_list_whole_blood_for_subsampling_with_qc0*/Whole_Blood/pack/mypack-08-10-20__indiv_subset-indiv_subset__fraction', frac, '__batch', bat, '-result_pip-', method, '.rds'))
       for(ee in e) {
         d = readRDS(ee)
       list_pip[[length(list_pip) + 1]] = d$pip %>% mutate(method = method, batch = bat, fraction = frac)
@@ -76,9 +78,14 @@ df_full_g_complete = df_full_g %>% group_by(gene) %>% summarize(n_success = n())
 gene_complete_all = df_subsample_g_complete %>% filter(gene %in% df_full_g_complete$gene)
 
 # extract the genes with complete results (no failed runs)
-df_subsample_complete = df_subsample %>% filter(gene %in% gene_complete_all$gene)
+df_subsample_complete = df_subsample %>% filter(gene %in% gene_complete_all$gene) 
 df_full_complete = df_full %>% filter(gene %in% gene_complete_all$gene)
 df_both_complete = rbind(df_full_complete, df_subsample_complete)
+
+# # filter out low asc genes
+# df_subsample_complete = df_subsample_complete %>% filter(gene %in% expression_level$gene[expression_level$n_good_asc > 30 / 3 * 10]) 
+# df_full_complete = df_full_complete %>% filter(gene %in% expression_level$gene[expression_level$n_good_asc > 30 / 3 * 10]) 
+# df_both_complete = df_both_complete %>% filter(gene %in% expression_level$gene[expression_level$n_good_asc > 30 / 3 * 10]) 
 ```
 
 # Plot
@@ -98,7 +105,7 @@ g %>% ggplot() + geom_point(aes(x = nefine, y = mixfine)) + facet_wrap(~fraction
 # extract variant-gene pairs with PIP > 0.5 from full set in both mixfine and nefine
 # plot the fraction of them identified in sub sampled sets
 consensus_eqtl = df_full_complete %>% filter(variable_prob > 0.5) %>% group_by(variant_id, gene) %>% summarize(n_method = n()) %>% ungroup() %>% filter(n_method == 2)
-df_subsample_with_consensus = df_subsample_complete %>% mutate(is_consensus = paste(variant_id, gene) %in% paste(consensus_eqtl$variant_id, consensus_eqtl$gene))
+df_subsample_with_consensus = df_subsample_complete %>% filter(variable_prob > 0) %>% mutate(is_consensus = paste(variant_id, gene) %in% paste(consensus_eqtl$variant_id, consensus_eqtl$gene))
 df_subsample_with_consensus_summary = df_subsample_with_consensus %>% group_by(method, fraction, batch) %>% summarize(fraction_of_detection = sum(is_consensus) / nrow(consensus_eqtl))
 df_subsample_with_consensus_summary_flat = df_subsample_with_consensus_summary %>% dcast(fraction + batch ~ method, value.var = 'fraction_of_detection')
 df_subsample_with_consensus_summary_flat %>% ggplot() + geom_point(aes(x = mixfine, y = nefine)) + geom_abline(slope = 1, intercept = 0)
@@ -154,7 +161,6 @@ sub_flat %>% filter(!is.na(mixfine), !is.na(nefine)) %>% summarize(mean_mixfine 
 # Stratifying by gene expression level
 
 ```{r}
-expression_level = read.table('~/Desktop/mixqtl-pipeline-results/misc_data/gtex-v8-genes-passed-qc-with-median-trc.txt', header = T, stringsAsFactors = F)
 cutoffs = quantile(expression_level$median_trc, probs = c(1/3, 2/3))
 # df_subsample_with_consensus$median_trc = expression_level$median_trc[match(df_subsample_with_consensus$gene, expression_level$gene)]
 df_subsample_with_consensus = df_subsample_complete %>% mutate(is_consensus = paste(variant_id, gene) %in% paste(consensus_eqtl$variant_id, consensus_eqtl$gene))
