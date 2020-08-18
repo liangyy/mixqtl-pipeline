@@ -409,8 +409,16 @@ df$theta = factor(df$theta, levels = theta)</code></pre>
 <div id="prediction-performance" class="section level1">
 <h1><span class="header-section-number">2</span> Prediction performance</h1>
 <pre class="r"><code>df[is.na(df)] = 0
-df_pcor = df %&gt;% select(method, m, replicate, pearson_correlation, sample_size, theta) %&gt;% dcast(sample_size + theta + m + replicate ~ method, value.var = &#39;pearson_correlation&#39;)
-df_pve = df %&gt;% select(method, m, replicate, pve, sample_size, theta) %&gt;% dcast(sample_size + theta + m + replicate ~ method, value.var = &#39;pve&#39;)</code></pre>
+df_pcor = df %&gt;% select(method, m, replicate, pearson_correlation, sample_size, theta) %&gt;% dcast(sample_size + theta + m + replicate ~ method, value.var = &#39;pearson_correlation&#39;)</code></pre>
+<pre><code>## Warning in dcast(., sample_size + theta + m + replicate ~ method, value.var = &quot;pearson_correlation&quot;): The dcast generic in
+## data.table has been passed a data.frame and will attempt to redirect to the reshape2::dcast; please note that reshape2 is
+## deprecated, and this redirection is now deprecated as well. Please do this redirection yourself like reshape2::dcast(.). In
+## the next version, this warning will become an error.</code></pre>
+<pre class="r"><code>df_pve = df %&gt;% select(method, m, replicate, pve, sample_size, theta) %&gt;% dcast(sample_size + theta + m + replicate ~ method, value.var = &#39;pve&#39;)</code></pre>
+<pre><code>## Warning in dcast(., sample_size + theta + m + replicate ~ method, value.var = &quot;pve&quot;): The dcast generic in data.table has
+## been passed a data.frame and will attempt to redirect to the reshape2::dcast; please note that reshape2 is deprecated,
+## and this redirection is now deprecated as well. Please do this redirection yourself like reshape2::dcast(.). In the next
+## version, this warning will become an error.</code></pre>
 <div id="overall" class="section level2">
 <h2><span class="header-section-number">2.1</span> Overall</h2>
 <pre class="r"><code>df_pcor %&gt;% melt(id.vars = c(&#39;sample_size&#39;, &#39;theta&#39;, &#39;m&#39;, &#39;replicate&#39;)) %&gt;% ggplot() + geom_boxplot(aes(x = variable, y = value, color = variable)) + facet_grid(theta ~ sample_size, labeller = label_both) + scale_color_manual(values=cbPalette2) +
@@ -418,12 +426,20 @@ df_pve = df %&gt;% select(method, m, replicate, pve, sample_size, theta) %&gt;% 
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
   theme(legend.position=&quot;bottom&quot;)</code></pre>
+<pre><code>## Warning in melt(., id.vars = c(&quot;sample_size&quot;, &quot;theta&quot;, &quot;m&quot;, &quot;replicate&quot;)): The melt generic in data.table has been passed a
+## data.frame and will attempt to redirect to the relevant reshape2 method; please note that reshape2 is deprecated, and this
+## redirection is now deprecated as well. To continue using melt methods from reshape2 while both libraries are attached, e.g.
+## melt.list, you can prepend the namespace like reshape2::melt(.). In the next version, this warning will become an error.</code></pre>
 <p><img src="sim_mixpred_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <pre class="r"><code>df_pve %&gt;% melt(id.vars = c(&#39;sample_size&#39;, &#39;theta&#39;, &#39;m&#39;, &#39;replicate&#39;)) %&gt;% ggplot() + geom_boxplot(aes(x = variable, y = value, color = variable)) + facet_grid(theta ~ sample_size, labeller = label_both) + scale_color_manual(values=cbPalette2) +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank()) +
   theme(legend.position=&quot;bottom&quot;)</code></pre>
+<pre><code>## Warning in melt(., id.vars = c(&quot;sample_size&quot;, &quot;theta&quot;, &quot;m&quot;, &quot;replicate&quot;)): The melt generic in data.table has been passed a
+## data.frame and will attempt to redirect to the relevant reshape2 method; please note that reshape2 is deprecated, and this
+## redirection is now deprecated as well. To continue using melt methods from reshape2 while both libraries are attached, e.g.
+## melt.list, you can prepend the namespace like reshape2::melt(.). In the next version, this warning will become an error.</code></pre>
 <p><img src="sim_mixpred_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
 </div>
 <div id="mixpred-vs.glmnet-new" class="section level2">
@@ -455,8 +471,12 @@ df_cpu %&gt;% ggplot() + geom_bar(aes(x = method, y = mean_time, fill = method),
 th$panel.border = element_rect(colour = th$axis.line$colour)
 sample_sizes = c(100, 300, 500)
 thetas = c(&#39;1e-5&#39;, &#39;2.5e-6&#39;)
-sub = df_pcor %&gt;% filter(sample_size %in% sample_sizes, theta %in% thetas) %&gt;% melt(id.vars = c(&#39;sample_size&#39;, &#39;theta&#39;, &#39;m&#39;, &#39;replicate&#39;)) 
-sub$variable = as.character(sub$variable)
+sub = df_pcor %&gt;% filter(sample_size %in% sample_sizes, theta %in% thetas) %&gt;% melt(id.vars = c(&#39;sample_size&#39;, &#39;theta&#39;, &#39;m&#39;, &#39;replicate&#39;)) </code></pre>
+<pre><code>## Warning in melt(., id.vars = c(&quot;sample_size&quot;, &quot;theta&quot;, &quot;m&quot;, &quot;replicate&quot;)): The melt generic in data.table has been passed a
+## data.frame and will attempt to redirect to the relevant reshape2 method; please note that reshape2 is deprecated, and this
+## redirection is now deprecated as well. To continue using melt methods from reshape2 while both libraries are attached, e.g.
+## melt.list, you can prepend the namespace like reshape2::melt(.). In the next version, this warning will become an error.</code></pre>
+<pre class="r"><code>sub$variable = as.character(sub$variable)
 
 p = sub %&gt;% filter(variable %in% c(&#39;trcPred&#39;, &#39;mixPred&#39;)) %&gt;% ggplot() + geom_violin(aes(x = variable, y = value, fill = variable), alpha = .5) + geom_boxplot(aes(x = variable, y = value, fill = variable), width = .2) + facet_grid(sample_size ~ theta, labeller = label_both) + scale_fill_manual(values=cbPalette2) +
   # theme(axis.title.x=element_blank(),
@@ -481,8 +501,12 @@ ggsave(&#39;../output/grid_sim-multi_0613_prediction_runtime.png&#39;, p, height
 <h1><span class="header-section-number">6</span> Summary with TRC and mixPred (full grid for supp)</h1>
 <pre class="r"><code>sample_sizes = unique(df_pcor$sample_size) # c(100, 300, 500)
 thetas = unique(df_pcor$theta)  # c(&#39;1e-5&#39;, &#39;2.5e-6&#39;)
-sub = df_pcor %&gt;% filter(sample_size %in% sample_sizes, theta %in% thetas) %&gt;% melt(id.vars = c(&#39;sample_size&#39;, &#39;theta&#39;, &#39;m&#39;, &#39;replicate&#39;)) 
-sub$variable = as.character(sub$variable)
+sub = df_pcor %&gt;% filter(sample_size %in% sample_sizes, theta %in% thetas) %&gt;% melt(id.vars = c(&#39;sample_size&#39;, &#39;theta&#39;, &#39;m&#39;, &#39;replicate&#39;)) </code></pre>
+<pre><code>## Warning in melt(., id.vars = c(&quot;sample_size&quot;, &quot;theta&quot;, &quot;m&quot;, &quot;replicate&quot;)): The melt generic in data.table has been passed a
+## data.frame and will attempt to redirect to the relevant reshape2 method; please note that reshape2 is deprecated, and this
+## redirection is now deprecated as well. To continue using melt methods from reshape2 while both libraries are attached, e.g.
+## melt.list, you can prepend the namespace like reshape2::melt(.). In the next version, this warning will become an error.</code></pre>
+<pre class="r"><code>sub$variable = as.character(sub$variable)
 
 p = sub %&gt;% filter(variable %in% c(&#39;trcPred&#39;, &#39;mixPred&#39;)) %&gt;% ggplot() + geom_violin(aes(x = variable, y = value, fill = variable), alpha = .5) + geom_boxplot(aes(x = variable, y = value, fill = variable), width = .2) + facet_grid(sample_size ~ theta) + scale_fill_manual(values=cbPalette2) +
   # theme(axis.title.x=element_blank(),

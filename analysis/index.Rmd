@@ -10,6 +10,7 @@ title: "Analysis gallary"
 * mixFine on GTEx V8 (experimental validation plot) [link](gtex_v8_finemap_experimental.html)
 * mixFine on GTEx V8 (subsampling analysis) [link](gtex_v8_finemap_subsample.html)
 * mixPred on GTEx V8 (Prediction performance evaluated by cross-validation) [link](gtex_v8_prediction_cv.html)
+* mixPred on GTEx V8 (added more tests on smaller sample sizes) [link](gtex_v8_prediction_cv_new.html)
 
 Analysis on the side:
 
