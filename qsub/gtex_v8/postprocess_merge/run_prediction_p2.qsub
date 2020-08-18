@@ -11,7 +11,7 @@ source ~/.bashrc
 cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/gtex_v8
 conda activate mixqtl
 
-namelist=('indiv_partition-gtex_v8_whole_blood_partition_2-performance-mixpred' 'indiv_partition-gtex_v8_whole_blood_partition_2-performance-nepred')
+namelist=('indiv_partition-gtex_v8_whole_blood_partition_2_old-performance-mixpred' 'indiv_partition-gtex_v8_whole_blood_partition_2_old-performance-nepred')
 
 for i in "${namelist[@]}"
 do

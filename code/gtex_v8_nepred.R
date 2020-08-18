@@ -105,8 +105,14 @@ if(is.null(df_partition)) {
   for(p in parts) {
     message('working on partition ', p, '/', length(parts))
     indiv_subset = df_partition$indiv[df_partition$partition == p]
-    test_ind = colnames(data_collector$geno1) %in% indiv_subset
-    train_ind = ! test_ind
+    if(as.numeric(p) < 0) {
+      test_ind = ! colnames(data_collector$geno1) %in% indiv_subset
+      train_ind = ! test_ind
+    } else {
+      test_ind = colnames(data_collector$geno1) %in% indiv_subset
+      train_ind = ! test_ind
+    }
+    print(sum(train_ind))
     mod = mixqtl:::fit_glmnet_with_cv(
       X[train_ind, , drop = FALSE],
       y[train_ind], 

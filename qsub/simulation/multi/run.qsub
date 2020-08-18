@@ -7,7 +7,7 @@
 
 source ~/.bash_profile
 source ~/.bashrc
-cd /home/t.cri.yliang/scratch/GitHub/mixqtl-pipeline/pipeline/simulation
+cd /gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/pipeline/simulation
 conda activate mixqtl  
 
 snakemake -s simulation_multi.snmk --configfile ../../qsub/simulation/multi/configs/config_$NAME.yaml --unlock --config outdir=$OUTDIR

@@ -12,6 +12,9 @@ option_list <- list(
                 metavar="character"),
     make_option(c("-s", "--subsample_indiv"), type="numeric", default=NULL,
                 help="fraction to subsample individuals",
+                metavar="character"),
+    make_option(c("-d", "--direction"), type="character", default="+",
+                help='If set "-" it will add minus sign to parition which will trigger the opposite behavior in traning/testing.',
                 metavar="character")
 )
 
@@ -46,7 +49,9 @@ for(i in 1 : length(size_per_part)) {
 }
 random_partition = part_labels[sample(1 : nindiv)]
 out = data.frame(indiv = covariate_names, partition = random_partition)
-
+if(opt$direction == '-') {
+  out$partition = - out$partition
+}
 
 write.table(out, paste0(opt$output_prefix, '.partition_', n, '.txt'), col = T, row = F, quo = F)
 

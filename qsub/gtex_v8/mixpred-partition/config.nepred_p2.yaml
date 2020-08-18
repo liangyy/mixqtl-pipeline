@@ -1,10 +1,10 @@
 tissue: 'Whole_Blood'
 method: 'nepred'
 covariate: '/gpfs/data/gtex-group/v8/59349/gtex/exchange/GTEx_phs000424/exchange/analysis_releases/GTEx_Analysis_2017-06-05_v8/eqtl/GTEx_Analysis_v8_eQTL_covariates/Whole_Blood.v8.covariates.txt'
-expression: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/expression/merge-Whole_Blood.rds'
-genotype: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-preprocess/genotype/{gene}.txt.gz'
-indiv_partition: '/gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/misc_data/prediction_partition_whole_blood.partition_2.txt' 
-indiv_partition_name: 'gtex_v8_whole_blood_partition_2'
+expression: '/gpfs/data/im-lab/nas40t2/yanyul/GTExV8-mixqtl/mixqtl-pipeline-results/gtex_v8-preprocess/expression/merge-Whole_Blood.rds'
+genotype: '/gpfs/data/im-lab/nas40t2/yanyul/GTExV8-mixqtl/mixqtl-pipeline-results/gtex_v8-preprocess/genotype/{gene}.txt.gz'
+indiv_partition: '/gpfs/data/im-lab/nas40t2/yanyul/GitHub/mixqtl-pipeline/misc_data/prediction_partition_whole_blood_old.partition_2.txt' 
+indiv_partition_name: 'gtex_v8_whole_blood_partition_2_old'
 outdir: '/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/mixpred-partition-p2'
 
 

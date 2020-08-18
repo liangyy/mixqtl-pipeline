@@ -44,7 +44,7 @@ df = data.frame(
 
 # run mixFine
 timer = system.time({
-  mod = mixfine(h1, h2, df$y1, df$y2, df$ytotal, df$lib_size, cov_offset = NULL, trc_cutoff = 0, asc_cutoff = 0, nobs_asc_cutoff = 1)  # , weight_cap = NULL)
+  mod = mixfine(h1, h2, df$y1, df$y2, df$ytotal, df$lib_size, cov_offset = NULL, trc_cutoff = 0, asc_cutoff = 0, nobs_asc_cutoff = 10)  # , weight_cap = NULL)
   # mod = tmp$mod
 }, gcFirst = T)
   

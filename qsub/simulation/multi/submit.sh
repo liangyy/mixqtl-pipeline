@@ -35,6 +35,15 @@ do
     echo '  path: ../../qsub/simulation/multi/configs/param_'"$jobname".yaml >> configs/config_$jobname.yaml
     
     # submit
-    qsub -v NAME=$jobname,OUTDIR=$OUTDIR -N $jobname run.qsub
+    if [[ -f logs/$jobname.out ]]
+    then
+      e=`cat logs/$jobname.out  | grep Exit | tail -n 1 | grep 0 | wc -l`;
+      if [[ $e != 1 ]]
+      then
+        qsub -v NAME=$jobname,OUTDIR=$OUTDIR -N $jobname run.qsub
+      fi
+    else
+      qsub -v NAME=$jobname,OUTDIR=$OUTDIR -N $jobname run.qsub
+    fi
   done
 done

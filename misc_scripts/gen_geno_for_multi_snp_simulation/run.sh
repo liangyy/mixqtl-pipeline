@@ -14,9 +14,13 @@ if [[ ! -f ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.v
 then 
   wget http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
 fi
-if [[ ! -f integrated_call_samples_v2.20130502.ALL.ped ]]
-then 
-  wget http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/integrated_call_samples_v2.20130502.ALL.ped
+# if [[ ! -f integrated_call_samples_v2.20130502.ALL.ped ]]
+# then 
+#   wget http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/integrated_call_samples_v2.20130502.ALL.ped
+# fi
+if [[ ! -f integrated_call_samples_v3.20200731.ALL.ped ]]
+then
+  wget http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/integrated_call_samples_v3.20200731.ALL.ped
 fi
 
 # download gencode gene annotation
@@ -61,6 +65,7 @@ bash $scriptdir/extract_genotype.sh \
   selected_genes.txt \
   EUR.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz \
   genotype \
-  "EUR_AF<0.01|EUR_AF>0.99"
+  "EUR_AF<0.05|EUR_AF>0.95"
+  # "EUR_AF<0.01|EUR_AF>0.99"
 
 
