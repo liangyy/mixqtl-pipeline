@@ -8,7 +8,7 @@ MYCONFIGS=config.mixfine.yaml:config.nefine.yaml  # $1
 TASKNAME=gene_list_whole_blood_for_subsampling_with_qc  
 # genelist=$2
 SUBSETDIR=subsample_whole_blood  # $3
-packname=mypack-03-08-20  # $4
+packname=mypack-08-10-20  # $4
 outdir=/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/mixfine-subsample  # $5
 
 if [ ! -d "pack_logs" ]; then
@@ -17,7 +17,7 @@ fi
 
 for genelist in `ls gene_list/$TASKNAME* | sed 's#gene_list/##g'`;
 do
-  qsub -v GENELIST=$genelist,PACKNAME=$packname,MYCONFIGS=$MYCONFIGS,OUTDIR=$outdir,SUBSETDIR=$SUBSETDIR -N $packname run_pack.qsub
+  echo qsub -v GENELIST=$genelist,PACKNAME=$packname,MYCONFIGS=$MYCONFIGS,OUTDIR=$outdir,SUBSETDIR=$SUBSETDIR -N $packname run_pack.qsub
 done
 
 

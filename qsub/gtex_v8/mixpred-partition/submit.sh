@@ -8,13 +8,13 @@
 # ARGV6: name of job
 # ARGV7: output folder of log
 
-MYCONFIGS=config.mixpred.yaml:config.nepred.yaml:config.trcpred.yaml  # $1
+MYCONFIGS=config.mixpred.yaml:config.nepred.yaml  # :config.trcpred.yaml  # $1
 TASKNAME=gene_list_whole_blood_for_subsampling_with_qc  # this is the subset of genes passing QC # gtex-v8-genes-passed-qc_gene_list  # $2  # gene list name
 # SUBSETDIR=subsample_whole_blood  # relative path to subsampled individual IDs  # $3
 # OUTDIR=/scratch/t.cri.yliang/mixqtl-pipeline-results/gtex_v8-results/mixpred-partition  # $4
 NGENE=100  # $4
 JOBNAME=mixpred-partition  # $5
-OUTLOG=myrun-03-06-20  # $6
+OUTLOG=myrun-08-15-20  # $6
 
 if [ ! -d "logs" ]; then
   mkdir logs/

@@ -74,7 +74,11 @@ geno2[is_na] = geno1[is_na]
 df = data.frame(y1 = data_collector$ase1_g, y2 = data_collector$ase2_g, trc = data_collector$trc_g, Ti_lib = data_collector$nlib) %>% mutate(y_trc = trc, lib_size = Ti_lib, y_ase1 = y1, y_ase2 = y2)
 
 
-mod = mixfine(geno1, geno2, df$y1, df$y2, df$y_trc, df$lib_size, cov_offset = indiv_offset, trc_cutoff = 100, asc_cutoff = 50, weight_cap = 10, asc_cap = 1000, nobs_asc_cutoff = 3)
+mod = mixfine(geno1, geno2, df$y1, df$y2, df$y_trc, df$lib_size, cov_offset = indiv_offset, 
+              trc_cutoff = 0, # 100 
+              asc_cutoff = 0, # 50 
+              nobs_asc_cutoff = 10
+)
 if('cs' %in% names(mod)) {
   cs = mod$cs
   vars = mod$vars

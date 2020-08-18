@@ -24,10 +24,16 @@ cd ../
 
 for i in `ls gene_list/$genelist* | sed 's#gene_list/##g'`
 do
-  e=`cat logs/prep_gene--$i.out | grep Exit | tail -n 1 | grep 1`
-  if [[ -z $e ]]
+  if [[ -f logs/prep_gene--$i.out ]]
   then
-    continue
+    e=`cat logs/prep_gene--$i.out | grep Exit | tail -n 1 | grep 1`
+    if [[ -z $e ]]
+    then
+      continue
+    else
+      qsub -v GENELIST=../../qsub/gtex_v8/mixfine/gene_list/$i,MYID=$i -N prep-$i prepare_genes.qsub
+    fi
+  else
+    qsub -v GENELIST=../../qsub/gtex_v8/mixfine/gene_list/$i,MYID=$i -N prep-$i prepare_genes.qsub
   fi
-  qsub -v GENELIST=../../qsub/gtex_v8/mixfine/gene_list/$i,MYID=$i -N prep-$i prepare_genes.qsub
 done

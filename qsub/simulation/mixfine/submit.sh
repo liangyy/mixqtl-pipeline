@@ -4,6 +4,8 @@
 # ARGV4: middle name of readcount file
 # ARGV5: suffix of readcount file
 # ARGV6: outdir
+# ARGV7: suffix of logs
+
 
 genoprefix=$1
 genosuffix=$2
@@ -33,7 +35,7 @@ do
     do
       m=${method[$i]}
       f=${finemap[$i]}
-      logf=logs/$name-$m.out
+      logf=logs/$name$7-$m.out
        
       if [[ -f $logf ]]
       then 
@@ -50,8 +52,8 @@ do
   M_from: 1
   M_to: 100
   name: '$name'
-" > configs/config_$name.yaml
-      qsub -v NAME=$name,METHOD=$m,OUTDIR=$outdir -N $name-$m run.qsub
+" > configs/config_$name$7.yaml
+      qsub -v NAME=$name$7,METHOD=$m,OUTDIR=$outdir -N $name-$m run.qsub
     done
   done
 done
