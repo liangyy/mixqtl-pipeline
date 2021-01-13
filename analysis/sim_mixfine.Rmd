@@ -13,7 +13,16 @@ source('../code/rlib_analysis.R')
 datadir = '~/Desktop/mixqtl-pipeline-results/simulation-mixfine/'
 cbPalette2 <- c("ascFine" = "#999999", "mixFine" = "#E69F00", "trcFine" = "#56B4E9")
 source('https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/8151c6fe70e3d4ee43d9ce340ecc0eb65172e616/my_ggplot_theme.R')
+th2 = th
 th$panel.border = element_rect(colour = th$axis.line$colour)
+
+get_true_varid = function(v, beta) {
+  if(sum(beta != 0) != 1) {
+    return(NA)
+  } else {
+    return(v[beta != 0])
+  }
+}
 ```
 
 # Load data
@@ -47,8 +56,8 @@ for(theta in thetas) {
       inclusion[[length(inclusion) + 1]] = inclusion_sub
       calibration[[length(calibration) + 1]] = data.frame(pip = temp$vars$variable_prob, is_true = temp$vars$beta_true != 0) %>% mutate(pip_bin = floor(pip * 10)) %>% group_by(pip_bin) %>% summarise(total = n(), nsig = sum(is_true)) %>% ungroup() %>% mutate(method = m, theta = theta, sample_size = samplesize)
       # size of credible set
-      cs_temp = temp$vars %>% group_by(cs, simulation) %>% filter(cs != -1) %>% summarise(is_true = sum(beta_true != 0) > 0, size = n()) %>% ungroup() %>% filter(is_true)
-      cs_sub = data.frame(cs_size = cs_temp$size)
+      cs_temp = temp$vars %>% group_by(cs, simulation) %>% filter(cs != -1) %>% summarise(is_true = sum(beta_true != 0) > 0, size = n(), varid_true = get_true_varid(variable, beta_true)) %>% ungroup() %>% filter(is_true)
+      cs_sub = data.frame(cs_size = cs_temp$size, simulation = cs_temp$simulation, varid_true = cs_temp$varid_true)
       cs_sub$method = m
       cs_sub$sample_size = samplesize
       cs_sub$theta = theta
@@ -107,6 +116,7 @@ p = p + theme(legend.position = 'bottom')
 p = p + th
 p = p + xlab('Number of SNPs considered as positive') + ylab('Power') + theme(aspect.ratio = 1)
 ggsave('../output/grid_sim-multi_0613_finemap_inclusion.png', p, height = 5.5, width = 3.5)
+ggsave('../output/grid_sim-multi_0613_finemap_inclusion.pdf', p, height = 5.5, width = 3.5)
 ```
 
 ## Calibration of PIP
@@ -122,6 +132,7 @@ p = this_ca %>% filter(method %in% methods) %>% mutate(obs_fraction = nsig / n, 
 p = p + th
 p = p + ylab('Fraction of true positives') + xlab('PIP bin (bin size = 0.1)') + coord_equal(xlim = c(0, 1), ylim = c(0, 1))
 ggsave('../output/grid_sim-multi_0613_finemap_calibration.png', p, height = 3.5, width = 3.5)
+ggsave('../output/grid_sim-multi_0613_finemap_calibration.pdf', p, height = 3.5, width = 3.5)
 ```
 
 ## Size of credible set
@@ -135,6 +146,91 @@ p = p + th
 p = p + theme(legend.position = 'bottom')
 p = p + xlab('Size of 95% credible set') + ylab('Count of occurence') + theme(aspect.ratio = 1)
 ggsave('../output/grid_sim-multi_0613_finemap_cs.png', p, height = 5.5, width = 3.5)
+```
+
+Compare the mean of CS size. And do QQ-plot.
+
+```{r}
+# CS size boxplot
+p = this_cs %>% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %>% ggplot(aes(x = method, y = cs_size, fill = method)) + 
+  geom_violin() +
+  geom_boxplot(width = .2) + th + scale_fill_manual(values = cbPalette2) +
+  facet_grid(sample_size~theta, labeller = label_both, scales = 'free_y') 
+p = p + xlab('Size of 95% credible set') + ylab('Method')
+p = p + theme(legend.position = 'bottom')
+ggsave('../output/grid_sim-multi_0613_finemap_cs_boxplot.png', p, height = 5.5, width = 3.5)
+
+# get_quantile = function(x, probs = 0 : 50 / 100) {
+#   tmp = quantile(x, probs = probs)
+#   data.frame(quantiles = names(tmp), values = as.numeric(tmp))
+# }
+# 
+# test_mean = function(values, labels) {
+#   v1 = values[labels == 'mixFine']
+#   v2 = values[labels == 'trcFine']
+#   tmp = t.test(v1, v2)
+#   data.frame(mean_mixFine = tmp$estimate[1], mean_trcFine = tmp$estimate[2], pval = tmp$p.value)
+# }
+# 
+# # test mean 
+# this_cs %>% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %>% 
+#   group_by(sample_size, theta) %>% do(test_mean(.$cs_size, .$method)) 
+# %>% 
+#   dcast(sample_size + theta + quantiles ~ method, value.var = 'values') %>% 
+#   ggplot() + geom_point(aes(x = trcFine, y = mixFine)) +
+#   facet_grid(sample_size~theta, labeller = label_both, scales = 'free_y') 
+
+# limit to signals identified in both
+paired = cs_size %>% dcast(simulation + varid_true + sample_size + theta ~ method, value.var = 'cs_size') %>% filter(!is.na(mixFine), !is.na(trcFine))
+paired_ttest = t.test(paired$trcFine, paired$mixFine, paired = T)
+df_ttest = t(data.frame(method = 'paired t.test \n (trcFine vs. mixFine)', mean_diff = signif(paired_ttest$estimate, digits = 3), pval = signif(paired_ttest$p.value, digits = 3)))
+colnames(df_ttest) = NULL
+p = paired %>% ggplot() + geom_point(aes(x = trcFine, y = mixFine), alpha = 0.1, size = 4) + th2 + 
+  geom_abline(slope = 1, intercept = 0, color = 'gray') 
+p = p + annotation_custom(gridExtra::tableGrob(df_ttest), xmin=130, xmax=130, ymin=390, ymax=390)
+p = p + xlab('Size of 95% credible set in trcFine') + ylab('Size of 95% credible set in mixFine')
+
+
+# in log scale
+p = paired %>% ggplot() + 
+  geom_hex(aes(x = trcFine, y = mixFine),bins=20) + #th2 + 
+  geom_abline(slope = 1, intercept = 0, color = 'dark gray',size=1) +
+  annotation_custom(gridExtra::tableGrob(df_ttest), xmin=0.7, xmax=0.75, ymin=2.3, ymax=2.3) + theme_bw(base_size = 15) +
+  scale_x_log10() + scale_y_log10() + 
+  scale_fill_gradient( limits = c(0, 50),
+                      low =  "light gray",
+                      high = "black",
+                      na.value="steelblue") + th2  ; p
+
+ggsave('../output/grid_sim-multi_0613_finemap_cs_pairwise.png', p, height = 5.5, width = 6.5)
+
+p = paired %>% ggplot() + 
+  geom_hex(aes(x = trcFine, y = mixFine),bins=20) + #th2 + 
+  geom_abline(slope = 1, intercept = 0, color = 'dark gray',size=1) +
+  annotation_custom(gridExtra::tableGrob(df_ttest), xmin=0.7, xmax=0.75, ymin=2.3, ymax=2.3) + theme_bw(base_size = 15) +
+  scale_x_log10() + scale_y_log10() + 
+  scale_fill_gradient( limits = c(0, 50),
+                      low =  "light gray",
+                      high = "black",
+                      na.value="steelblue") + th2 +
+  theme(legend.position = c(0.1, 0.5)) + coord_equal()
+ggsave('../output/grid_sim-multi_0613_finemap_cs_pairwise.pdf', p, height = 5.5, width = 5.8)
+
+# CS size boxplot (limit to signals identified in both)
+p = this_cs %>% filter(method %in% methods, sample_size %in% sample_sizes, theta %in% thetas) %>% 
+  filter(paste(simulation, varid_true, sample_size, theta) %in% paste(paired$simulation, paired$varid_true, paired$sample_size, paired$theta)) %>% 
+  ggplot(aes(x = method, y = cs_size, fill = method)) + 
+  geom_violin() +
+  geom_boxplot(width = .2) + th + scale_fill_manual(values = cbPalette2) +
+  facet_grid(sample_size~theta, labeller = label_both, scales = 'free_y') 
+p = p + xlab('Size of 95% credible set') + ylab('Method')
+p = p + theme(legend.position = 'bottom')
+ggsave('../output/grid_sim-multi_0613_finemap_cs_boxplot_restricted.png', p, height = 5.5, width = 3.5)
+# 
+# p = paired %>% filter(sample_size %in% sample_sizes, theta %in% thetas) %>% 
+#   ggplot() + geom_point(aes(x = trcFine, y = mixFine), alpha = 0.1, size = 4) + th + 
+#   geom_abline(slope = 1, intercept = 0, color = 'gray')  +
+#   facet_grid(sample_size~theta, labeller = label_both, scales = 'free_y') 
 ```
 
 

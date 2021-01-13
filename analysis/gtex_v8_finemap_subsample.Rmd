@@ -119,6 +119,7 @@ p = temp %>% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of
 p = p + th + theme(aspect.ratio = 1)
 p
 ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc.png', p, height = 4, width = 4)
+ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc.pdf', p, height = 4, width = 4)
 ```
 
 ## Concensus CSs

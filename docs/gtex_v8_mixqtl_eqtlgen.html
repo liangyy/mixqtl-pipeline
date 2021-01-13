@@ -25,8 +25,19 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -414,10 +425,12 @@ for(f in names(fnames)) {
   sub$gene = trim_dot(sub$gene)
   df = rbind(df, sub)
 }
-df_clean = df %&gt;% group_by(gene, variant) %&gt;% summarize(nobs = n()) %&gt;% filter(nobs == 4) %&gt;% ungroup()
-df = df %&gt;% filter(paste(gene, variant) %in% paste(df_clean$gene, df_clean$variant))
+df_clean = df %&gt;% group_by(gene, variant) %&gt;% summarize(nobs = n()) %&gt;% filter(nobs == 4) %&gt;% ungroup()</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;gene&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>df = df %&gt;% filter(paste(gene, variant) %in% paste(df_clean$gene, df_clean$variant))
 # df$pval[df$method == &#39;metaQTL&#39;] = df$pval[df$method == &#39;metaQTL&#39;]
 df %&gt;% group_by(method) %&gt;% summarize(nobs = n()) %&gt;% pander</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <table style="width:25%;">
 <colgroup>
 <col width="12%" />
@@ -462,6 +475,7 @@ p</code></pre>
 <div id="save-figure-for-paper" class="section level2">
 <h2><span class="header-section-number">1.3</span> Save figure for paper</h2>
 <pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive.png&#39;, p, height = 4, width = 4)
+ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive.pdf&#39;, p, height = 4, width = 4)
 collector = df
 for(m in c(&#39;ascQTL&#39;, &#39;trcQTL&#39;, &#39;mixQTL&#39;)) {
   sub = df %&gt;% filter(method %in% c(m, &#39;eQTL&#39;))
@@ -526,7 +540,8 @@ p</code></pre>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.png&#39;), p, height = 4, width = 4)</code></pre>
+<pre class="r"><code>ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.png&#39;), p, height = 4, width = 4)
+ggsave(paste0(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.pdf&#39;), p, height = 4, width = 4)</code></pre>
 </div>
 </div>
 <div id="negative-set-eqtlgen-pvalue-0.5" class="section level1">
@@ -547,10 +562,12 @@ for(f in names(fnames)) {
   sub$gene = trim_dot(sub$gene)
   df = rbind(df, sub)
 }
-df_clean = df %&gt;% group_by(gene, variant) %&gt;% summarize(nobs = n()) %&gt;% filter(nobs == 4) %&gt;% ungroup()
-df = df %&gt;% filter(paste(gene, variant) %in% paste(df_clean$gene, df_clean$variant))
+df_clean = df %&gt;% group_by(gene, variant) %&gt;% summarize(nobs = n()) %&gt;% filter(nobs == 4) %&gt;% ungroup()</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;gene&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>df = df %&gt;% filter(paste(gene, variant) %in% paste(df_clean$gene, df_clean$variant))
 # df$pval[df$method == &#39;metaQTL&#39;] = df$pval[df$method == &#39;metaQTL&#39;]
 df %&gt;% group_by(method) %&gt;% summarize(nobs = n()) %&gt;% pander</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <table style="width:25%;">
 <colgroup>
 <col width="12%" />
@@ -596,6 +613,7 @@ p</code></pre>
 <div id="save-figure-for-paper-1" class="section level2">
 <h2><span class="header-section-number">2.3</span> Save figure for paper</h2>
 <pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-negative.png&#39;, p, height = 4, width = 4)
+ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-negative.pdf&#39;, p, height = 4, width = 4)
 for(m in c(&#39;ascQTL&#39;, &#39;trcQTL&#39;, &#39;mixQTL&#39;)) {
   sub = df %&gt;% filter(method %in% c(m, &#39;eQTL&#39;))
   p = my_qqplot(sub$pval, sub$method) 
@@ -704,7 +722,9 @@ p2</code></pre>
 <div id="save-rocpr-curves-by-expression-level" class="section level2">
 <h2><span class="header-section-number">4.3</span> Save ROC/PR curves by expression level</h2>
 <pre class="r"><code>ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-roc-stratified.png&#39;, p, width = 10, height = 4)
-ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-pr-stratified.png&#39;, p2, width = 10, height = 4)</code></pre>
+ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-roc-stratified.pdf&#39;, p, width = 10, height = 4)
+ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-pr-stratified.png&#39;, p2, width = 10, height = 4)
+ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-pr-stratified.pdf&#39;, p2, width = 10, height = 4)</code></pre>
 </div>
 </div>
 
@@ -719,7 +739,7 @@ ggsave(&#39;../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-pr-strat
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -758,7 +778,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0

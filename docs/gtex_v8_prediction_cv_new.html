@@ -25,8 +25,19 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -388,7 +399,7 @@ source(&#39;../code/rlib_analysis.R&#39;)
 datadir = &#39;/Users/yanyul/Desktop/mixqtl-pipeline-results/postprocess-prediction&#39;
 cbPalette &lt;- c(&#39;ascQTL&#39; = &quot;#999999&quot;, &#39;mixPred&#39; = &quot;#E69F00&quot;, &#39;trcQTL&#39; = &quot;#56B4E9&quot;, &#39;standard&#39; = &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
 source(&#39;https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/3ca651cfa53ffccb8422f432561138a46e93710f/my_ggplot_theme.R&#39;)
-th$panel.border = element_rect(colour = th$axis.line$colour)
+# th$panel.border = element_rect(colour = th$axis.line$colour)
 ifrun = FALSE</code></pre>
 <div id="analysis-plan" class="section level1">
 <h1><span class="header-section-number">1</span> Analysis plan</h1>
@@ -421,19 +432,21 @@ df = do.call(rbind, out)</code></pre>
 <h1><span class="header-section-number">3</span> Plot Pearson correlation comparison</h1>
 <p>Median correlation across partitions.</p>
 <pre class="r"><code>p = df %&gt;% group_by(gene, method, sample_size) %&gt;% summarize(pearson = median(pearson_correlation)) %&gt;% select(gene, pearson, method, sample_size) %&gt;% dcast(gene + sample_size ~ method, value.var = &#39;pearson&#39;) %&gt;% ggplot(aes(x = standard, y = mixPred)) + geom_point(alpha = .3) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~sample_size, labeller = label_both, ncol=4) + th2 + coord_equal()</code></pre>
-<pre><code>## Warning in dcast(., gene + sample_size ~ method, value.var = &quot;pearson&quot;): The dcast generic in data.table has been passed
-## a grouped_df and will attempt to redirect to the reshape2::dcast; please note that reshape2 is deprecated, and this
-## redirection is now deprecated as well. Please do this redirection yourself like reshape2::dcast(.). In the next version,
-## this warning will become an error.</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;gene&#39;, &#39;method&#39; (override with `.groups` argument)</code></pre>
+<pre><code>## Warning in dcast(., gene + sample_size ~ method, value.var = &quot;pearson&quot;): The dcast generic in data.table
+## has been passed a grouped_df and will attempt to redirect to the reshape2::dcast; please note that
+## reshape2 is deprecated, and this redirection is now deprecated as well. Please do this redirection
+## yourself like reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
 <pre class="r"><code>p </code></pre>
 <p><img src="gtex_v8_prediction_cv_new_files/figure-html/plot_pearson_scatter-1.png" width="768" /></p>
 <pre class="r"><code>ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson_new.png&#39;, height = 6, width = 8)</code></pre>
 <p>All pairwise comparison.</p>
 <pre class="r"><code>df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% dcast(gene + partition + sample_size ~ method , value.var = &#39;pearson_correlation&#39;) %&gt;% ggplot(aes(x = standard, y = mixPred)) + geom_point(alpha = .2) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~sample_size, labeller = label_both, ncol=4) + th2 + coord_equal()</code></pre>
-<pre><code>## Warning in dcast(., gene + partition + sample_size ~ method, value.var = &quot;pearson_correlation&quot;): The dcast generic in
-## data.table has been passed a data.frame and will attempt to redirect to the reshape2::dcast; please note that reshape2 is
-## deprecated, and this redirection is now deprecated as well. Please do this redirection yourself like reshape2::dcast(.). In
-## the next version, this warning will become an error.</code></pre>
+<pre><code>## Warning in dcast(., gene + partition + sample_size ~ method, value.var = &quot;pearson_correlation&quot;):
+## The dcast generic in data.table has been passed a data.frame and will attempt to redirect to the
+## reshape2::dcast; please note that reshape2 is deprecated, and this redirection is now deprecated as
+## well. Please do this redirection yourself like reshape2::dcast(.). In the next version, this warning will
+## become an error.</code></pre>
 <p><img src="gtex_v8_prediction_cv_new_files/figure-html/plot_pearson_box-1.png" width="768" /></p>
 <p>As violin plot.</p>
 <pre class="r"><code>p = df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% ggplot(aes(x = method, y = pearson_correlation, fill = method)) + geom_violin() + geom_boxplot(width = .2) + facet_wrap(~sample_size, labeller = label_both) + th2 + scale_fill_manual(values = cbPalette) + theme(legend.position = &#39;bottom&#39;)
@@ -442,7 +455,8 @@ p </code></pre>
 <pre class="r"><code># ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.png&#39;, height = 4, width = 7)</code></pre>
 <pre class="r"><code>p = df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% ggplot(aes(x = factor(sample_size), y = pearson_correlation, fill = method)) + geom_violin(position = position_dodge(width=0.8), alpha = 0.5) + geom_boxplot(width = .2, position = position_dodge(width=0.8), alpha = 0.5) + th + scale_fill_manual(values = cbPalette) + theme(legend.position = &#39;bottom&#39;) +
   ylab(&#39;Pearson\&#39;s correlation&#39;) + xlab(&#39;Sample size&#39;)
-ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.png&#39;, height = 3, width = 6)</code></pre>
+ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.png&#39;, height = 3, width = 6)
+ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.pdf&#39;, height = 3, width = 6)</code></pre>
 <p>Paired t-test</p>
 <pre class="r"><code>perform_t_test = function(method, gene, score) {
   df = data.frame(method, gene, score)
@@ -452,20 +466,26 @@ ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-v
   res = t.test(dd$score.x, dd$score.y, paired = T)
   return(data.frame(pairwise_diff = res$estimate, diff_ci95_low = res$conf.int[1], diff_ci95_high = res$conf.int[2], pval = res$p.value, median_mixpred = median(dd$score.x), median_standard = median(dd$score.y)))
 }</code></pre>
-<pre class="r"><code>tmp = df %&gt;% group_by(gene, method, sample_size) %&gt;% summarize(pearson = median(pearson_correlation)) %&gt;% select(gene, pearson, method, sample_size) %&gt;% ungroup() %&gt;% group_by(sample_size) %&gt;% do(perform_t_test(.$method, .$gene, .$pearson))
+<pre class="r"><code>tmp = df %&gt;% group_by(gene, method, sample_size) %&gt;% summarize(pearson = median(pearson_correlation)) %&gt;% select(gene, pearson, method, sample_size) %&gt;% ungroup() %&gt;% group_by(sample_size) %&gt;% do(perform_t_test(.$method, .$gene, .$pearson))</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;gene&#39;, &#39;method&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>oldnames = colnames(tmp)
+tmp$nfold = round(670 / tmp$sample_size)
+tmp = tmp[, c(&#39;nfold&#39;, oldnames)]
 tmp %&gt;% pander</code></pre>
 <table>
 <colgroup>
-<col width="12%" />
+<col width="6%" />
+<col width="11%" />
+<col width="13%" />
+<col width="13%" />
 <col width="14%" />
-<col width="14%" />
-<col width="15%" />
 <col width="10%" />
+<col width="14%" />
 <col width="15%" />
-<col width="16%" />
 </colgroup>
 <thead>
 <tr class="header">
+<th align="center">nfold</th>
 <th align="center">sample_size</th>
 <th align="center">pairwise_diff</th>
 <th align="center">diff_ci95_low</th>
@@ -477,6 +497,7 @@ tmp %&gt;% pander</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="center">10</td>
 <td align="center">67</td>
 <td align="center">0.05208</td>
 <td align="center">0.04687</td>
@@ -486,6 +507,7 @@ tmp %&gt;% pander</code></pre>
 <td align="center">0.07011</td>
 </tr>
 <tr class="even">
+<td align="center">9</td>
 <td align="center">75</td>
 <td align="center">0.04952</td>
 <td align="center">0.04386</td>
@@ -495,6 +517,7 @@ tmp %&gt;% pander</code></pre>
 <td align="center">0.07935</td>
 </tr>
 <tr class="odd">
+<td align="center">8</td>
 <td align="center">84</td>
 <td align="center">0.04889</td>
 <td align="center">0.04357</td>
@@ -504,6 +527,7 @@ tmp %&gt;% pander</code></pre>
 <td align="center">0.1003</td>
 </tr>
 <tr class="even">
+<td align="center">7</td>
 <td align="center">96</td>
 <td align="center">0.0473</td>
 <td align="center">0.04187</td>
@@ -513,6 +537,7 @@ tmp %&gt;% pander</code></pre>
 <td align="center">0.1189</td>
 </tr>
 <tr class="odd">
+<td align="center">6</td>
 <td align="center">112</td>
 <td align="center">0.04332</td>
 <td align="center">0.0381</td>
@@ -522,6 +547,7 @@ tmp %&gt;% pander</code></pre>
 <td align="center">0.1519</td>
 </tr>
 <tr class="even">
+<td align="center">5</td>
 <td align="center">134</td>
 <td align="center">0.0362</td>
 <td align="center">0.03104</td>
@@ -531,6 +557,7 @@ tmp %&gt;% pander</code></pre>
 <td align="center">0.1953</td>
 </tr>
 <tr class="odd">
+<td align="center">4</td>
 <td align="center">168</td>
 <td align="center">0.02762</td>
 <td align="center">0.02278</td>
@@ -540,6 +567,7 @@ tmp %&gt;% pander</code></pre>
 <td align="center">0.2192</td>
 </tr>
 <tr class="even">
+<td align="center">3</td>
 <td align="center">224</td>
 <td align="center">0.01657</td>
 <td align="center">0.01198</td>
@@ -549,6 +577,7 @@ tmp %&gt;% pander</code></pre>
 <td align="center">0.2536</td>
 </tr>
 <tr class="odd">
+<td align="center">2</td>
 <td align="center">335</td>
 <td align="center">0.006543</td>
 <td align="center">0.002176</td>
@@ -559,7 +588,15 @@ tmp %&gt;% pander</code></pre>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>tmp %&gt;% write.csv(&#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-pairwise-ttest.csv&#39;, quote = F)</code></pre>
+<pre class="r"><code>tmp %&gt;% write.csv(&#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-pairwise-ttest.csv&#39;, quote = F)
+print(xtable::xtable(tmp, 
+               type = &quot;latex&quot;,
+               digits = 3,
+               display = c(&#39;s&#39;, &#39;d&#39;, &#39;d&#39;, &#39;f&#39;, &#39;f&#39;, &#39;f&#39;, &#39;e&#39;, &#39;f&#39;, &#39;f&#39;)
+    ),
+    include.rownames = FALSE,
+    file = &quot;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-pairwise-ttest.tex&quot;
+)</code></pre>
 <!-- Sample size comparison -->
 <!-- ```{r} -->
 <!-- # two_cols = as.character(unique(df$sample_size)) -->
@@ -580,7 +617,7 @@ tmp %&gt;% pander</code></pre>
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -619,7 +656,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0

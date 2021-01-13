@@ -88,6 +88,7 @@ p = p + xlab('Method') + ylab('Type I error')
 p = p + theme(legend.position = 'bottom') + theme(aspect.ratio = 1)
 p
 ggsave('../output/grid_sim_0615-matrix_t1e.png', p, height = 5.5, width = 3.5)
+ggsave('../output/grid_sim_0615-matrix_t1e.pdf', p, height = 5.5, width = 3.5)
 ```
 
 # Power
@@ -135,6 +136,7 @@ p = p + th
 p = p + xlab('True aFC') + ylab('Power')
 p = p + theme(legend.position = 'bottom') + theme(aspect.ratio = 1)
 ggsave('../output/grid_sim_0615-matrix_power.png', p, height = 5.5, width = 3.5)
+ggsave('../output/grid_sim_0615-matrix_power.pdf', p, height = 5.5, width = 3.5)
 ```
 
 # Estimates

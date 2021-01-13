@@ -106,6 +106,7 @@ p = sub %>% filter(variable %in% c('trcPred', 'mixPred')) %>% ggplot() + geom_vi
 p = p + th
 p = p + ylab('Pearson correlation on test data') + xlab('Method') + theme(aspect.ratio = 1)
 ggsave('../output/grid_sim-multi_0613_prediction_pearson.png', p, height = 5.5, width = 3.5)
+ggsave('../output/grid_sim-multi_0613_prediction_pearson.pdf', p, height = 5.5, width = 3.5)
 ```
 
 
@@ -114,6 +115,7 @@ p = df_pcor %>% filter(sample_size %in% sample_sizes, theta %in% thetas) %>% ggp
 p = p + th
 p = p + ylab('Pearson correlation in mixPred') + xlab('Pearson correlation in trcPred') + theme(axis.text.x=element_text(angle = 90, hjust = .5, vjust = .5)) + coord_equal()
 ggsave('../output/grid_sim-multi_0613_prediction_pearson_pair.png', p, height = 5.5, width = 3.5)
+ggsave('../output/grid_sim-multi_0613_prediction_pearson_pair.pdf', p, height = 5.5, width = 3.5)
 ```
 
 ```{r}

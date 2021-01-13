@@ -67,6 +67,7 @@ p
 
 ```{r save-pos}
 ggsave('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive.png', p, height = 4, width = 4)
+ggsave('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive.pdf', p, height = 4, width = 4)
 collector = df
 for(m in c('ascQTL', 'trcQTL', 'mixQTL')) {
   sub = df %>% filter(method %in% c(m, 'eQTL'))
@@ -95,6 +96,7 @@ p
 dfplot %>% summarize(median_eqtl = median(eQTL), median_mixqtl = median(mixQTL)) %>% mutate(ratio = median_mixqtl / median_eqtl) %>% pander('ratio of median')
 dfplot %>% mutate(ratio = mixQTL / eQTL) %>% summarize(median_ratio = median(ratio, na.rm = T)) %>% pander('median of ratio')
 ggsave(paste0('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.png'), p, height = 4, width = 4)
+ggsave(paste0('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-positive-chisq.pdf'), p, height = 4, width = 4)
 ```
 
 
@@ -139,6 +141,7 @@ collector = rbind(collector %>% mutate(type = 'positive'), df %>% mutate(type = 
 
 ```{r save-neg}
 ggsave('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-negative.png', p, height = 4, width = 4)
+ggsave('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-negative.pdf', p, height = 4, width = 4)
 for(m in c('ascQTL', 'trcQTL', 'mixQTL')) {
   sub = df %>% filter(method %in% c(m, 'eQTL'))
   p = my_qqplot(sub$pval, sub$method) 
@@ -252,5 +255,7 @@ p2
 
 ```{r save-roc-pr-by-expr}
 ggsave('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-roc-stratified.png', p, width = 10, height = 4)
+ggsave('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-roc-stratified.pdf', p, width = 10, height = 4)
 ggsave('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-pr-stratified.png', p2, width = 10, height = 4)
+ggsave('../output/gtex-v8-pipeline-eqtl-matrix-with-gene-qc-eqtlgen-pr-stratified.pdf', p2, width = 10, height = 4)
 ```

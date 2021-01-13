@@ -17,7 +17,7 @@ source('../code/rlib_analysis.R')
 datadir = '/Users/yanyul/Desktop/mixqtl-pipeline-results/postprocess-prediction'
 cbPalette <- c('ascQTL' = "#999999", 'mixPred' = "#E69F00", 'trcQTL' = "#56B4E9", 'standard' = "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 source('https://gist.githubusercontent.com/liangyy/43912b3ecab5d10c89f9d4b2669871c9/raw/3ca651cfa53ffccb8422f432561138a46e93710f/my_ggplot_theme.R')
-th$panel.border = element_rect(colour = th$axis.line$colour)
+# th$panel.border = element_rect(colour = th$axis.line$colour)
 ifrun = FALSE
 ```
 
@@ -83,6 +83,7 @@ p
 p = df %>% select(gene, pearson_correlation, method, partition, sample_size) %>% ggplot(aes(x = factor(sample_size), y = pearson_correlation, fill = method)) + geom_violin(position = position_dodge(width=0.8), alpha = 0.5) + geom_boxplot(width = .2, position = position_dodge(width=0.8), alpha = 0.5) + th + scale_fill_manual(values = cbPalette) + theme(legend.position = 'bottom') +
   ylab('Pearson\'s correlation') + xlab('Sample size')
 ggsave(filename = '../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.png', height = 3, width = 6)
+ggsave(filename = '../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.pdf', height = 3, width = 6)
 ```
 
 
@@ -101,8 +102,19 @@ perform_t_test = function(method, gene, score) {
 
 ```{r}
 tmp = df %>% group_by(gene, method, sample_size) %>% summarize(pearson = median(pearson_correlation)) %>% select(gene, pearson, method, sample_size) %>% ungroup() %>% group_by(sample_size) %>% do(perform_t_test(.$method, .$gene, .$pearson))
+oldnames = colnames(tmp)
+tmp$nfold = round(670 / tmp$sample_size)
+tmp = tmp[, c('nfold', oldnames)]
 tmp %>% pander
 tmp %>% write.csv('../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-pairwise-ttest.csv', quote = F)
+print(xtable::xtable(tmp, 
+               type = "latex",
+               digits = 3,
+               display = c('s', 'd', 'd', 'f', 'f', 'f', 'e', 'f', 'f')
+    ),
+    include.rownames = FALSE,
+    file = "../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-pairwise-ttest.tex"
+)
 ```
 
 <!-- Sample size comparison -->

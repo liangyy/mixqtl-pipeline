@@ -25,8 +25,19 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -410,8 +421,9 @@ dat$theta = factor(dat$theta, levels = thetas)</code></pre>
 <pre class="r"><code>dat_null = dat %&gt;% filter(beta == 0) %&gt;% mutate(idx = 1 : nrow(.))
 melt_null = dat_null %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;), measure.vars = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;))
 melt_null = melt_null %&gt;% mutate(is_sig = is_sig(value))
-summary_t1e = melt_null %&gt;% group_by(theta, sample_size, variable) %&gt;% summarize(t1e = mean(is_sig), nobs = n()) %&gt;% ungroup() %&gt;% mutate(t1e_se = sqrt(t1e * (1 - t1e) / nobs)) 
-summary_t1e = summary_t1e %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
+summary_t1e = melt_null %&gt;% group_by(theta, sample_size, variable) %&gt;% summarize(t1e = mean(is_sig), nobs = n()) %&gt;% ungroup() %&gt;% mutate(t1e_se = sqrt(t1e * (1 - t1e) / nobs)) </code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;theta&#39;, &#39;sample_size&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>summary_t1e = summary_t1e %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
   x = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;),
   y = c(&#39;trcQTL&#39;, &#39;ascQTL&#39;, &#39;mixQTL&#39;)
 )))</code></pre>
@@ -446,7 +458,8 @@ p = p + xlab(&#39;Method&#39;) + ylab(&#39;Type I error&#39;)
 p = p + theme(legend.position = &#39;bottom&#39;) + theme(aspect.ratio = 1)
 p</code></pre>
 <p><img src="sim_mixqtl_files/figure-html/t1e%20sub-1.png" width="336" /></p>
-<pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_t1e.png&#39;, p, height = 5.5, width = 3.5)</code></pre>
+<pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_t1e.png&#39;, p, height = 5.5, width = 3.5)
+ggsave(&#39;../output/grid_sim_0615-matrix_t1e.pdf&#39;, p, height = 5.5, width = 3.5)</code></pre>
 </div>
 <div id="power" class="section level1">
 <h1><span class="header-section-number">3</span> Power</h1>
@@ -454,8 +467,9 @@ p</code></pre>
 <pre class="r"><code>dat_causal = dat %&gt;% filter(beta != 0) %&gt;% mutate(idx = 1 : nrow(.))
 melt_causal = dat_causal %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;, &#39;beta&#39;), measure.vars = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;))
 melt_causal = melt_causal %&gt;% mutate(is_sig = is_sig(value))
-summary_causal = melt_causal %&gt;% group_by(theta, sample_size, variable, beta) %&gt;% summarize(power = mean(is_sig), nobs = n()) %&gt;% ungroup() %&gt;% mutate(power_se = sqrt(power * (1 - power) / nobs)) 
-summary_causal = summary_causal %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
+summary_causal = melt_causal %&gt;% group_by(theta, sample_size, variable, beta) %&gt;% summarize(power = mean(is_sig), nobs = n()) %&gt;% ungroup() %&gt;% mutate(power_se = sqrt(power * (1 - power) / nobs)) </code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;theta&#39;, &#39;sample_size&#39;, &#39;variable&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>summary_causal = summary_causal %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
   x = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;),
   y = c(&#39;trcQTL&#39;, &#39;ascQTL&#39;, &#39;mixQTL&#39;)
 )))</code></pre>
@@ -483,7 +497,8 @@ p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1)) # + gg
 p = p + th
 p = p + xlab(&#39;True aFC&#39;) + ylab(&#39;Power&#39;)
 p = p + theme(legend.position = &#39;bottom&#39;) + theme(aspect.ratio = 1)
-ggsave(&#39;../output/grid_sim_0615-matrix_power.png&#39;, p, height = 5.5, width = 3.5)</code></pre>
+ggsave(&#39;../output/grid_sim_0615-matrix_power.png&#39;, p, height = 5.5, width = 3.5)
+ggsave(&#39;../output/grid_sim_0615-matrix_power.pdf&#39;, p, height = 5.5, width = 3.5)</code></pre>
 </div>
 <div id="estimates" class="section level1">
 <h1><span class="header-section-number">4</span> Estimates</h1>
@@ -527,7 +542,7 @@ p</code></pre>
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -566,7 +581,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
