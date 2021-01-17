@@ -115,7 +115,9 @@ df_subsample_with_consensus_summary %>% ggplot() + geom_boxplot(aes(x = as.facto
 temp = df_subsample_with_consensus_summary
 temp$method[temp$method == 'mixfine'] = 'mixFine'
 temp$method[temp$method == 'nefine'] = 'standard approach'
-p = temp %>% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = .5, position = position_dodge(1)) + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = 1, width = .2, position = position_dodge(1)) + scale_fill_manual(values = cbPalette) + xlab('Subsampling fraction') + ylab('Power (detection rate)') + theme(legend.position = c(0.8, 0.2), legend.title = element_blank()) # + ggtitle('Consensus variants \n (PIP > 0.5 in both) \n being detected')
+p = temp %>% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = .5, position = position_dodge(1), width = 1.5) + 
+  # geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = 1, width = .2, position = position_dodge(1)) + 
+  scale_fill_manual(values = cbPalette) + xlab('Subsampling fraction') + ylab('Power (detection rate)') + theme(legend.position = c(0.8, 0.2), legend.title = element_blank()) + geom_jitter(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), position = position_dodge(1), size = 0.7, alpha = 0.5) # + ggtitle('Consensus variants \n (PIP > 0.5 in both) \n being detected')
 p = p + th + theme(aspect.ratio = 1)
 p
 ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc.png', p, height = 4, width = 4)
@@ -189,7 +191,9 @@ df_subsample_with_consensus_summary %>% ggplot() + geom_boxplot(aes(x = as.facto
 temp = df_subsample_with_consensus_summary
 temp$method[temp$method == 'mixfine'] = 'mixFine'
 temp$method[temp$method == 'nefine'] = 'standard approach'
-p = temp %>% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = .5, position = position_dodge(1)) + geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = 1, width = .2, position = position_dodge(1)) + scale_fill_manual(values = cbPalette) + xlab('Subsampling fraction') + ylab('Power (detection rate)') + theme(legend.position = 'bottom', legend.title = element_blank()) + facet_wrap(~expression_level)  # + ggtitle('Consensus variants \n (PIP > 0.5 in both) \n being detected')
+p = temp %>% ggplot() + geom_violin(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = .5, position = position_dodge(1), width = 1.5) + 
+  # geom_boxplot(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), alpha = 1, width = .2, position = position_dodge(1)) + 
+  scale_fill_manual(values = cbPalette) + xlab('Subsampling fraction') + ylab('Power (detection rate)') + theme(legend.position = 'bottom', legend.title = element_blank()) + facet_wrap(~expression_level) + geom_point(aes(x = as.factor(fraction), y = fraction_of_detection, fill = method), position = position_dodge(1), size = 0.7, alpha = 0.5) # + ggtitle('Consensus variants \n (PIP > 0.5 in both) \n being detected')
 p = p + th2 + theme(aspect.ratio = 1)
 p
 ggsave('../output/gtex-v8-pipeline-eqtl-finemapping-concensus-snp-with-gene-qc-stratified.png', p, height = 4, width = 8)

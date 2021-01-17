@@ -80,8 +80,12 @@ p
 ```
 
 ```{r plot_pearson_box3, fig.height=3, fig.width=6}
-p = df %>% select(gene, pearson_correlation, method, partition, sample_size) %>% ggplot(aes(x = factor(sample_size), y = pearson_correlation, fill = method)) + geom_violin(position = position_dodge(width=0.8), alpha = 0.5) + geom_boxplot(width = .2, position = position_dodge(width=0.8), alpha = 0.5) + th + scale_fill_manual(values = cbPalette) + theme(legend.position = 'bottom') +
-  ylab('Pearson\'s correlation') + xlab('Sample size')
+tmp_ = df %>% group_by(method, sample_size) %>% summarize(n = n()) %>% ungroup()
+df2 = df %>% left_join(tmp_, by = c('method', 'sample_size')) %>% mutate(tag = paste0(sample_size, '\n(', n, ')'))
+df2$tag = factor(df2$tag, levels = unique(df2$tag[order(df2$sample_size)]))
+p = df2 %>% select(gene, pearson_correlation, method, partition, sample_size, tag) %>% ggplot(aes(x = factor(tag), y = pearson_correlation, fill = method)) + geom_violin(position = position_dodge(width=0.8), alpha = 0.5) + geom_boxplot(width = .2, position = position_dodge(width=0.8), alpha = 0.5) + th + scale_fill_manual(values = cbPalette) + theme(legend.position = 'bottom') +
+  ylab('Pearson correlation') + xlab('Sample size')
+
 ggsave(filename = '../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.png', height = 3, width = 6)
 ggsave(filename = '../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.pdf', height = 3, width = 6)
 ```

@@ -434,27 +434,31 @@ df = do.call(rbind, out)</code></pre>
 <pre class="r"><code>p = df %&gt;% group_by(gene, method, sample_size) %&gt;% summarize(pearson = median(pearson_correlation)) %&gt;% select(gene, pearson, method, sample_size) %&gt;% dcast(gene + sample_size ~ method, value.var = &#39;pearson&#39;) %&gt;% ggplot(aes(x = standard, y = mixPred)) + geom_point(alpha = .3) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~sample_size, labeller = label_both, ncol=4) + th2 + coord_equal()</code></pre>
 <pre><code>## `summarise()` regrouping output by &#39;gene&#39;, &#39;method&#39; (override with `.groups` argument)</code></pre>
 <pre><code>## Warning in dcast(., gene + sample_size ~ method, value.var = &quot;pearson&quot;): The dcast generic in data.table
-## has been passed a grouped_df and will attempt to redirect to the reshape2::dcast; please note that
-## reshape2 is deprecated, and this redirection is now deprecated as well. Please do this redirection
-## yourself like reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
+## has been passed a grouped_df and will attempt to redirect to the reshape2::dcast; please note that reshape2
+## is deprecated, and this redirection is now deprecated as well. Please do this redirection yourself like
+## reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
 <pre class="r"><code>p </code></pre>
 <p><img src="gtex_v8_prediction_cv_new_files/figure-html/plot_pearson_scatter-1.png" width="768" /></p>
 <pre class="r"><code>ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson_new.png&#39;, height = 6, width = 8)</code></pre>
 <p>All pairwise comparison.</p>
 <pre class="r"><code>df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% dcast(gene + partition + sample_size ~ method , value.var = &#39;pearson_correlation&#39;) %&gt;% ggplot(aes(x = standard, y = mixPred)) + geom_point(alpha = .2) + geom_density2d(color = &#39;gray&#39;) + geom_abline(slope = 1, intercept = 0, color = &#39;gray&#39;) + facet_wrap(~sample_size, labeller = label_both, ncol=4) + th2 + coord_equal()</code></pre>
-<pre><code>## Warning in dcast(., gene + partition + sample_size ~ method, value.var = &quot;pearson_correlation&quot;):
-## The dcast generic in data.table has been passed a data.frame and will attempt to redirect to the
-## reshape2::dcast; please note that reshape2 is deprecated, and this redirection is now deprecated as
-## well. Please do this redirection yourself like reshape2::dcast(.). In the next version, this warning will
-## become an error.</code></pre>
+<pre><code>## Warning in dcast(., gene + partition + sample_size ~ method, value.var = &quot;pearson_correlation&quot;): The dcast
+## generic in data.table has been passed a data.frame and will attempt to redirect to the reshape2::dcast; please
+## note that reshape2 is deprecated, and this redirection is now deprecated as well. Please do this redirection
+## yourself like reshape2::dcast(.). In the next version, this warning will become an error.</code></pre>
 <p><img src="gtex_v8_prediction_cv_new_files/figure-html/plot_pearson_box-1.png" width="768" /></p>
 <p>As violin plot.</p>
 <pre class="r"><code>p = df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% ggplot(aes(x = method, y = pearson_correlation, fill = method)) + geom_violin() + geom_boxplot(width = .2) + facet_wrap(~sample_size, labeller = label_both) + th2 + scale_fill_manual(values = cbPalette) + theme(legend.position = &#39;bottom&#39;)
 p </code></pre>
 <p><img src="gtex_v8_prediction_cv_new_files/figure-html/plot_pearson_box2-1.png" width="768" /></p>
 <pre class="r"><code># ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.png&#39;, height = 4, width = 7)</code></pre>
-<pre class="r"><code>p = df %&gt;% select(gene, pearson_correlation, method, partition, sample_size) %&gt;% ggplot(aes(x = factor(sample_size), y = pearson_correlation, fill = method)) + geom_violin(position = position_dodge(width=0.8), alpha = 0.5) + geom_boxplot(width = .2, position = position_dodge(width=0.8), alpha = 0.5) + th + scale_fill_manual(values = cbPalette) + theme(legend.position = &#39;bottom&#39;) +
-  ylab(&#39;Pearson\&#39;s correlation&#39;) + xlab(&#39;Sample size&#39;)
+<pre class="r"><code>tmp_ = df %&gt;% group_by(method, sample_size) %&gt;% summarize(n = n()) %&gt;% ungroup()</code></pre>
+<pre><code>## `summarise()` regrouping output by &#39;method&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>df2 = df %&gt;% left_join(tmp_, by = c(&#39;method&#39;, &#39;sample_size&#39;)) %&gt;% mutate(tag = paste0(sample_size, &#39;\n(&#39;, n, &#39;)&#39;))
+df2$tag = factor(df2$tag, levels = unique(df2$tag[order(df2$sample_size)]))
+p = df2 %&gt;% select(gene, pearson_correlation, method, partition, sample_size, tag) %&gt;% ggplot(aes(x = factor(tag), y = pearson_correlation, fill = method)) + geom_violin(position = position_dodge(width=0.8), alpha = 0.5) + geom_boxplot(width = .2, position = position_dodge(width=0.8), alpha = 0.5) + th + scale_fill_manual(values = cbPalette) + theme(legend.position = &#39;bottom&#39;) +
+  ylab(&#39;Pearson correlation&#39;) + xlab(&#39;Sample size&#39;)
+
 ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.png&#39;, height = 3, width = 6)
 ggsave(filename = &#39;../output/gtex-v8-pipeline-mixpred-with-gene-qc-pearson-violin_new.pdf&#39;, height = 3, width = 6)</code></pre>
 <p>Paired t-test</p>

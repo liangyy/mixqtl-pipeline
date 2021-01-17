@@ -70,6 +70,22 @@ p
 ggsave('../output/grid_sim_0615-matrix_t1e_full.png', p, height = 6, width = 6)
 ```
 
+```{r t1e plot point, fig.width=6, fig.height=6}
+p = summary_t1e %>% ggplot(aes(color = method)) + 
+  geom_point(aes(x = method, y = t1e)) + 
+  geom_errorbar(aes(x = method, ymin = t1e - t1e_se * 1.96, ymax = t1e + t1e_se * 1.96), width = .2) + 
+  geom_hline(yintercept = 0.05, linetype = 2) + 
+  scale_color_manual(values=cbPalette2) + 
+  ggtitle('Type I error') + 
+  facet_grid(sample_size~theta)  # , labeller = label_both
+p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1))
+p = p + th
+p = p + xlab('Method') + ylab('Type I error')
+p = p + theme(legend.position = 'bottom') + theme(aspect.ratio = 1)
+p
+ggsave('../output/grid_sim_0615-matrix_t1e_full_point.png', p, height = 6, width = 6)
+```
+
 Plot a sub-grid for main text.
 
 ```{r t1e sub, fig.height = 5.5, fig.width = 3.5}
@@ -89,6 +105,25 @@ p = p + theme(legend.position = 'bottom') + theme(aspect.ratio = 1)
 p
 ggsave('../output/grid_sim_0615-matrix_t1e.png', p, height = 5.5, width = 3.5)
 ggsave('../output/grid_sim_0615-matrix_t1e.pdf', p, height = 5.5, width = 3.5)
+```
+
+```{r t1e sub point, fig.height = 5.5, fig.width = 3.5}
+sub_thetas = c('1e-5', '2.5e-6')
+sub_samplesizes = c(100, 300, 500)
+p = summary_t1e %>% filter(theta %in% sub_thetas, sample_size %in% sub_samplesizes) %>% ggplot(aes(color = method)) + 
+  geom_point(aes(x = method, y = t1e)) + 
+  geom_errorbar(aes(x = method, ymin = t1e - t1e_se * 1.96, ymax = t1e + t1e_se * 1.96), width = .2) + 
+  geom_hline(yintercept = 0.05, linetype = 2) + 
+  scale_color_manual(values=cbPalette2) + 
+  # ggtitle('Type I error') + 
+  facet_grid(sample_size~theta, labeller = label_both)
+p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1))
+p = p + th
+p = p + xlab('Method') + ylab('Type I error')
+p = p + theme(legend.position = 'bottom') + theme(aspect.ratio = 1)
+p
+ggsave('../output/grid_sim_0615-matrix_t1e_point.png', p, height = 5.5, width = 3.5)
+ggsave('../output/grid_sim_0615-matrix_t1e_point.pdf', p, height = 5.5, width = 3.5)
 ```
 
 # Power

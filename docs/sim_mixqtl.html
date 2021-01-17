@@ -419,8 +419,12 @@ dat$theta = factor(dat$theta, levels = thetas)</code></pre>
 <h1><span class="header-section-number">2</span> Type I error</h1>
 <p>Calculate type I error at alpha = 0.05.</p>
 <pre class="r"><code>dat_null = dat %&gt;% filter(beta == 0) %&gt;% mutate(idx = 1 : nrow(.))
-melt_null = dat_null %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;), measure.vars = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;))
-melt_null = melt_null %&gt;% mutate(is_sig = is_sig(value))
+melt_null = dat_null %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;), measure.vars = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;))</code></pre>
+<pre><code>## Warning in melt(., id.vars = c(&quot;idx&quot;, &quot;theta&quot;, &quot;sample_size&quot;), measure.vars = c(&quot;pval.trc&quot;, : The melt generic in data.table has
+## been passed a data.frame and will attempt to redirect to the relevant reshape2 method; please note that reshape2 is deprecated, and
+## this redirection is now deprecated as well. To continue using melt methods from reshape2 while both libraries are attached, e.g.
+## melt.list, you can prepend the namespace like reshape2::melt(.). In the next version, this warning will become an error.</code></pre>
+<pre class="r"><code>melt_null = melt_null %&gt;% mutate(is_sig = is_sig(value))
 summary_t1e = melt_null %&gt;% group_by(theta, sample_size, variable) %&gt;% summarize(t1e = mean(is_sig), nobs = n()) %&gt;% ungroup() %&gt;% mutate(t1e_se = sqrt(t1e * (1 - t1e) / nobs)) </code></pre>
 <pre><code>## `summarise()` regrouping output by &#39;theta&#39;, &#39;sample_size&#39; (override with `.groups` argument)</code></pre>
 <pre class="r"><code>summary_t1e = summary_t1e %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
@@ -442,6 +446,20 @@ p = p + theme(legend.position = &#39;bottom&#39;) + theme(aspect.ratio = 1)
 p</code></pre>
 <p><img src="sim_mixqtl_files/figure-html/t1e%20plot-1.png" width="576" /></p>
 <pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_t1e_full.png&#39;, p, height = 6, width = 6)</code></pre>
+<pre class="r"><code>p = summary_t1e %&gt;% ggplot(aes(color = method)) + 
+  geom_point(aes(x = method, y = t1e)) + 
+  geom_errorbar(aes(x = method, ymin = t1e - t1e_se * 1.96, ymax = t1e + t1e_se * 1.96), width = .2) + 
+  geom_hline(yintercept = 0.05, linetype = 2) + 
+  scale_color_manual(values=cbPalette2) + 
+  ggtitle(&#39;Type I error&#39;) + 
+  facet_grid(sample_size~theta)  # , labeller = label_both
+p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1))
+p = p + th
+p = p + xlab(&#39;Method&#39;) + ylab(&#39;Type I error&#39;)
+p = p + theme(legend.position = &#39;bottom&#39;) + theme(aspect.ratio = 1)
+p</code></pre>
+<p><img src="sim_mixqtl_files/figure-html/t1e%20plot%20point-1.png" width="576" /></p>
+<pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_t1e_full_point.png&#39;, p, height = 6, width = 6)</code></pre>
 <p>Plot a sub-grid for main text.</p>
 <pre class="r"><code>sub_thetas = c(&#39;1e-5&#39;, &#39;2.5e-6&#39;)
 sub_samplesizes = c(100, 300, 500)
@@ -460,13 +478,35 @@ p</code></pre>
 <p><img src="sim_mixqtl_files/figure-html/t1e%20sub-1.png" width="336" /></p>
 <pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_t1e.png&#39;, p, height = 5.5, width = 3.5)
 ggsave(&#39;../output/grid_sim_0615-matrix_t1e.pdf&#39;, p, height = 5.5, width = 3.5)</code></pre>
+<pre class="r"><code>sub_thetas = c(&#39;1e-5&#39;, &#39;2.5e-6&#39;)
+sub_samplesizes = c(100, 300, 500)
+p = summary_t1e %&gt;% filter(theta %in% sub_thetas, sample_size %in% sub_samplesizes) %&gt;% ggplot(aes(color = method)) + 
+  geom_point(aes(x = method, y = t1e)) + 
+  geom_errorbar(aes(x = method, ymin = t1e - t1e_se * 1.96, ymax = t1e + t1e_se * 1.96), width = .2) + 
+  geom_hline(yintercept = 0.05, linetype = 2) + 
+  scale_color_manual(values=cbPalette2) + 
+  # ggtitle(&#39;Type I error&#39;) + 
+  facet_grid(sample_size~theta, labeller = label_both)
+p = p + theme(axis.text.x=element_text(angle = 45, hjust = 1, vjust = 1))
+p = p + th
+p = p + xlab(&#39;Method&#39;) + ylab(&#39;Type I error&#39;)
+p = p + theme(legend.position = &#39;bottom&#39;) + theme(aspect.ratio = 1)
+p</code></pre>
+<p><img src="sim_mixqtl_files/figure-html/t1e%20sub%20point-1.png" width="336" /></p>
+<pre class="r"><code>ggsave(&#39;../output/grid_sim_0615-matrix_t1e_point.png&#39;, p, height = 5.5, width = 3.5)
+ggsave(&#39;../output/grid_sim_0615-matrix_t1e_point.pdf&#39;, p, height = 5.5, width = 3.5)</code></pre>
 </div>
 <div id="power" class="section level1">
 <h1><span class="header-section-number">3</span> Power</h1>
 <p>Calculate power at alpha = 0.05</p>
 <pre class="r"><code>dat_causal = dat %&gt;% filter(beta != 0) %&gt;% mutate(idx = 1 : nrow(.))
-melt_causal = dat_causal %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;, &#39;beta&#39;), measure.vars = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;))
-melt_causal = melt_causal %&gt;% mutate(is_sig = is_sig(value))
+melt_causal = dat_causal %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;, &#39;beta&#39;), measure.vars = c(&#39;pval.trc&#39;, &#39;pval.asc&#39;, &#39;pval.meta&#39;))</code></pre>
+<pre><code>## Warning in melt(., id.vars = c(&quot;idx&quot;, &quot;theta&quot;, &quot;sample_size&quot;, &quot;beta&quot;), measure.vars = c(&quot;pval.trc&quot;, : The melt generic in
+## data.table has been passed a data.frame and will attempt to redirect to the relevant reshape2 method; please note that reshape2 is
+## deprecated, and this redirection is now deprecated as well. To continue using melt methods from reshape2 while both libraries are
+## attached, e.g. melt.list, you can prepend the namespace like reshape2::melt(.). In the next version, this warning will become an
+## error.</code></pre>
+<pre class="r"><code>melt_causal = melt_causal %&gt;% mutate(is_sig = is_sig(value))
 summary_causal = melt_causal %&gt;% group_by(theta, sample_size, variable, beta) %&gt;% summarize(power = mean(is_sig), nobs = n()) %&gt;% ungroup() %&gt;% mutate(power_se = sqrt(power * (1 - power) / nobs)) </code></pre>
 <pre><code>## `summarise()` regrouping output by &#39;theta&#39;, &#39;sample_size&#39;, &#39;variable&#39; (override with `.groups` argument)</code></pre>
 <pre class="r"><code>summary_causal = summary_causal %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
@@ -504,8 +544,13 @@ ggsave(&#39;../output/grid_sim_0615-matrix_power.pdf&#39;, p, height = 5.5, widt
 <h1><span class="header-section-number">4</span> Estimates</h1>
 <p>Organize the data</p>
 <pre class="r"><code>dat_est = dat %&gt;% mutate(idx = 1 : nrow(.))
-melt_est = dat_est %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;, &#39;beta&#39;), measure.vars = c(&#39;bhat.trc&#39;, &#39;bhat.asc&#39;, &#39;bhat.meta&#39;))
-melt_est = melt_est %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
+melt_est = dat_est %&gt;% melt(id.vars = c(&#39;idx&#39;, &#39;theta&#39;, &#39;sample_size&#39;, &#39;beta&#39;), measure.vars = c(&#39;bhat.trc&#39;, &#39;bhat.asc&#39;, &#39;bhat.meta&#39;))</code></pre>
+<pre><code>## Warning in melt(., id.vars = c(&quot;idx&quot;, &quot;theta&quot;, &quot;sample_size&quot;, &quot;beta&quot;), measure.vars = c(&quot;bhat.trc&quot;, : The melt generic in
+## data.table has been passed a data.frame and will attempt to redirect to the relevant reshape2 method; please note that reshape2 is
+## deprecated, and this redirection is now deprecated as well. To continue using melt methods from reshape2 while both libraries are
+## attached, e.g. melt.list, you can prepend the namespace like reshape2::melt(.). In the next version, this warning will become an
+## error.</code></pre>
+<pre class="r"><code>melt_est = melt_est %&gt;% mutate(method = add_new_name_by_map(variable, map = data.frame(
   x = c(&#39;bhat.trc&#39;, &#39;bhat.asc&#39;, &#39;bhat.meta&#39;),
   y = c(&#39;trcQTL&#39;, &#39;ascQTL&#39;, &#39;mixQTL&#39;)
 )))</code></pre>
