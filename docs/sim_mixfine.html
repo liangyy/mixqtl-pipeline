@@ -542,17 +542,17 @@ calibration = calibration %&gt;% group_by(method, pip_bin) %&gt;% summarise(nsig
 <h2><span class="header-section-number">2.1</span> Inclusion rate</h2>
 <pre class="r"><code>inclusion %&gt;% group_by(theta, sample_size, method, number_of_signals) %&gt;% summarize(inclusion_rate = mean(inclusion_rate), n = n()) %&gt;% ungroup() %&gt;% mutate(rate_se = sqrt(inclusion_rate * (1 - inclusion_rate) / n)) %&gt;% ggplot() + geom_line(aes(x = number_of_signals, y = inclusion_rate, color = method)) + facet_grid(theta ~ sample_size, labeller = label_both) + geom_errorbar(aes(x = number_of_signals, ymin = inclusion_rate - 1.96 * rate_se, ymax = inclusion_rate + 1.96 * rate_se, color = method))</code></pre>
 <pre><code>## `summarise()` regrouping output by &#39;theta&#39;, &#39;sample_size&#39;, &#39;method&#39; (override with `.groups` argument)</code></pre>
-<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 </div>
 <div id="calibration-of-pip" class="section level2">
 <h2><span class="header-section-number">2.2</span> Calibration of PIP</h2>
 <pre class="r"><code>calibration %&gt;% mutate(obs_fraction = nsig / n) %&gt;% mutate(obs_fraction_se = sqrt(obs_fraction * (1 - obs_fraction) / n)) %&gt;% ggplot() + geom_point(aes(x = (pip_bin + .5) / 10, y = obs_fraction, color = method)) + geom_abline(slope = 1, intercept = 0) + geom_errorbar(aes(x = (pip_bin + .5) / 10, ymin = obs_fraction - 1.96 * obs_fraction_se, ymax = obs_fraction + 1.96 * obs_fraction_se, color = method)) + theme(legend.position = c(0.8, 0.2)) + xlab(&#39;PIP bin (bin size = 0.1)&#39;)</code></pre>
-<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 <div id="size-of-credible-set" class="section level2">
 <h2><span class="header-section-number">2.3</span> Size of credible set</h2>
 <pre class="r"><code>cs_size %&gt;% ggplot() + geom_density(aes(x = cs_size, color = method)) + facet_grid(theta ~ sample_size, labeller = label_both) + coord_cartesian(xlim = c(0, 50)) </code></pre>
-<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
 </div>
 <div id="summary-with-trc-and-mixfine-for-main-text" class="section level1">
@@ -652,7 +652,7 @@ p = paired %&gt;% ggplot() +
                       low =  &quot;light gray&quot;,
                       high = &quot;black&quot;,
                       na.value=&quot;steelblue&quot;) + th2  ; p</code></pre>
-<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 <pre class="r"><code>ggsave(&#39;../output/grid_sim-multi_0613_finemap_cs_pairwise.png&#39;, p, height = 5.5, width = 6.5)
 
 p = paired %&gt;% ggplot() + 
@@ -699,7 +699,7 @@ p = p + th
 p = p + ylab(&#39;seconds per run&#39;)
 # p = p + theme(axis.text.x=element_text(angle = 0, hjust = 1))
 p</code></pre>
-<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 <pre class="r"><code>ggsave(&#39;../output/grid_sim-multi_0613_finemap_runtime.png&#39;, p, height = 5.5, width = 3.5)</code></pre>
 </div>
 </div>
@@ -747,7 +747,7 @@ p = p + th
 p = p + ylab(&#39;seconds per run&#39;)
 # p = p + theme(axis.text.x=element_text(angle = 0, hjust = 1))
 p</code></pre>
-<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<p><img src="sim_mixfine_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 <pre class="r"><code>ggsave(&#39;../output/grid_sim-multi_0613_finemap_runtime_full.png&#39;, p, height = 6, width = 7)</code></pre>
 </div>
 </div>
